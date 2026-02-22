@@ -27,4 +27,4 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
-        python dj-swe-app/manage.py test
+        python manage.py test
