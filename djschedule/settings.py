@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
+import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5grwn+)d#r8(g#n_$0sop$_6$4h(fl199v)4gw(_%6k%a)87tb'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['localhost', 'dj-lesson-scheduler-swe-a-12-ddb7c472ccde.herokuapp.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dj-lesson-scheduler-swe-a-12-ddb7c472ccde.herokuapp.com']
 
 
 # Application definition
@@ -74,10 +79,11 @@ WSGI_APPLICATION = 'djschedule.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600,
+        ssl_require=os.getenv("DJANGO_POSTGRES_SSL_REQUIRE", "True") == "True"
+    )
 }
 
 
