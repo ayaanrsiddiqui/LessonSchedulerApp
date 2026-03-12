@@ -1,0 +1,11 @@
+
+
+<h1>{{ request.user.first_name }} {{ request.user.last_name }}</h1>
+<p>Email: {{ request.user.email }}</p>
+
+{% if profile.profile_picture %}
+<img src="{{ profile.profile_picture }}" alt="Profile Picture" width="150">
+{% endif %}
+
+<p>Bio: {{ profile.bio }}</p>
+<p>Role: {% if profile.is_teacher %}Teacher{% else %}Student{% endif %}</p>
