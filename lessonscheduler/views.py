@@ -6,4 +6,4 @@ from django.http import HttpResponse
 
 
 def index(request):
-    return HttpResponse("This works! Team Number: A-12; Members: Lillie Paris, Jamar Oldacre, Elsa Norman, Sid Luthra, Ayaan Siddiqui")
+    return render(request, "index.html")
