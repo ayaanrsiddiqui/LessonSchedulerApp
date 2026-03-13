@@ -1,0 +1,279 @@
+{% load i18n %}
+{% load socialaccount %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{% trans "Signup" %}</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+
+body{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);
+padding:30px;
+}
+
+.corner-logo{
+position:fixed;
+top:30px;
+left:40px;
+width:110px;
+background:white;
+padding:8px;
+border-radius:10px;
+box-shadow:0 6px 18px rgba(0,0,0,.35);
+z-index:999;
+}
+
+.page-container{
+display:flex;
+width:950px;
+max-width:100%;
+min-height:560px;
+border-radius:18px;
+overflow:hidden;
+background:#f5f5f5;
+box-shadow:0 18px 50px rgba(0,0,0,0.35);
+}
+
+.left-panel{
+flex:1;
+background:linear-gradient(160deg,#111111,#1d1d1f 55%,#2c2c2f);
+color:white;
+display:flex;
+flex-direction:column;
+align-items:flex-start;
+justify-content:center;
+padding:60px 50px;
+}
+
+.left-panel h1{
+font-size:44px;
+font-weight:700;
+letter-spacing:1px;
+margin-bottom:18px;
+}
+
+.left-panel p{
+font-size:17px;
+line-height:1.6;
+color:#d7d7d7;
+max-width:360px;
+}
+
+.login-panel{
+flex:1;
+background:white;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:50px 40px;
+}
+
+.login-wrapper{
+width:100%;
+max-width:360px;
+}
+
+.login-wrapper h2{
+font-size:32px;
+margin-bottom:10px;
+color:#111;
+}
+
+.subtitle{
+margin-bottom:20px;
+color:#666;
+font-size:15px;
+line-height:1.5;
+}
+
+.form-group{
+margin-bottom:16px;
+}
+
+.form-group input{
+width:100%;
+padding:14px;
+border:1px solid #d3d3d3;
+border-radius:8px;
+font-size:15px;
+background:#fafafa;
+outline:none;
+}
+
+.form-group input:focus{
+border-color:#444;
+background:white;
+box-shadow:0 0 0 3px rgba(0,0,0,0.08);
+}
+
+.signin-btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+background:#111;
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+margin-bottom:22px;
+transition:0.2s ease;
+}
+
+.signin-btn:hover{
+background:#2a2a2a;
+}
+
+/* Divider with lines */
+.divider{
+display:flex;
+align-items:center;
+text-align:center;
+margin:20px 0;
+color:#777;
+font-size:14px;
+}
+
+.divider::before,
+.divider::after{
+content:"";
+flex:1;
+border-bottom:1px solid #ddd;
+}
+
+.divider span{
+padding:0 10px;
+}
+
+.google-btn{
+display:block;
+text-align:center;
+padding:14px;
+border:1px solid #d8d8d8;
+border-radius:8px;
+text-decoration:none;
+color:#111;
+background:white;
+font-weight:600;
+margin-bottom:22px;
+transition:0.2s ease;
+}
+
+.google-btn:hover{
+background:#f3f3f3;
+}
+
+.signup-text{
+text-align:center;
+font-size:14px;
+color:#555;
+margin-bottom:18px;
+}
+
+.signup-text a{
+color:#111;
+text-decoration:none;
+font-weight:700;
+}
+
+.signup-text a:hover{
+text-decoration:underline;
+}
+
+.errorlist{
+list-style:none;
+color:#b00020;
+margin-bottom:10px;
+font-size:14px;
+}
+
+.helptext{
+display:block;
+font-size:12px;
+color:#666;
+margin-top:6px;
+}
+
+@media (max-width:850px){
+.page-container{flex-direction:column;}
+.left-panel,.login-panel{width:100%;}
+.left-panel{padding:40px 30px;}
+.login-panel{padding:36px 24px;}
+}
+</style>
+</head>
+
+<body>
+
+<img src="{% static 'images/shho-logo.png' %}" class="corner-logo">
+
+<div class="page-container">
+
+<div class="left-panel">
+<h1>TITLE</h1>
+<p>Schedule With The Best DJs at UVA!</p>
+</div>
+
+<div class="login-panel">
+<div class="login-wrapper">
+
+<h2>{% trans "Sign Up" %}</h2>
+<p class="subtitle">
+{% blocktrans %}Already have an account? Then please sign in.{% endblocktrans %}
+</p>
+
+<form method="post" action="{% url 'account_signup' %}">
+{% csrf_token %}
+
+{% if form.non_field_errors %}
+{{ form.non_field_errors }}
+{% endif %}
+
+{% for field in form %}
+<div class="form-group">
+{{ field }}
+{% if field.errors %}{{ field.errors }}{% endif %}
+{% if field.help_text %}
+<span class="helptext">{{ field.help_text }}</span>
+{% endif %}
+</div>
+{% endfor %}
+
+{% if redirect_field_value %}
+<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+{% endif %}
+
+<button class="signin-btn" type="submit">
+{% trans "Sign Up" %}
+</button>
+
+</form>
+
+<div class="divider"><span>Or</span></div>
+
+<a class="google-btn" href="{% provider_login_url 'google' %}">
+Sign Up with Google
+</a>
+
+<p class="signup-text">
+Already have an account?
+<a href="{% url 'account_login' %}">
+{% trans "Sign In" %}
+</a>
+</p>
+
+</div>
+</div>
+</div>
+
+</body>
+</html>
