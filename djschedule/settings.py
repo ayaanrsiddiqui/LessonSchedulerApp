@@ -155,4 +155,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'client_id': os.getenv('CLIENT_ID'),
             'secret': os.getenv('CLIENT_SECRET'),
             'key': os.getenv('GOOGLE_KEY'),
-   
+        }
+    }
+}
