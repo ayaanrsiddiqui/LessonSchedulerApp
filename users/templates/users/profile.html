@@ -8,7 +8,7 @@
 {% endif %}
 
 <p>Bio: {{ profile.bio }}</p>
-<p>Role: {% if profile.is_teacher %}Teacher{% else %}Student{% endif %}</p>
+<p>Role: {% if profile.is_djteacher %}Teacher{% else %}Student{% endif %} — <a href="{% url 'edit_role' %}">Change</a></p>
 
 <form method="post" action="{% url 'account_logout' %}">
     {% csrf_token %}

@@ -1,0 +1,18 @@
+<h1>Change Role</h1>
+<p>Current role: {% if profile.is_djteacher %}Teacher{% else %}Student{% endif %}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <p>Select your role:</p>
+    <label>
+        <input type="radio" name="is_djteacher" value="false" {% if not profile.is_djteacher %}checked{% endif %}>
+        Student
+    </label><br>
+    <label>
+        <input type="radio" name="is_djteacher" value="true" {% if profile.is_djteacher %}checked{% endif %}>
+        Teacher
+    </label><br><br>
+    <button type="submit">Save</button>
+</form>
+
+<a href="{% url 'profile' %}">Cancel</a>
