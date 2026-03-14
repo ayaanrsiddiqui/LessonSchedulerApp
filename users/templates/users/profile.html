@@ -9,3 +9,23 @@
 
 <p>Bio: {{ profile.bio }}</p>
 <p>Role: {% if profile.is_teacher %}Teacher{% else %}Student{% endif %}</p>
+
+{% if profile_user.profile.is_djteacher %}
+  <h3>DJ Classes</h3>
+
+  <!-- Add Class Button -->
+  <a href="{% url 'add_class' %}" class="btn btn-primary">Add Class</a>
+
+  <!-- List of classes -->
+  <ul>
+    {% for c in classes %}
+      <li>
+        {{ c.start_time }} - {{ c.end_time }} | Capacity: {{ c.capacity }}
+        <a href="{% url 'edit_class' c.id %}">Edit</a>
+        <a href="{% url 'delete_class' c.id %}">Delete</a>
+      </li>
+    {% empty %}
+      <li>No classes yet.</li>
+    {% endfor %}
+  </ul>
+{% endif %}
