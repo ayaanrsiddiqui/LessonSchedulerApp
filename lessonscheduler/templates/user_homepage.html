@@ -1,0 +1,50 @@
+<!--
+## Description: Logged-in user homepage with profile summary, upcoming lessons placeholder, and schedule button
+## Generated with Copilot on March 14, 2026
+## Prompt: Create here the home page for the user that includes their name, theri account type, and has a space to display upcoming lessons that we will add later. also include a button to where they would schedule new lessons. add the citation format i mentioned
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Home</title>
+</head>
+<body>
+<div>
+	<section>
+		<h1>Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
+
+		<div>
+			<p>Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
+			<p>Account Type: {{ account_type }}</p>
+			<p>Email: {{ request.user.email }}</p>
+		</div>
+		<div>
+			<a href="{% url 'lesson_create' %}">Schedule New Lesson</a> <br>
+			<a href="{% url 'profile' %}">Go to Profile</a>
+		</div>
+	</section>
+
+	<section>
+		<h2>Upcoming Lessons</h2>
+		{% if upcoming_lessons %}
+		<ul>
+			{% for lesson in upcoming_lessons %}
+			<li>
+				<strong>{{ lesson.title }}</strong><br>
+				Starts: {{ lesson.start_time }}<br>
+				Ends: {{ lesson.end_time }}<br>
+				Teacher: {{ lesson.teacher.get_full_name|default:lesson.teacher.username }}<br>
+				Student: {{ lesson.student.get_full_name|default:lesson.student.username }}
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+		<p>No upcoming lessons yet.</p>
+		{% endif %}
+	</section>
+</div>
+</body>
+</html>

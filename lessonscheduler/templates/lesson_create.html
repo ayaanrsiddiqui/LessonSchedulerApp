@@ -1,0 +1,25 @@
+<!--
+## Description: Minimal lesson creation page for role-aware lesson scheduling
+## Generated with Copilot on March 14, 2026
+## Prompt: lets work on phase 3 and 4 next
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Lesson</title>
+</head>
+<body>
+<h1>Schedule New Lesson</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Lesson</button>
+</form>
+
+<p><a href="{% url 'index' %}">Back to Upcoming Lessons</a></p>
+</body>
+</html>
