@@ -1,0 +1,6 @@
+<h2>Inbox</h2>
+{% for msg in messages %}
+    <p><strong>{{ msg.sender.username }}</strong>: {{ msg.content }} ({{ msg.timestamp }})</p>
+{% empty %}
+    <p>No messages yet.</p>
+{% endfor %}

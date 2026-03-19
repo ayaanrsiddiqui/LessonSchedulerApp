@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
     'users',
     'lessonscheduler',
+    'messaging',
 ]
 
 MIDDLEWARE = [
