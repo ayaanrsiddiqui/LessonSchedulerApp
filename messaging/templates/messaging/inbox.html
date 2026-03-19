@@ -1,4 +1,5 @@
 <h2>Inbox</h2>
+<a href="{% url 'user_list' %}" class="btn btn-primary">Send New Message</a>
 {% for msg in messages %}
     <p><strong>{{ msg.sender.username }}</strong>: {{ msg.content }} ({{ msg.timestamp }})</p>
 {% empty %}

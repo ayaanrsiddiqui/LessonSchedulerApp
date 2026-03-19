@@ -17,3 +17,8 @@ def send_message(request, username):
             Message.objects.create(sender=request.user, recipient=recipient, content=content)
             return redirect('inbox')
     return render(request, 'messaging/send_message.html', {'recipient': recipient})
+
+@login_required
+def user_list(request):
+    users = User.objects.exclude(id=request.user.id)
+    return render(request, 'messaging/user_list.html', {'users': users})
