@@ -1,7 +1,78 @@
-<h2>Send Message to {{ recipient.username }}</h2>
-<form method="post">
-    {% csrf_token %}
-    <textarea name="content" placeholder="Type your message here..." required></textarea>
-    <button type="submit">Send</button>
-</form>
-<a href="{% url 'inbox' %}" class="btn btn-secondary">Back to Inbox</a>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chat with {{ recipient.username }}</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);padding:30px;}
+.corner-logo{position:fixed;top:30px;left:40px;width:110px;background:white;padding:8px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:999;}
+.page-container{display:flex;flex-direction:column;width:950px;max-width:100%;height:90vh;border-radius:18px;overflow:hidden;background:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,0.35);}
+.header{background:#111;color:#fff;padding:30px 40px;}
+.header h1{font-size:32px;margin-bottom:8px;}
+.header p{font-size:15px;color:#cfcfcf;}
+.content{padding:28px 40px;display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.message-list{flex:1;overflow-y:auto;margin-bottom:18px;}
+.message-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px;margin-bottom:10px;}
+.message-card.sent{background:#e8f5ef;border-color:#c7e7d6;}
+.message-card.received{background:#f3f3f5;border-color:#d8d8dd;}
+.message-card strong{display:block;font-size:14px;}
+.message-card p{margin:6px 0;color:#333;}
+.message-card small{color:#777;}
+.select-box{width:100%;max-width:420px; margin-bottom:14px; padding:12px 14px; border:1px solid #ccc; border-radius:8px; background:#fff; font-size:16px; color:#111;}
+.text-area{width:100%;height:100px;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;}
+.send-btn{padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;cursor:pointer;}
+.top-right-btn{position:absolute;top:38px;right:40px;padding:12px 12px;border-radius:8px;background:#fff;font-size:17px;color:#111;border:1px solid #ccc;text-decoration:none;}
+.back-btn{display:inline-block;margin-top:12px;color:#111;text-decoration:none;}
+</style>
+</head>
+<body>
+<a href="{% url 'index' %}"><img src="{% static 'images/shho-logo.png' %}" class="corner-logo"></a>
+<div class="page-container">
+    <div class="header" style="position:relative;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+            <h1>Chat with {{ recipient.username }}</h1>
+            <p>Messages between you and {{ recipient.username }}.</p>
+        </div>
+        <a href="{% url 'inbox' %}" class="top-right-btn">Back to Inbox</a>
+    </div>
+    <div class="content">
+        <label for="recipientDropdown" style="display:block;font-weight:600;margin-bottom:8px;">Switch recipient:</label>
+        <select id="recipientDropdown" class="select-box" onchange="if(this.value){window.location.href=this.value;}">
+            <option value="">-- Select recipient --</option>
+            {% for user in users %}
+                <option value="{% url 'send_message' user.username %}" {% if user == recipient %}selected{% endif %}>{{ user.username }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="message-list">
+            {% for message in messages %}
+                <div class="message-card {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                    <strong>{{ message.sender.username }}:</strong>
+                    <p>{{ message.content }}</p>
+                    <small>{{ message.timestamp|date:"M d, Y H:i" }}</small>
+                </div>
+            {% empty %}
+                <p>No messages yet. Start the conversation!</p>
+            {% endfor %}
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="content" class="text-area" placeholder="Type your message here..." required></textarea>
+            <button type="submit" class="send-btn">Send</button>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var messageList = document.querySelector('.message-list');
+        if (messageList) {
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+    });
+</script>
+</body>
+</html>

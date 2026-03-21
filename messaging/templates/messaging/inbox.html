@@ -1,7 +1,51 @@
-<h2>Inbox</h2>
-<a href="{% url 'user_list' %}" class="btn btn-primary">Send New Message</a>
-{% for msg in messages %}
-    <p><strong>{{ msg.sender.username }}</strong>: {{ msg.content }} ({{ msg.timestamp }})</p>
-{% empty %}
-    <p>No messages yet.</p>
-{% endfor %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inbox</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);padding:30px;}
+.corner-logo{position:fixed;top:30px;left:40px;width:110px;background:white;padding:8px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:999;}
+.page-container{display:flex;flex-direction:column;width:950px;max-width:100%;height:90vh;border-radius:18px;overflow:hidden;background:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,0.35);}
+.header{background:#111;color:#fff;padding:30px 40px;}
+.header h1{font-size:32px;margin-bottom:8px;}
+.header p{font-size:15px;color:#cfcfcf;}
+.content{padding:28px 40px;display:flex;flex-direction:column;flex:1;}
+.send-btn{display:inline-block;margin-bottom:18px;padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;text-decoration:none;width:181px;}
+.conversation-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 5px 10px rgba(0,0,0,.08);}
+.conversation-card strong{font-size:16px;}
+.conversation-card p{margin:8px 0;color:#333;}
+.conversation-card small{color:#777;}
+.open-chat-btn{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:8px;background:#2a2a2a;color:white;text-decoration:none;font-size:14px;}
+</style>
+</head>
+
+<body>
+<a href="{% url 'index' %}"><img src="{% static 'images/shho-logo.png' %}" class="corner-logo"></a>
+<div class="page-container">
+    <div class="header">
+        <h1>Inbox</h1>
+        <p>View your conversations with other users here.</p>
+    </div>
+    <div class="content">
+        <a href="{% url 'user_list' %}" class="send-btn">Send New Message</a>
+        {% if conversations %}
+            {% for convo in conversations %}
+                <div class="conversation-card">
+                    <strong>{{ convo.peer.username }}</strong>
+                    <p>{{ convo.message.content }}</p>
+                    <small>{{ convo.message.timestamp|date:"M d, Y H:i" }}</small>
+                    <br>
+                    <a href="{% url 'send_message' convo.peer.username %}" class="open-chat-btn">Open Chat</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No conversations yet.</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
