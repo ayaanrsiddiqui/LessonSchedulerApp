@@ -49,13 +49,3 @@ def send_message(request, username):
         'messages': messages,
         'users': users,
     })
-
-@login_required
-def user_list(request):
-    role = request.GET.get('role')
-    users = User.objects.exclude(id=request.user.id).select_related('profile')
-    if role == 'student':
-        users = users.filter(profile__is_djteacher=False)
-    elif role == 'teacher':
-        users = users.filter(profile__is_djteacher=True)
-    return render(request, 'messaging/user_list.html', {'users': users, 'role': role})
