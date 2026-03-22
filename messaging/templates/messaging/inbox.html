@@ -23,11 +23,12 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 .dropdown-header{font-weight:bold;padding:8px 16px;background-color:#e0e0e0;border-bottom:1px solid #bbb;border-radius:8px 8px 0 0;}
 .search-input{width:100%;padding:8px 16px;box-sizing:border-box;border:none;border-bottom:1px solid #ccc;font-size:16px;}
 .no-users{padding:8px 16px;color:#777;font-size:16px;}
-.conversation-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 5px 10px rgba(0,0,0,.08);}
+.conversation-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 5px 10px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;}
+.conversation-card-content{flex:1;}
 .conversation-card strong{font-size:16px;}
 .conversation-card p{margin:8px 0;color:#333;}
 .conversation-card small{color:#777;}
-.open-chat-btn{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:8px;background:#2a2a2a;color:white;text-decoration:none;font-size:14px;}
+.open-chat-btn{display:inline-block;padding:8px 14px;border-radius:8px;background:#2a2a2a;color:white;text-decoration:none;font-size:15px;margin-left:16px;white-space:nowrap;margin-right: 8px;margin-top: 25px;}
 </style>
 </head>
 
@@ -72,10 +73,11 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
         {% if conversations %}
             {% for convo in conversations %}
                 <div class="conversation-card">
-                    <strong>{{ convo.peer.username }}</strong>
-                    <p>{{ convo.message.content }}</p>
-                    <small>{{ convo.message.timestamp|date:"M d, Y H:i" }}</small>
-                    <br>
+                    <div class="conversation-card-content">
+                        <strong>{{ convo.peer.username }}</strong>
+                        <p>{{ convo.message.content|truncatechars:68 }}</p>
+                        <small>{{ convo.message.timestamp|date:"M d, Y H:i" }}</small>
+                    </div>
                     <a href="{% url 'send_message' convo.peer.username %}" class="open-chat-btn">Open Chat</a>
                 </div>
             {% endfor %}

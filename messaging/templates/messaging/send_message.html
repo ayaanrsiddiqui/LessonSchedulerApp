@@ -16,15 +16,15 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 .header p{font-size:15px;color:#cfcfcf;}
 .content{padding:28px 40px;display:flex;flex-direction:column;flex:1;overflow:hidden;}
 .message-list{flex:1;overflow-y:auto;margin-bottom:18px;}
-.message-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px;margin-bottom:10px;}
+.message-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:10px;margin-bottom:10px;word-wrap:break-word;}
 .message-card.sent{background:#e8f5ef;border-color:#c7e7d6;}
 .message-card.received{background:#f3f3f5;border-color:#d8d8dd;}
 .message-card strong{display:block;font-size:14px;}
-.message-card p{margin:6px 0;color:#333;}
+.message-card p{margin:6px 0;color:#333;word-break:break-word;white-space:pre-wrap;}
 .message-card small{color:#777;}
 .select-box{width:100%;max-width:420px; margin-bottom:14px; padding:12px 14px; border:1px solid #ccc; border-radius:8px; background:#fff; font-size:16px; color:#111;}
-.text-area{width:100%;height:100px;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;}
-.send-btn{padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;cursor:pointer;}
+.text-area{width:100%;height:100px;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;resize:none;}
+.send-btn{padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;cursor:pointer;font-size: 14px;}
 .top-right-btn{position:absolute;top:38px;right:40px;padding:12px 12px;border-radius:8px;background:#fff;font-size:17px;color:#111;border:1px solid #ccc;text-decoration:none;}
 .back-btn{display:inline-block;margin-top:12px;color:#111;text-decoration:none;}
 </style>
@@ -40,14 +40,6 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
         <a href="{% url 'inbox' %}" class="top-right-btn">Back to Inbox</a>
     </div>
     <div class="content">
-        <label for="recipientDropdown" style="display:block;font-weight:600;margin-bottom:8px;">Switch recipient:</label>
-        <select id="recipientDropdown" class="select-box" onchange="if(this.value){window.location.href=this.value;}">
-            <option value="">-- Select recipient --</option>
-            {% for user in users %}
-                <option value="{% url 'send_message' user.username %}" {% if user == recipient %}selected{% endif %}>{{ user.username }}</option>
-            {% endfor %}
-        </select>
-
         <div class="message-list">
             {% for message in messages %}
                 <div class="message-card {% if message.sender == request.user %}sent{% else %}received{% endif %}">
@@ -61,8 +53,11 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
         </div>
         <form method="post">
             {% csrf_token %}
-            <textarea name="content" class="text-area" placeholder="Type your message here..." required></textarea>
-            <button type="submit" class="send-btn">Send</button>
+            <textarea name="content" class="text-area" placeholder="Type your message here..." maxlength="1000" required></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <button type="submit" class="send-btn">Send</button>
+                <div style="font-size:12px;color:#666;"><span id="char-count">0</span>/1000 characters</div>
+            </div>
         </form>
     </div>
 </div>
@@ -71,6 +66,13 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
         var messageList = document.querySelector('.message-list');
         if (messageList) {
             messageList.scrollTop = messageList.scrollHeight;
+        }
+        var textarea = document.querySelector('.text-area');
+        var charCount = document.getElementById('char-count');
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
         }
     });
 </script>
