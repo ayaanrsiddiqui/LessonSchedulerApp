@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Message
 from django.contrib.auth.models import User
 from django.db.models import Q
+from users.models import Profile
 
 @login_required
 def inbox(request):
@@ -21,7 +22,14 @@ def inbox(request):
 
     conversations = list(latest_per_peer.values())
 
-    return render(request, 'messaging/inbox.html', {'conversations': conversations})
+    students = User.objects.exclude(id=request.user.id).filter(profile__is_djteacher=False).select_related('profile')
+    teachers = User.objects.exclude(id=request.user.id).filter(profile__is_djteacher=True).select_related('profile')
+
+    return render(request, 'messaging/inbox.html', {
+        'conversations': conversations,
+        'students': students,
+        'teachers': teachers,
+    })
 
 @login_required
 def send_message(request, username):
@@ -44,5 +52,10 @@ def send_message(request, username):
 
 @login_required
 def user_list(request):
-    users = User.objects.exclude(id=request.user.id)
-    return render(request, 'messaging/user_list.html', {'users': users})
+    role = request.GET.get('role')
+    users = User.objects.exclude(id=request.user.id).select_related('profile')
+    if role == 'student':
+        users = users.filter(profile__is_djteacher=False)
+    elif role == 'teacher':
+        users = users.filter(profile__is_djteacher=True)
+    return render(request, 'messaging/user_list.html', {'users': users, 'role': role})
