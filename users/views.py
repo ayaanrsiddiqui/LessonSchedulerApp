@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from .forms import ProfileUploadForm
+from .models import Profile
 
 @login_required
 def profile_view(request):
@@ -17,3 +19,18 @@ def edit_role(request):
         profile.save()
         return redirect('profile')
     return render(request, "users/edit_role.html", {"profile": profile})
+
+# Profile Picture and Audio upload
+@login_required
+def upload_profile_files(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = ProfileUploadForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileUploadForm(instance=profile)
+
+    return render(request, "users/upload_files.html", {"form": form})

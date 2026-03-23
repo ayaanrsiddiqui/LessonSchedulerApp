@@ -4,7 +4,15 @@
 <p>Email: {{ request.user.email }}</p>
 
 {% if profile.profile_picture %}
-<img src="{{ profile.profile_picture }}" alt="Profile Picture" width="150">
+<img src="{{ profile.profile_picture.url }}" alt="Profile Picture" width="150">
+{% endif %}
+
+{% if profile.intro_audio %}
+<p>Intro Audio:</p>
+<audio controls>
+    <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
 {% endif %}
 
 <p>Bio: {{ profile.bio }}</p>
