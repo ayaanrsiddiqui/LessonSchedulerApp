@@ -165,9 +165,22 @@ SOCIALACCOUNT_PROVIDERS = {
 LOGIN_REDIRECT_URL = '/'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# For both static and media files
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+}
+
+
+
 AWS_ACCESS_KEY_ID = 'REDACTED'
 AWS_SECRET_ACCESS_KEY = 'REDACTED'
 AWS_STORAGE_BUCKET_NAME = 'amazn-s3-dj-proj'
+AWS_S3_REGION_NAME = 'us-east-2'
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
+MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
