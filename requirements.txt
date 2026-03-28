@@ -11,3 +11,4 @@ whitenoise==6.11.0
 django-allauth==0.58.2
 django-storages[boto3]==1.14.0
 boto3==1.28.64
+Pillow==10.0.0
