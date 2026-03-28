@@ -1,6 +1,75 @@
-<h2>Upload Profile Picture & Audio</h2>
-<form method="post" enctype="multipart/form-data">
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Upload Profile Media</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);padding:30px;}
+.corner-logo{position:fixed;top:30px;left:40px;width:110px;background:white;padding:8px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:999;}
+.page-container{display:flex;flex-direction:column;width:950px;max-width:100%;height:90vh;border-radius:18px;overflow:hidden;background:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,0.35);}
+.header{background:#111;color:#fff;padding:30px 40px;}
+.header h1{font-size:32px;margin-bottom:8px;}
+.header p{font-size:15px;color:#cfcfcf;}
+.content{padding:28px 40px;display:flex;flex-direction:column;flex:1;gap:24px;}
+.upload-section{background:#fff;padding:24px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.1);}
+.upload-section p{margin-bottom:8px;font-weight:bold;}
+.upload-section img{border-radius:10px;max-width:150px;display:block;margin-bottom:8px;}
+.upload-section audio{margin-top:8px;}
+.upload-section button{margin-top:8px;padding:8px 16px;border:none;border-radius:8px;background:#111;color:white;cursor:pointer;font-weight:600;}
+.clear-label{display:inline-block;margin-left:8px;cursor:pointer;color:#c0392b;font-weight:bold;}
+</style>
+</head>
+
+<body>
+<a href="{% url 'index' %}"><img src="{% static 'images/shho-logo.png' %}" class="corner-logo"></a>
+
+<div class="page-container">
+    <div class="header">
+        <h1>Upload Profile Media</h1>
+        <p>Add or update your profile picture and intro audio here.</p>
+    </div>
+
+    <div class="content">
+        <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload</button>
+
+    <!-- Profile Picture -->
+    <div class="upload-section">
+        <p>Profile Picture:</p>
+
+        {% if profile.profile_picture %}
+            <div style="position:relative; display:inline-block;">
+                <img src="{{ profile.profile_picture.url }}" width="150" style="border-radius:10px;">
+                <!-- Remove button -->
+                <button type="submit" name="remove_profile_picture" value="1"
+                        style="position:absolute; top:0; right:0; background:#c0392b; color:white; border:none; border-radius:4px; cursor:pointer;">×</button>
+            </div>
+        {% endif %}
+
+        <input type="file" name="profile_picture">
+    </div>
+
+    <!-- Intro Audio -->
+    <div class="upload-section">
+        <p>Intro Audio:</p>
+
+        {% if profile.intro_audio %}
+            <audio controls>
+                <source src="{{ profile.intro_audio.url }}">
+            </audio>
+            <button type="submit" name="remove_intro_audio" value="1"
+                    style="background:#c0392b; color:white; border:none; border-radius:4px; cursor:pointer; margin-left:8px;">× Remove</button>
+        {% endif %}
+
+        <input type="file" name="intro_audio">
+    </div>
+
+    <button type="submit">Save</button>
 </form>
+    </div>
+</div>
+</body>
+</html>

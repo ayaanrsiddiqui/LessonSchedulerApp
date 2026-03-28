@@ -26,11 +26,19 @@ def upload_profile_files(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileUploadForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            return redirect('profile')
-    else:
-        form = ProfileUploadForm(instance=profile)
+        # Handle removals first
+        if 'remove_profile_picture' in request.POST and profile.profile_picture:
+            profile.profile_picture.delete()
+        if 'remove_intro_audio' in request.POST and profile.intro_audio:
+            profile.intro_audio.delete()
 
-    return render(request, "users/upload_files.html", {"form": form})
+        # Handle new uploads
+        if 'profile_picture' in request.FILES:
+            profile.profile_picture = request.FILES['profile_picture']
+        if 'intro_audio' in request.FILES:
+            profile.intro_audio = request.FILES['intro_audio']
+
+        profile.save()
+        return redirect('profile')
+
+    return render(request, 'users/upload_files.html', {'profile': profile})

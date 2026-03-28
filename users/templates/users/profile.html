@@ -4,15 +4,35 @@
 <p>Email: {{ request.user.email }}</p>
 
 {% if profile.profile_picture %}
-<img src="{{ profile.profile_picture.url }}" alt="Profile Picture" width="150">
+    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" width="150">
+    
+    <br>
+    <a href="{% url 'upload_profile_files' %}">
+        <button type="button">Edit Profile Picture</button>
+    </a>
+
+{% else %}
+    <a href="{% url 'upload_profile_files' %}">
+        <button type="button">+ Add Profile Picture</button>
+    </a>
 {% endif %}
 
 {% if profile.intro_audio %}
-<p>Intro Audio:</p>
-<audio controls>
-    <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
+    <p>Intro Audio:</p>
+    <audio controls>
+        <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <br>
+    <a href="{% url 'upload_profile_files' %}">
+        <button type="button">Edit Intro Audio</button>
+    </a>
+
+{% else %}
+    <a href="{% url 'upload_profile_files' %}">
+        <button type="button">+ Add Intro Audio</button>
+    </a>
 {% endif %}
 
 <p>Bio: {{ profile.bio }}</p>
