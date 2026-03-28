@@ -4,48 +4,588 @@
 ## Prompt: Create here the home page for the user that includes their name, theri account type, and has a space to display upcoming lessons that we will add later. also include a button to where they would schedule new lessons. add the citation format i mentioned
 -->
 
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Home</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);
+}
+
+/* ===== TOP NAVBAR ===== */
+.top-bar{
+    width:100%;
+    background:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 40px;
+    box-shadow:0 6px 18px rgba(0,0,0,.15);
+}
+
+.logo{
+    width:90px;
+}
+
+.nav-left{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-buttons{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.nav-right{
+    display:flex;
+    align-items:center;
+}
+
+/* ===== BUTTONS ===== */
+.primary-btn,
+.secondary-btn{
+    padding:10px 16px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:14px;
+    transition:.2s ease;
+    display:inline-block;
+}
+
+.primary-btn{
+    background:#111;
+    color:white;
+}
+
+.primary-btn:hover{
+    background:#2a2a2a;
+}
+
+.secondary-btn{
+    background:white;
+    color:#111;
+    border:1px solid #ccc;
+}
+
+.secondary-btn:hover{
+    background:#f3f3f3;
+}
+
+/* ===== MAIN CONTENT ===== */
+.page-container{
+    max-width:1100px;
+    margin:40px auto;
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+    padding:0 20px 40px;
+}
+
+.card{
+    background:#f5f5f5;
+    border-radius:18px;
+    box-shadow:0 18px 50px rgba(0,0,0,0.20);
+    padding:28px;
+}
+
+.hero-card h2{
+    font-size:32px;
+    margin-bottom:10px;
+    color:#111;
+}
+
+.hero-card p{
+    color:#555;
+}
+
+.info-box{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    margin-top:15px;
+    border:1px solid #e5e5e5;
+}
+
+.info-box p{
+    margin-bottom:8px;
+    color:#333;
+}
+
+/* ===== CALENDAR ===== */
+.calendar-shell{
+    background:white;
+    border-radius:16px;
+    padding:20px;
+    border:1px solid #e5e5e5;
+}
+
+.calendar-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.calendar-header h3{
+    color:#111;
+    font-size:24px;
+}
+
+.calendar-nav{
+    background:#111;
+    color:white;
+    border:none;
+    border-radius:8px;
+    width:40px;
+    height:40px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:700;
+}
+
+.calendar-nav:hover{
+    background:#2a2a2a;
+}
+
+.calendar-weekdays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.calendar-weekdays div{
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:#666;
+    padding:8px 0;
+}
+
+.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+.calendar-day{
+    min-height:86px;
+    border:1px solid #e4e4e4;
+    border-radius:12px;
+    background:#fafafa;
+    padding:10px;
+    cursor:pointer;
+    transition:.2s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.calendar-day:hover{
+    background:#efefef;
+}
+
+.calendar-day.other-month{
+    opacity:.35;
+    cursor:default;
+}
+
+.calendar-day.today{
+    border:2px solid #111;
+}
+
+.calendar-day.has-lesson{
+    background:#ececec;
+}
+
+.calendar-day.selected{
+    background:#111;
+    color:white;
+}
+
+.calendar-day-number{
+    font-weight:700;
+    font-size:15px;
+}
+
+.lesson-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+    background:#111;
+    margin-top:8px;
+}
+
+.calendar-day.selected .lesson-dot{
+    background:white;
+}
+
+.calendar-details{
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px solid #ddd;
+}
+
+.calendar-details h4{
+    font-size:20px;
+    color:#111;
+    margin-bottom:12px;
+}
+
+.lesson-detail-card{
+    background:#f7f7f7;
+    border:1px solid #e4e4e4;
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:12px;
+}
+
+.lesson-detail-card strong{
+    display:block;
+    font-size:17px;
+    color:#111;
+    margin-bottom:8px;
+}
+
+.lesson-detail-card p{
+    margin-bottom:4px;
+    color:#555;
+    font-size:14px;
+}
+
+/* ===== UPCOMING LESSONS ===== */
+.lessons-card h2{
+    color:#111;
+    margin-bottom:12px;
+    font-size:28px;
+}
+
+.lesson-list{
+    list-style:none;
+    margin-top:10px;
+}
+
+.lesson-item{
+    background:white;
+    border:1px solid #e4e4e4;
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:14px;
+}
+
+.lesson-item strong{
+    display:block;
+    font-size:18px;
+    color:#111;
+    margin-bottom:8px;
+}
+
+.lesson-item p{
+    color:#555;
+    margin-bottom:4px;
+    font-size:14px;
+}
+
+.empty-state{
+    color:#666;
+    font-size:15px;
+    margin-top:10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:800px){
+    .top-bar{
+        padding:15px 20px;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    .nav-left{
+        flex-direction:column;
+        align-items:flex-start;
+        width:100%;
+    }
+
+    .nav-buttons{
+        width:100%;
+    }
+
+    .nav-right{
+        width:100%;
+    }
+}
+</style>
 </head>
+
 <body>
-<div>
-	<section>
-		<h1>Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
 
-		<div>
-			<p>Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
-			<p>Account Type: {{ account_type }}</p>
-			<p>Email: {{ request.user.email }}</p>
-		</div>
-		<div>
-			<a href="{% url 'lesson_create' %}">Schedule New Lesson</a> <br>
-			<a href="{% url 'inbox' %}">View Messages</a> <br>
-			<a href="{% url 'profile' %}">Go to Profile</a>
-		</div>
-	</section>
+<div class="top-bar">
 
-	<section>
-		<h2>Upcoming Lessons</h2>
-		{% if upcoming_lessons %}
-		<ul>
-			{% for lesson in upcoming_lessons %}
-			<li>
-				<strong>{{ lesson.title }}</strong><br>
-				Starts: {{ lesson.start_time }}<br>
-				Ends: {{ lesson.end_time }}<br>
-				Teacher: {{ lesson.teacher.get_full_name|default:lesson.teacher.username }}<br>
-				Student: {{ lesson.student.get_full_name|default:lesson.student.username }}
-			</li>
-			{% endfor %}
-		</ul>
-		{% else %}
-		<p>No upcoming lessons yet.</p>
-		{% endif %}
-	</section>
+    <div class="nav-left">
+        <a href="{% url 'index' %}">
+            <img src="{% static 'images/shho-logo.png' %}" class="logo" alt="Logo">
+        </a>
+
+        <div class="nav-buttons">
+            <a href="{% url 'lesson_create' %}" class="primary-btn">Schedule New Lesson</a>
+            <a href="{% url 'inbox' %}" class="secondary-btn">View Messages</a>
+            <a href="{% url 'profile' %}" class="secondary-btn">Go to Profile</a>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <a href="{% url 'account_logout' %}" class="secondary-btn">Logout</a>
+    </div>
+
 </div>
+
+<div class="page-container">
+
+    <div class="card hero-card">
+        <h2>Welcome, {{ request.user.first_name|default:request.user.username }}!</h2>
+
+        <div class="info-box">
+            <p><strong>Name:</strong> {{ request.user.first_name }} {{ request.user.last_name }}</p>
+            <p><strong>Account Type:</strong> {{ account_type }}</p>
+            <p><strong>Email:</strong> {{ request.user.email }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="color:#111; margin-bottom:8px; font-size:28px;">Lesson Scheduling</h2>
+        <p style="color:#666; margin-bottom:20px; font-size:15px;">
+            Click a highlighted day to view scheduled lessons.
+        </p>
+
+        <div class="calendar-shell">
+            <div class="calendar-header">
+                <button type="button" class="calendar-nav" id="prevMonth">&lt;</button>
+                <h3 id="calendarMonthYear"></h3>
+                <button type="button" class="calendar-nav" id="nextMonth">&gt;</button>
+            </div>
+
+            <div class="calendar-weekdays">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid"></div>
+
+            <div class="calendar-details">
+                <h4 id="selectedDateTitle">Select a day</h4>
+                <div id="selectedDateLessons">
+                    <p class="empty-state">No day selected.</p>
+                </div>
+            </div>
+        </div>
+
+        <script id="lessonData" type="application/json">
+        [
+            {% for lesson in upcoming_lessons %}
+            {
+                "title": "{{ lesson.title|escapejs }}",
+                "start": "{{ lesson.start_time|date:'Y-m-d' }}",
+                "start_display": "{{ lesson.start_time|date:'M d, Y g:i A'|escapejs }}",
+                "end_display": "{{ lesson.end_time|date:'M d, Y g:i A'|escapejs }}",
+                "teacher": "{{ lesson.teacher.get_full_name|default:lesson.teacher.username|escapejs }}",
+                "student": "{{ lesson.student.get_full_name|default:lesson.student.username|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+        </script>
+    </div>
+
+    <div class="card lessons-card">
+        <h2>Upcoming Lessons</h2>
+
+        {% if upcoming_lessons %}
+            <ul class="lesson-list">
+                {% for lesson in upcoming_lessons %}
+                    <li class="lesson-item">
+                        <strong>{{ lesson.title }}</strong>
+                        <p><strong>Starts:</strong> {{ lesson.start_time }}</p>
+                        <p><strong>Ends:</strong> {{ lesson.end_time }}</p>
+                        <p><strong>Teacher:</strong> {{ lesson.teacher.get_full_name|default:lesson.teacher.username }}</p>
+                        <p><strong>Student:</strong> {{ lesson.student.get_full_name|default:lesson.student.username }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">No upcoming lessons yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+(function () {
+    const lessonDataEl = document.getElementById("lessonData");
+    if (!lessonDataEl) return;
+
+    const lessons = JSON.parse(lessonDataEl.textContent || "[]");
+    const lessonsByDate = {};
+
+    lessons.forEach(lesson => {
+        if (!lessonsByDate[lesson.start]) {
+            lessonsByDate[lesson.start] = [];
+        }
+        lessonsByDate[lesson.start].push(lesson);
+    });
+
+    const monthYearEl = document.getElementById("calendarMonthYear");
+    const gridEl = document.getElementById("calendarGrid");
+    const selectedDateTitleEl = document.getElementById("selectedDateTitle");
+    const selectedDateLessonsEl = document.getElementById("selectedDateLessons");
+    const prevBtn = document.getElementById("prevMonth");
+    const nextBtn = document.getElementById("nextMonth");
+
+    const today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    let selectedDate = null;
+
+    function formatDateKey(year, month, day) {
+        const mm = String(month + 1).padStart(2, "0");
+        const dd = String(day).padStart(2, "0");
+        return `${year}-${mm}-${dd}`;
+    }
+
+    function formatReadableDate(dateKey) {
+        const d = new Date(dateKey + "T00:00:00");
+        return d.toLocaleDateString(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
+    function renderLessonDetails(dateKey) {
+        selectedDate = dateKey;
+        selectedDateTitleEl.textContent = formatReadableDate(dateKey);
+        const dayLessons = lessonsByDate[dateKey] || [];
+
+        if (!dayLessons.length) {
+            selectedDateLessonsEl.innerHTML = '<p class="empty-state">No lessons scheduled for this day.</p>';
+            return;
+        }
+
+        selectedDateLessonsEl.innerHTML = dayLessons.map(lesson => `
+            <div class="lesson-detail-card">
+                <strong>${lesson.title}</strong>
+                <p><strong>Starts:</strong> ${lesson.start_display}</p>
+                <p><strong>Ends:</strong> ${lesson.end_display}</p>
+                <p><strong>Teacher:</strong> ${lesson.teacher}</p>
+                <p><strong>Student:</strong> ${lesson.student}</p>
+            </div>
+        `).join("");
+    }
+
+    function renderCalendar(month, year) {
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        monthYearEl.textContent = new Date(year, month).toLocaleDateString(undefined, {
+            month: "long",
+            year: "numeric"
+        });
+
+        gridEl.innerHTML = "";
+
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const dayNum = daysInPrevMonth - i;
+            const dayEl = document.createElement("div");
+            dayEl.className = "calendar-day other-month";
+            dayEl.innerHTML = `<div class="calendar-day-number">${dayNum}</div>`;
+            gridEl.appendChild(dayEl);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = formatDateKey(year, month, day);
+            const isToday =
+                day === today.getDate() &&
+                month === today.getMonth() &&
+                year === today.getFullYear();
+
+            const hasLesson = !!lessonsByDate[dateKey];
+            const isSelected = selectedDate === dateKey;
+
+            const dayEl = document.createElement("div");
+            dayEl.className = "calendar-day";
+            if (isToday) dayEl.classList.add("today");
+            if (hasLesson) dayEl.classList.add("has-lesson");
+            if (isSelected) dayEl.classList.add("selected");
+
+            dayEl.innerHTML = `
+                <div class="calendar-day-number">${day}</div>
+                ${hasLesson ? '<div class="lesson-dot"></div>' : ''}
+            `;
+
+            dayEl.addEventListener("click", function () {
+                renderLessonDetails(dateKey);
+                renderCalendar(currentMonth, currentYear);
+            });
+
+            gridEl.appendChild(dayEl);
+        }
+
+        const totalCells = firstDay + daysInMonth;
+        const trailingDays = (7 - (totalCells % 7)) % 7;
+
+        for (let day = 1; day <= trailingDays; day++) {
+            const dayEl = document.createElement("div");
+            dayEl.className = "calendar-day other-month";
+            dayEl.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+            gridEl.appendChild(dayEl);
+        }
+    }
+
+    prevBtn.addEventListener("click", function () {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    nextBtn.addEventListener("click", function () {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    renderCalendar(currentMonth, currentYear);
+})();
+</script>
+
 </body>
 </html>
