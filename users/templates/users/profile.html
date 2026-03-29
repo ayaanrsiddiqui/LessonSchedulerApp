@@ -1,47 +1,232 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Profile</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+    color: #e5e7eb;
+}
+.top-bar {
+    width: 100%;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.brand-link {
+    color: #111;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+.secondary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
+    display: inline-block;
+    background: #fff;
+    color: #111;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+.secondary-btn:hover {
+    background: #f3f3f3;
+}
+.container {
+    max-width: 900px;
+    margin: 28px auto;
+    padding: 0 18px 36px;
+}
+.card {
+    background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.card h1,
+.card h2 {
+    margin-top: 0;
+    color: #ffffff;
+}
+.muted {
+    color: #c9ced6;
+}
+.role-row {
+    margin: 6px 0 0;
+}
+.inline-link {
+    color: #7cb6ff;
+    text-decoration: none;
+}
+.inline-link:hover {
+    color: #a8ceff;
+}
+.field-label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ffffff;
+}
+.bio-input {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    padding: 10px 12px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+.bio-input::placeholder {
+    color: #b7bcc4;
+}
+.error-list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: #ffb4b4;
+}
+.media-card {
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 4px solid #0066cc;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.primary-btn {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #0066cc;
+    color: #fff;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+}
+.primary-btn:hover {
+    background: #0052a3;
+}
+audio {
+    width: 100%;
+    margin-top: 8px;
+}
+@media (max-width: 800px) {
+    .top-bar {
+        padding: 15px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link">SHHO</a>
+        <a href="{% url 'index' %}" class="secondary-btn">Back to Dashboard</a>
+    </div>
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="secondary-btn">Sign Out</button>
+    </form>
+</div>
 
-<h1>{{ request.user.first_name }} {{ request.user.last_name }}</h1>
-<p>Email: {{ request.user.email }}</p>
+<div class="container">
+    <div class="card">
+        <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
+        <p class="muted">Email: {{ request.user.email }}</p>
+        <p class="role-row">Role: {% if profile.is_djteacher %}Teacher{% else %}Student{% endif %} - <a class="inline-link" href="{% url 'edit_role' %}">Change</a></p>
+        <p class="muted">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
 
-{% if profile.profile_picture %}
-    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" width="150">
-    
-    <br>
-    <a href="{% url 'upload_profile_files' %}">
-        <button type="button">Edit Profile Picture</button>
-    </a>
+        <form method="post">
+            {% csrf_token %}
+            <label class="field-label" for="id_bio">Edit Bio</label>
+            <textarea id="id_bio" name="bio" class="bio-input" rows="4" placeholder="Tell people a little about yourself...">{{ bio_form.bio.value|default_if_none:"" }}</textarea>
+            {% if bio_form.bio.errors %}
+            <ul class="error-list">
+                {% for error in bio_form.bio.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <div class="action-row">
+                <button type="submit" class="primary-btn">Save Bio</button>
+            </div>
+        </form>
+    </div>
 
-{% else %}
-    <a href="{% url 'upload_profile_files' %}">
-        <button type="button">+ Add Profile Picture</button>
-    </a>
-{% endif %}
+    <div class="card">
+        <h2>Profile Media</h2>
 
-{% if profile.intro_audio %}
-    <p>Intro Audio:</p>
-    <audio controls>
-        <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+        <div class="media-card">
+            <strong>Profile Picture</strong>
+            {% if profile.profile_picture %}
+            <div class="action-row">
+                <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="Profile Picture">
+            </div>
+            <div class="action-row">
+                <a class="primary-btn" href="{% url 'upload_profile_files' %}">Edit Profile Picture</a>
+            </div>
+            {% else %}
+            <p class="muted">No profile picture uploaded.</p>
+            <a class="primary-btn" href="{% url 'upload_profile_files' %}">+ Add Profile Picture</a>
+            {% endif %}
+        </div>
 
-    <br>
-    <a href="{% url 'upload_profile_files' %}">
-        <button type="button">Edit Intro Audio</button>
-    </a>
-
-{% else %}
-    <a href="{% url 'upload_profile_files' %}">
-        <button type="button">+ Add Intro Audio</button>
-    </a>
-{% endif %}
-
-<p>Bio: {{ profile.bio }}</p>
-<p>Role: {% if profile.is_djteacher %}Teacher{% else %}Student{% endif %} — <a href="{% url 'edit_role' %}">Change</a></p>
-
-<form method="post" action="{% url 'account_logout' %}">
-    {% csrf_token %}
-    <button type="submit">Sign Out</button>
-</form>
-
-<!-- # Copilot, 3/14/26, "add a button to go back to the home page" -->
-<a href="{% url 'index' %}">Back to Home</a>
+        <div class="media-card">
+            <strong>Intro Audio</strong>
+            {% if profile.intro_audio %}
+            <audio controls>
+                <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <div class="action-row">
+                <a class="primary-btn" href="{% url 'upload_profile_files' %}">Edit Intro Audio</a>
+            </div>
+            {% else %}
+            <p class="muted">No intro audio uploaded.</p>
+            <a class="primary-btn" href="{% url 'upload_profile_files' %}">+ Add Intro Audio</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

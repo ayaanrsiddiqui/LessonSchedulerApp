@@ -1,12 +1,21 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileUploadForm
+from .forms import ProfileUploadForm, ProfileBioForm
 from .models import Profile
 
 @login_required
 def profile_view(request):
-    profile = request.user.profile
-    return render(request, "users/profile.html", {"profile": profile})
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        bio_form = ProfileBioForm(request.POST, instance=profile)
+        if bio_form.is_valid():
+            bio_form.save()
+            return redirect('profile')
+    else:
+        bio_form = ProfileBioForm(instance=profile)
+
+    return render(request, "users/profile.html", {"profile": profile, "bio_form": bio_form})
 
 # Description: Profile display and role editing views
 # Generated with Copilot on March 14, 2026
