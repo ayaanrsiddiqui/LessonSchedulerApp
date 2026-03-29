@@ -1,0 +1,146 @@
+<!--
+# Description: DJ class detail page showing class metadata and student signup roster
+# Generated with Copilot on March 29, 2026
+# Prompt: add a DJ-side page to view class details and the list of signed up students
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Details</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+            color: #e5e7eb;
+            padding: 24px 14px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .card {
+            background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        h1, h2 {
+            margin-top: 0;
+            color: #ffffff;
+        }
+        .meta p {
+            margin: 6px 0;
+            color: #c9ced6;
+        }
+        .pill {
+            display: inline-block;
+            background: #2f2f33;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .list-item {
+            background: rgba(255, 255, 255, 0.06);
+            border-left: 4px solid #0066cc;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .muted {
+            color: #c9ced6;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 9px 13px;
+            border-radius: 6px;
+            background: #0066cc;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background: #0052a3;
+        }
+        .btn-secondary {
+            background: #666;
+        }
+        .btn-secondary:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>{{ lesson.title }}</h1>
+        <div class="meta">
+            <p><strong>Time:</strong> {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}</p>
+            <p><strong>Location:</strong> {{ lesson.location }}</p>
+            <p><strong>Description:</strong> {{ lesson.description }}</p>
+            <p><strong>Requirements:</strong> {{ lesson.experience_requirements }}</p>
+            <p>
+                <span class="pill">Capacity: {{ lesson.capacity }}</span>
+                <span class="pill">Confirmed: {{ confirmed_signups|length }}</span>
+                <span class="pill">Waitlisted: {{ waitlisted_signups|length }}</span>
+            </p>
+        </div>
+        <div class="btn-row">
+            <a class="btn" href="{% url 'lesson_create' %}">Post New Class</a>
+            <a class="btn btn-secondary" href="{% url 'index' %}">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Confirmed Students</h2>
+        {% if confirmed_signups %}
+            <ul class="list">
+                {% for signup in confirmed_signups %}
+                    <li class="list-item">
+                        <strong>{{ signup.student.get_full_name|default:signup.student.username }}</strong><br>
+                        <span class="muted">{{ signup.student.email }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">No confirmed students yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Waitlisted Students</h2>
+        {% if waitlisted_signups %}
+            <ul class="list">
+                {% for signup in waitlisted_signups %}
+                    <li class="list-item">
+                        <strong>{{ signup.student.get_full_name|default:signup.student.username }}</strong><br>
+                        <span class="muted">{{ signup.student.email }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="muted">No waitlisted students.</p>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

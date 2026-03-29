@@ -1,17 +1,26 @@
+# Description: Forms for DJ class creation, student signup/request, and DJ request response
+# Generated with Copilot on March 29, 2026
+# Prompt: implement asymmetrical form workflow for DJs posting classes and students requesting/signing up
+
 from django import forms
 from django.contrib.auth.models import User
 
-from .models import Lesson
+from .models import Lesson, ClassSignup, ClassRequest
 
 
-# Description: Lesson creation form with role-aware teacher/student assignment
-# Generated with Copilot on March 14, 2026
-# Prompt: lets work on phase 3 and 4 next
+# DJ Form: Post a new class
 class LessonCreateForm(forms.ModelForm):
+    """Form for DJs to create and post a new class."""
+    
     class Meta:
         model = Lesson
-        fields = ["title", "description", "start_time", "end_time"]
+        fields = ["title", "description", "location", "capacity", "experience_requirements", "start_time", "end_time"]
         widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "e.g., 'House Music Basics'"}),
+            "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Describe your class..."}),
+            "location": forms.TextInput(attrs={"placeholder": "e.g., 'Studio A, Downtown'"}),
+            "capacity": forms.NumberInput(attrs={"min": 1}),
+            "experience_requirements": forms.Textarea(attrs={"rows": 2, "placeholder": "e.g., 'Beginner', 'Must know basic mixing'"}),
             "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
@@ -19,35 +28,97 @@ class LessonCreateForm(forms.ModelForm):
     def __init__(self, *args, user, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
-        self.fields["start_time"].required = True
-        self.fields["end_time"].required = True
-
-        if self.user.profile.is_djteacher:
-            self.fields["student"] = forms.ModelChoiceField(
-                queryset=User.objects.filter(profile__is_djteacher=False).exclude(
-                    pk=self.user.pk
-                ),
-                required=True,
-            )
-        else:
-            self.fields["teacher"] = forms.ModelChoiceField(
-                queryset=User.objects.filter(profile__is_djteacher=True).exclude(
-                    pk=self.user.pk
-                ),
-                required=True,
-            )
+        
+        # Ensure all fields are required
+        for field in self.fields:
+            self.fields[field].required = True
 
     def save(self, commit=True):
         lesson = super().save(commit=False)
-
-        if self.user.profile.is_djteacher:
-            lesson.teacher = self.user
-            lesson.student = self.cleaned_data["student"]
-        else:
-            lesson.student = self.user
-            lesson.teacher = self.cleaned_data["teacher"]
-
+        lesson.dj = self.user
         if commit:
             lesson.save()
-
         return lesson
+
+
+# Student Form: Sign up for a class (simple confirmation)
+class ClassSignupForm(forms.ModelForm):
+    """Form for students to sign up for a posted class."""
+    
+    class Meta:
+        model = ClassSignup
+        fields = []  # No required fields from model
+    
+    def __init__(self, *args, user, lesson, status="confirmed", **kwargs):
+        self.user = user
+        self.lesson = lesson
+        self.status = status
+        super().__init__(*args, **kwargs)
+
+        # Bind required model fields before validation since this form has no fields.
+        self.instance.student = self.user
+        self.instance.lesson = self.lesson
+        self.instance.status = self.status
+
+    def save(self, commit=True):
+        signup = super().save(commit=False)
+        signup.student = self.user
+        signup.lesson = self.lesson
+        signup.status = self.status
+        if commit:
+            signup.save()
+        return signup
+
+
+# Student Form: Request a specific date/time from a DJ
+class ClassRequestForm(forms.ModelForm):
+    """Form for students to request a specific date/time from a DJ."""
+    
+    class Meta:
+        model = ClassRequest
+        fields = ["requested_start_time", "requested_end_time", "description"]
+        widgets = {
+            "requested_start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "requested_end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Explain why you need this specific time..."}),
+        }
+
+    def __init__(self, *args, user, dj, **kwargs):
+        self.user = user
+        self.dj = dj
+        super().__init__(*args, **kwargs)
+        self.fields["requested_start_time"].required = True
+        self.fields["requested_end_time"].required = True
+        self.fields["description"].required = True
+
+    def save(self, commit=True):
+        request = super().save(commit=False)
+        request.student = self.user
+        request.dj = self.dj
+        if commit:
+            request.save()
+        return request
+
+
+# DJ Form: Respond to student requests
+class ManageClassRequestForm(forms.ModelForm):
+    """Form for DJs to accept or deny class requests."""
+    
+    class Meta:
+        model = ClassRequest
+        fields = ["status"]
+        widgets = {
+            "status": forms.Select(choices=[
+                ("pending", "Pending"),
+                ("accepted", "Accept Request"),
+                ("denied", "Deny Request"),
+            ])
+        }
+
+    def save(self, commit=True):
+        request = super().save(commit=False)
+        from django.utils import timezone
+        request.responded_at = timezone.now()
+        if commit:
+            request.save()
+        return request
