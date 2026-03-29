@@ -1,7 +1,7 @@
 <!--
-## Description: Logged-in user homepage with profile summary, upcoming lessons placeholder, and schedule button
-## Generated with Copilot on March 14, 2026
-## Prompt: Create here the home page for the user that includes their name, theri account type, and has a space to display upcoming lessons that we will add later. also include a button to where they would schedule new lessons. add the citation format i mentioned
+# Description: Root integrated user dashboard showing DJ or student data based on role
+# Generated with Copilot on March 29, 2026
+# Prompt: keep dashboard at root URL and integrate DJ/student dashboard content into one page
 -->
 
 <!DOCTYPE html>
@@ -9,43 +9,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Home</title>
+<title>User Dashboard</title>
+<style>
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	font-family: Arial, sans-serif;
+	background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+	color: #e5e7eb;
+}
+.container {
+	max-width: 1080px;
+	margin: 28px auto;
+	padding: 0 18px;
+}
+.card {
+	background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+	border-radius: 12px;
+	padding: 22px;
+	box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+	margin-bottom: 18px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.card h1,
+.card h2 {
+	margin-top: 0;
+	color: #ffffff;
+}
+.top-links {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 12px;
+}
+.top-links a {
+	display: inline-block;
+	padding: 9px 13px;
+	border-radius: 6px;
+	background: #0066cc;
+	color: #ffffff;
+	text-decoration: none;
+	font-size: 14px;
+}
+.top-links a:hover {
+	background: #0052a3;
+}
+.muted {
+	color: #c9ced6;
+}
+.pill {
+	display: inline-block;
+	background: #2f2f33;
+	border-radius: 999px;
+	padding: 4px 10px;
+	font-size: 12px;
+}
+ul {
+	padding-left: 18px;
+	margin-bottom: 0;
+}
+li {
+	margin-bottom: 12px;
+}
+.item {
+	background: rgba(255, 255, 255, 0.06);
+	border-left: 4px solid #0066cc;
+	padding: 12px;
+	border-radius: 6px;
+}
+.inline-link {
+	color: #7cb6ff;
+}
+.inline-link:hover {
+	color: #a8ceff;
+}
+@media (max-width: 640px) {
+	.container {
+		padding: 0 12px;
+	}
+	.card {
+		padding: 16px;
+	}
+}
+</style>
 </head>
 <body>
-<div>
-	<section>
+<div class="container">
+	<div class="card">
 		<h1>Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
-
-		<div>
-			<p>Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
-			<p>Account Type: {{ account_type }}</p>
-			<p>Email: {{ request.user.email }}</p>
-		</div>
-		<div>
-			<a href="{% url 'lesson_create' %}">Schedule New Lesson</a> <br>
-			<a href="{% url 'inbox' %}">View Messages</a> <br>
+		<p class="muted">Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
+		<p class="muted">Email: {{ request.user.email }}</p>
+		<p>Account Type: <span class="pill">{{ account_type }}</span></p>
+		<div class="top-links">
+			{% if is_dj %}
+			<a href="{% url 'lesson_create' %}">Post New Class</a>
+			{% else %}
+			<a href="{% url 'browse_classes' %}">Browse Classes</a>
+			{% endif %}
+			<a href="{% url 'inbox' %}">View Messages</a>
 			<a href="{% url 'profile' %}">Go to Profile</a>
 		</div>
-	</section>
+	</div>
 
-	<section>
-		<h2>Upcoming Lessons</h2>
-		{% if upcoming_lessons %}
+	{% if is_dj %}
+	<div class="card">
+		<h2>Your Posted Classes</h2>
+		{% if posted_classes %}
 		<ul>
-			{% for lesson in upcoming_lessons %}
-			<li>
-				<strong>{{ lesson.title }}</strong><br>
-				Starts: {{ lesson.start_time }}<br>
-				Ends: {{ lesson.end_time }}<br>
-				Teacher: {{ lesson.teacher.get_full_name|default:lesson.teacher.username }}<br>
-				Student: {{ lesson.student.get_full_name|default:lesson.student.username }}
+			{% for lesson in posted_classes %}
+			<li class="item">
+				<strong>{{ lesson.title }}</strong> ({{ lesson.confirmed_count }}/{{ lesson.capacity }} confirmed)
+				<br>
+				{{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
+				<br>
+				Location: {{ lesson.location }}
+				<br>
+				<a class="inline-link" href="{% url 'dj_class_detail' lesson.id %}">View Class Details</a>
 			</li>
 			{% endfor %}
 		</ul>
 		{% else %}
-		<p>No upcoming lessons yet.</p>
+		<p class="muted">You have not posted any classes yet.</p>
 		{% endif %}
-	</section>
+	</div>
+
+	<div class="card">
+		<h2>Pending Student Requests</h2>
+		{% if pending_requests %}
+		<ul>
+			{% for req in pending_requests %}
+			<li class="item">
+				{{ req.student.get_full_name|default:req.student.username }}
+				requested {{ req.requested_start_time|date:"M d, Y H:i" }} - {{ req.requested_end_time|date:"H:i" }}
+				<br>
+				<a class="inline-link" href="{% url 'manage_request' req.id %}">Review Request</a>
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+		<p class="muted">No pending requests.</p>
+		{% endif %}
+	</div>
+	{% else %}
+	<div class="card">
+		<h2>Your Upcoming Classes</h2>
+		{% if my_signups %}
+		<ul>
+			{% for signup in my_signups %}
+			<li class="item">
+				<strong>{{ signup.lesson.title }}</strong>
+				<br>
+				DJ: {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
+				<br>
+				{{ signup.lesson.start_time|date:"M d, Y H:i" }} - {{ signup.lesson.end_time|date:"H:i" }}
+				<br>
+				Location: {{ signup.lesson.location }}
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+			<p class="muted">No upcoming classes yet. <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.</p>
+		{% endif %}
+	</div>
+	{% endif %}
 </div>
 </body>
 </html>

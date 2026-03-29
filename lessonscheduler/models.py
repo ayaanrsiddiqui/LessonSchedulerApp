@@ -1,38 +1,47 @@
+# Description: Asymmetrical DJ/student scheduling data models with lessons, signups, and requests
+# Generated with Copilot on March 29, 2026
+# Prompt: build asymmetrical DJ/student class posting, signup, and request flow
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from users.models import Profile
 
 
-## Copilot, 3/14/2026: Added Lesson model with validation to ensure teacher and student are not the same and that the teacher is marked as a teacher in their profile.
+# Refactored for asymmetrical DJ/Student workflow (March 29, 2026)
 class Lesson(models.Model):
+    """Posted class by a DJ with capacity and requirements. Students sign up for these."""
     title = models.CharField(max_length=200)
     description = models.TextField()
+    location = models.CharField(max_length=300, default="TBD")
+    capacity = models.PositiveIntegerField(default=10)
+    experience_requirements = models.TextField(
+        default="No specific requirements",
+        help_text="e.g., 'Beginner', 'Intermediate', or specific skills needed"
+    )
     start_time = models.DateTimeField()
-    end_time = models.DateTimeField(null=True, blank=True)
-    teacher = models.ForeignKey(
-        User, related_name="lessons_as_teacher", on_delete=models.CASCADE
+    end_time = models.DateTimeField()
+    
+    dj = models.ForeignKey(
+        User,
+        related_name="posted_lessons",
+        on_delete=models.CASCADE,
     )
-    student = models.ForeignKey(
-        User, related_name="lessons_as_student", on_delete=models.CASCADE
-    )
+    created_at = models.DateTimeField(default=timezone.now)
 
     def clean(self):
         errors = {}
 
-        teacher_id = getattr(self, "teacher_id", None)
-        student_id = getattr(self, "student_id", None)
-
-        if teacher_id and student_id and teacher_id == student_id:
-            errors["student"] = "Teacher and student cannot be the same user."
+        dj_id = getattr(self, "dj_id", None)
 
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             errors["end_time"] = "End time must be after start time."
 
-        if teacher_id and not Profile.objects.filter(
-            user_id=teacher_id, is_djteacher=True
+        if dj_id and not Profile.objects.filter(
+            user_id=dj_id, is_djteacher=True
         ).exists():
-            errors["teacher"] = "Selected teacher account is not marked as a teacher."
+            errors["dj"] = "Only DJ accounts can post classes."
 
         if errors:
             raise ValidationError(errors)
@@ -43,3 +52,106 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def current_enrollment_count(self):
+        """Get current number of students signed up."""
+        return ClassSignup.objects.filter(
+            lesson=self,
+            status="confirmed",
+        ).count()
+
+    @property
+    def spots_available(self):
+        """Get remaining available spots."""
+        return max(0, self.capacity - self.current_enrollment_count)
+
+
+class ClassSignup(models.Model):
+    """Student enrollment in a DJ's posted class."""
+    STATUS_CHOICES = [
+        ("confirmed", "Confirmed"),
+        ("waitlisted", "Waitlisted"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    student = models.ForeignKey(
+        User, related_name="class_signups", on_delete=models.CASCADE
+    )
+    lesson = models.ForeignKey(
+        Lesson, related_name="signups", on_delete=models.CASCADE
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="confirmed")
+    signed_up_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ("student", "lesson")
+
+    def clean(self):
+        errors = {}
+
+        # Only confirmed enrollments consume class capacity.
+        if self.status == "confirmed" and self.lesson:
+            confirmed_count = ClassSignup.objects.filter(
+                lesson=self.lesson,
+                status="confirmed",
+            ).exclude(pk=self.pk).count()
+
+            if confirmed_count >= self.lesson.capacity:
+                errors["status"] = "This class is already full."
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student.username} -> {self.lesson.title}"
+
+
+class ClassRequest(models.Model):
+    """Student request for a specific date/time from a DJ."""
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("denied", "Denied"),
+    ]
+
+    student = models.ForeignKey(
+        User, related_name="class_requests", on_delete=models.CASCADE
+    )
+    dj = models.ForeignKey(
+        User, related_name="received_requests", on_delete=models.CASCADE
+    )
+    requested_start_time = models.DateTimeField()
+    requested_end_time = models.DateTimeField()
+    description = models.TextField(help_text="Why you need this specific time/date")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(default=timezone.now)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    def clean(self):
+        errors = {}
+        if self.student == self.dj:
+            errors["student"] = "Cannot request a class from yourself."
+        if (
+            self.requested_start_time
+            and self.requested_end_time
+            and self.requested_start_time >= self.requested_end_time
+        ):
+            errors["requested_end_time"] = "Requested end time must be after start time."
+        if self.dj and not Profile.objects.filter(
+            user_id=self.dj.pk, is_djteacher=True
+        ).exists():
+            errors["dj"] = "Selected user is not a DJ."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student.username} requests {self.dj.username} at {self.requested_start_time}"
