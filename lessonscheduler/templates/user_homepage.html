@@ -44,7 +44,7 @@ body{
 .nav-left{
     display:flex;
     align-items:center;
-    gap:20px;
+    gap:1200px;
 }
 
 .nav-buttons{
@@ -71,22 +71,32 @@ body{
 }
 
 .primary-btn{
-    background:#111;
-    color:white;
+    background:#fdfbfb;
+    color:#111;
+    border:1px solid #ccc;
 }
 
 .primary-btn:hover{
     background:#2a2a2a;
 }
 
-.secondary-btn{
+/* ===== WHITE BUTTONS (View Messages + Go to Profile) ===== */
+.nav-buttons .secondary-btn{
     background:white;
     color:#111;
     border:1px solid #ccc;
 }
 
+/* ===== LOGOUT BUTTON (BLACK) ===== */
+.nav-right .secondary-btn{
+    background:#111;
+    color:white;
+    border:1px solid #ccc;
+}
+
 .secondary-btn:hover{
     background:#f3f3f3;
+    
 }
 
 /* ===== MAIN CONTENT ===== */
