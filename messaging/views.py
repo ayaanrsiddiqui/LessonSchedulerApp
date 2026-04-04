@@ -22,8 +22,8 @@ def inbox(request):
 
     conversations = list(latest_per_peer.values())
 
-    students = User.objects.exclude(id=request.user.id).filter(profile__is_djteacher=False).select_related('profile')
-    teachers = User.objects.exclude(id=request.user.id).filter(profile__is_djteacher=True).select_related('profile')
+    students = User.objects.exclude(id=request.user.id).filter(profile__role='student').select_related('profile')
+    teachers = User.objects.exclude(id=request.user.id).filter(profile__role='teacher').select_related('profile')
 
     return render(request, 'messaging/inbox.html', {
         'conversations': conversations,

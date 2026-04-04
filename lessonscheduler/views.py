@@ -94,7 +94,7 @@ def index(request):
     """Home page with integrated DJ/student dashboard for authenticated users."""
     if request.user.is_authenticated:
         profile = getattr(request.user, "profile", None)
-        is_dj = profile and profile.is_djteacher
+        is_dj = profile and profile.role == "teacher"
         if is_dj:
             return _render_dj_dashboard(request)
         return _render_student_dashboard(request)
@@ -120,7 +120,7 @@ def student_dashboard(request):
 def lesson_create(request):
     """DJ: Create and post a new class."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.is_djteacher):
+    if not (profile and profile.role == "teacher"):
         raise Http404("Only DJs can post classes")
     
     form = LessonCreateForm(request.POST or None, user=request.user)
@@ -136,7 +136,7 @@ def lesson_create(request):
 def dj_class_detail(request, lesson_id):
     """DJ: View class details and signup roster for one posted class."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.is_djteacher):
+    if not (profile and profile.role == "teacher"):
         raise Http404("Only DJs can view class details")
 
     lesson = get_object_or_404(Lesson, id=lesson_id, dj=request.user)
@@ -160,7 +160,7 @@ def dj_class_detail(request, lesson_id):
 def browse_classes(request):
     """Student: Browse available classes."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.is_djteacher:
+    if profile and profile.role == "teacher":
         raise Http404("Only students can browse classes")
     
     # Show all posted classes that still have available spots.
@@ -184,7 +184,7 @@ def browse_classes(request):
 def class_signup(request, lesson_id):
     """Student: Sign up for a class."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.is_djteacher:
+    if profile and profile.role == "teacher":
         raise Http404("Only students can sign up for classes")
     
     lesson = get_object_or_404(Lesson, id=lesson_id)
@@ -233,10 +233,10 @@ def class_signup(request, lesson_id):
 def request_class(request, dj_id):
     """Student: Request a class at a specific date/time from a DJ."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.is_djteacher:
+    if profile and profile.role == "teacher":
         raise Http404("Only students can request classes")
     
-    dj_user = get_object_or_404(User, id=dj_id, profile__is_djteacher=True)
+    dj_user = get_object_or_404(User, id=dj_id, profile__role='teacher')
     
     form = ClassRequestForm(request.POST or None, user=request.user, dj=dj_user)
     if request.method == "POST" and form.is_valid():
@@ -251,7 +251,7 @@ def request_class(request, dj_id):
 def manage_request(request, request_id):
     """DJ: Accept or deny a class request."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.is_djteacher):
+    if not (profile and profile.role == "teacher"):
         raise Http404("Only DJs can manage requests")
     
     class_request = get_object_or_404(ClassRequest, id=request_id, dj=request.user)

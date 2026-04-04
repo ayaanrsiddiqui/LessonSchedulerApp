@@ -24,7 +24,7 @@ def profile_view(request):
 def edit_role(request):
     profile = request.user.profile
     if request.method == 'POST':
-        profile.is_djteacher = request.POST.get('is_djteacher') == 'true'
+        profile.role = request.POST.get('role')
         profile.save()
         return redirect('profile')
     return render(request, "users/edit_role.html", {"profile": profile})

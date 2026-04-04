@@ -5,17 +5,17 @@
 -->
 
 <h1>Change Role</h1>
-<p>Current role: {% if profile.is_djteacher %}Teacher{% else %}Student{% endif %}</p>
+<p>Current role: {{ profile.get_role_display }}</p>
 
 <form method="post">
     {% csrf_token %}
     <p>Select your role:</p>
     <label>
-        <input type="radio" name="is_djteacher" value="false" {% if not profile.is_djteacher %}checked{% endif %}>
+        <input type="radio" name="role" value="student" {% if profile.role == 'student' %}checked{% endif %}>
         Student
     </label><br>
     <label>
-        <input type="radio" name="is_djteacher" value="true" {% if profile.is_djteacher %}checked{% endif %}>
+        <input type="radio" name="role" value="teacher" {% if profile.role == 'teacher' %}checked{% endif %}>
         Teacher
     </label><br><br>
     <button type="submit">Save</button>
