@@ -173,11 +173,7 @@ audio {
     <div class="card">
         <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
         <p class="muted">Email: {{ request.user.email }}</p>
-        {% if profile.role != "user_admin" %}
-            <p class="role-row">Role: {{ profile.get_role_display }} - <a class="inline-link" href="{% url 'edit_role' %}">Change</a></p>
-        {% else %}
-            <p class="role-row">Role: {{ profile.get_role_display }}</p>
-        {% endif %}
+        <p class="role-row">Role: {{ profile.get_role_display }} - <a class="inline-link" href="{% url 'edit_role' %}">Change</a></p>
         <p class="muted">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
 
         <form method="post">

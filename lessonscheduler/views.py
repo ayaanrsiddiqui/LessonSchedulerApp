@@ -12,6 +12,7 @@ from django.contrib import messages
 
 from .forms import LessonCreateForm, ClassSignupForm, ClassRequestForm, ManageClassRequestForm
 from .models import Lesson, ClassSignup, ClassRequest
+from users.decorators import block_user_admin
 
 # Create your views here.
 
@@ -90,6 +91,8 @@ def _render_student_dashboard(request):
     )
 
 
+@login_required
+@block_user_admin
 def index(request):
     """Home page with integrated DJ/student dashboard for authenticated users."""
     if request.user.is_authenticated:
@@ -117,6 +120,7 @@ def student_dashboard(request):
 
 
 @login_required
+@block_user_admin
 def lesson_create(request):
     """DJ: Create and post a new class."""
     profile = getattr(request.user, "profile", None)
@@ -133,6 +137,7 @@ def lesson_create(request):
 
 
 @login_required
+@block_user_admin
 def dj_class_detail(request, lesson_id):
     """DJ: View class details and signup roster for one posted class."""
     profile = getattr(request.user, "profile", None)
@@ -157,6 +162,7 @@ def dj_class_detail(request, lesson_id):
 
 
 @login_required
+@block_user_admin
 def browse_classes(request):
     """Student: Browse available classes."""
     profile = getattr(request.user, "profile", None)
@@ -181,6 +187,7 @@ def browse_classes(request):
 
 
 @login_required
+@block_user_admin
 def class_signup(request, lesson_id):
     """Student: Sign up for a class."""
     profile = getattr(request.user, "profile", None)
@@ -230,6 +237,7 @@ def class_signup(request, lesson_id):
 
 
 @login_required
+@block_user_admin
 def request_class(request, dj_id):
     """Student: Request a class at a specific date/time from a DJ."""
     profile = getattr(request.user, "profile", None)
@@ -248,6 +256,7 @@ def request_class(request, dj_id):
 
 
 @login_required
+@block_user_admin
 def manage_request(request, request_id):
     """DJ: Accept or deny a class request."""
     profile = getattr(request.user, "profile", None)

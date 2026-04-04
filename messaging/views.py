@@ -4,8 +4,10 @@ from .models import Message
 from django.contrib.auth.models import User
 from django.db.models import Q
 from users.models import Profile
+from users.decorators import block_user_admin
 
 @login_required
+@block_user_admin
 def inbox(request):
     messages = Message.objects.filter(
         Q(sender=request.user) | Q(recipient=request.user)
@@ -32,6 +34,7 @@ def inbox(request):
     })
 
 @login_required
+@block_user_admin
 def send_message(request, username):
     recipient = get_object_or_404(User, username=username)
     users = User.objects.exclude(id=request.user.id)

@@ -29,5 +29,8 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.username
+    
+    def is_user_admin(self):
+        return self.role == "admin_user"
 
 
