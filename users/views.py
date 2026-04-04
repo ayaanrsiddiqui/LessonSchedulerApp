@@ -65,3 +65,19 @@ def manage_roles(request):
     users = Profile.objects.exclude(role="admin_user")
 
     return render(request, "users/manage_roles.html", {"users": users})
+
+# Allow User Administrator to update user roles
+@login_required
+@admin_only
+def update_role(request, user_id):
+    if request.method == "POST":
+        try:
+            profile = Profile.objects.get(user__id=user_id)
+            new_role = request.POST.get("role")
+            if new_role in ["student", "teacher"]:
+                profile.role = new_role
+                profile.save()
+        except Profile.DoesNotExist:
+            pass
+    return redirect("manage_roles")
+

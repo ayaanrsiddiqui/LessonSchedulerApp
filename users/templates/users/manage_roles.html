@@ -1,1 +1,21 @@
-<h1>Manage Roles</h1>
+<h2>Manage Roles</h2>
+
+{% for user in users %}
+<form method="POST" action="{% url 'update_role' user.user.id %}">
+{% csrf_token %}
+
+{{ user.user.username }}
+
+<select name="role">
+    <option value="student" {% if user.role == "student" %}selected{% endif %}>
+        Student
+    </option>
+
+    <option value="teacher" {% if user.role == "teacher" %}selected{% endif %}>
+        Teacher
+    </option>
+</select>
+
+<button type="submit">Update</button>
+</form>
+{% endfor %}
