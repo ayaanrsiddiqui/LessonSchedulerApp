@@ -123,7 +123,7 @@ def lesson_create(request):
     if not (profile and profile.is_djteacher):
         raise Http404("Only DJs can post classes")
     
-    form = LessonCreateForm(request.POST or None, user=request.user)
+    form = LessonCreateForm(request.POST or None, request.FILES or None, user=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Class posted successfully!")

@@ -14,7 +14,7 @@ class LessonCreateForm(forms.ModelForm):
     
     class Meta:
         model = Lesson
-        fields = ["title", "description", "location", "capacity", "experience_requirements", "start_time", "end_time"]
+        fields = ["title", "description","image", "location", "capacity", "experience_requirements", "start_time", "end_time"]
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "e.g., 'House Music Basics'"}),
             "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Describe your class..."}),

@@ -14,6 +14,7 @@ class Lesson(models.Model):
     """Posted class by a DJ with capacity and requirements. Students sign up for these."""
     title = models.CharField(max_length=200)
     description = models.TextField()
+    image = models.ImageField(upload_to="lesson_images/", blank=True, null=True)
     location = models.CharField(max_length=300, default="TBD")
     capacity = models.PositiveIntegerField(default=10)
     experience_requirements = models.TextField(
