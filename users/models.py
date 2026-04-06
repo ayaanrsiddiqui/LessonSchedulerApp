@@ -18,9 +18,19 @@ class Profile(models.Model):
     profile_picture = models.ImageField(upload_to=profile_pic_upload_path, blank=True, null=True)
     intro_audio = models.FileField(upload_to=audio_upload_path, blank=True, null=True)
 
-    is_djteacher = models.BooleanField(default=False)
+    # role choice for user type
+    ROLE_CHOICES = [
+        ("student", "Student"),
+        ("teacher", "Teacher"),
+        ("admin_user", "User Administrator"),
+    ]
+
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="student")
 
     def __str__(self):
         return self.user.username
+    
+    def is_user_admin(self):
+        return self.role == "admin_user"
 
 
