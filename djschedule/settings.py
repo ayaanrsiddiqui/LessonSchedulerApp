@@ -161,3 +161,5 @@ SOCIALACCOUNT_PROVIDERS = {
 
 LOGIN_REDIRECT_URL = '/profile/'
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
