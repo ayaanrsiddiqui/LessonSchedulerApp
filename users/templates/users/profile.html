@@ -72,6 +72,9 @@ body {
 }
 .muted {
     color: #c9ced6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .role-row {
     margin: 6px 0 0;
@@ -182,7 +185,7 @@ audio {
         <form method="post">
             {% csrf_token %}
             <label class="field-label" for="id_bio">Edit Bio</label>
-            <textarea id="id_bio" name="bio" class="bio-input" rows="4" placeholder="Tell people a little about yourself...">{{ bio_form.bio.value|default_if_none:"" }}</textarea>
+            <textarea id="id_bio" name="bio" class="bio-input" rows="4" maxlength="1000" placeholder="Tell people a little about yourself...">{{ bio_form.bio.value|default_if_none:"" }}</textarea>
             {% if bio_form.bio.errors %}
             <ul class="error-list">
                 {% for error in bio_form.bio.errors %}
@@ -238,14 +241,14 @@ audio {
                 <div>
                     <p class="muted" style="margin-top:8px;">Teacher role request pending.</p>
                     {% if pending_teacher_request.explanation %}
-                        <p class="muted" style="margin-top:4px;"><strong>Reason:</strong> {{ pending_teacher_request.explanation }}</p>
+                        <p class="muted" style="margin-top:4px;">Reason: {{ pending_teacher_request.explanation }}</p>
                     {% endif %}
                 </div>
             {% else %}
                 <form method="post" action="{% url 'request_teacher_role' %}" class="teacher-request-form">
                     {% csrf_token %}
                     <p>If you would like to request a teacher role, please provide your reasoning below.</p>
-                    <textarea id="id_explanation" name="explanation" class="bio-input" rows="3" placeholder="Share your experience, availability, or motivation..."></textarea>
+                    <textarea id="id_explanation" name="explanation" class="bio-input" rows="3" maxlength="1000" placeholder="Share your experience, availability, or motivation..."></textarea>
                     <button type="submit" class="primary-btn">Request Teacher Role</button>
                 </form>
             {% endif %}            
