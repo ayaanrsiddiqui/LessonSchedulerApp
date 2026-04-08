@@ -1,4 +1,4 @@
-# Generated migration to add max_length constraints
+# Generated migration - Add max_length constraints
 
 from django.db import migrations, models
 
@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0005_rolechangerequest_explanation'),
+        ('users', '0004_rolechangerequest_explanation'),
     ]
 
     operations = [

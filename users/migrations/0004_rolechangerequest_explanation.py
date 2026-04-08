@@ -1,4 +1,4 @@
-# Generated migration for explanation field
+# Generated migration - Add explanation field
 
 from django.db import migrations, models
 
@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_remove_profile_is_djteacher_profile_role_and_more'),
+        ('users', '0003_profile_role_rolechangerequest'),
     ]
 
     operations = [
