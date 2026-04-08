@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileUploadForm, ProfileBioForm
-from .models import Profile
+from django.utils import timezone
+from .forms import ProfileBioForm
+from .models import Profile, RoleChangeRequest
 from .decorators import block_user_admin, admin_only
 
 
@@ -18,20 +19,13 @@ def profile_view(request):
     else:
         bio_form = ProfileBioForm(instance=profile)
 
-    return render(request, "users/profile.html", {"profile": profile, "bio_form": bio_form})
+    pending_teacher_request = profile.role_requests.filter(status="pending", requested_role="teacher").first() if profile.role == 'student' else None
 
-# Description: Profile display and role editing views
-# Generated with Copilot on March 14, 2026
-# Prompt: could a user add a page where the user can change their profile type whenever they would like?
-@login_required
-@block_user_admin
-def edit_role(request):
-    profile = request.user.profile
-    if request.method == 'POST':
-        profile.role = request.POST.get('role')
-        profile.save()
-        return redirect('profile')
-    return render(request, "users/edit_role.html", {"profile": profile})
+    return render(request, "users/profile.html", {
+        "profile": profile,
+        "bio_form": bio_form,
+        "pending_teacher_request": pending_teacher_request,
+    })
 
 # Profile Picture and Audio upload
 @login_required
@@ -63,8 +57,44 @@ def upload_profile_files(request):
 def manage_roles(request):
 
     users = Profile.objects.exclude(role="admin_user")
+    pending_requests = RoleChangeRequest.objects.filter(status="pending").select_related("profile__user").order_by("submitted_at")
 
-    return render(request, "users/manage_roles.html", {"users": users})
+    return render(request, "users/manage_roles.html", {
+        "users": users,
+        "pending_requests": pending_requests,
+    })
+
+# Allow students to request the teacher role
+@login_required
+@block_user_admin
+def request_teacher_role(request):
+    profile = request.user.profile
+    if request.method == "POST" and profile.role == "student":
+        if not profile.has_pending_teacher_request():
+            explanation = request.POST.get("explanation", "").strip()
+            RoleChangeRequest.objects.create(profile=profile, explanation=explanation)
+    return redirect("profile")
+
+# Admin decision on role requests
+@login_required
+@admin_only
+def handle_role_request(request, request_id):
+    if request.method == "POST":
+        try:
+            role_request = RoleChangeRequest.objects.select_related("profile__user").get(id=request_id, status="pending")
+            action = request.POST.get("action")
+            if action == "approve":
+                role_request.profile.role = role_request.requested_role
+                role_request.profile.save()
+                role_request.status = "approved"
+            elif action == "deny":
+                role_request.status = "denied"
+            role_request.reviewer = request.user
+            role_request.reviewed_at = timezone.now()
+            role_request.save()
+        except RoleChangeRequest.DoesNotExist:
+            pass
+    return redirect("manage_roles")
 
 # Allow User Administrator to update user roles
 @login_required
