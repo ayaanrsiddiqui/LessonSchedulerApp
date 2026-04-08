@@ -75,6 +75,9 @@ body {
 }
 .role-row {
     margin: 6px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 .inline-link {
     color: #7cb6ff;
@@ -165,7 +168,7 @@ audio {
     </div>
     <form method="post" action="{% url 'account_logout' %}">
         {% csrf_token %}
-        <button type="submit" class="secondary-btn">Sign Out</button>
+        <button type="submit" class="secondary-btn">Logout</button>
     </form>
 </div>
 
@@ -173,7 +176,7 @@ audio {
     <div class="card">
         <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
         <p class="muted">Email: {{ request.user.email }}</p>
-        <p class="role-row">Role: {{ profile.get_role_display }} - <a class="inline-link" href="{% url 'edit_role' %}">Change</a></p>
+        <p class="muted">Role: {{ profile.get_role_display }}</p>
         <p class="muted">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
 
         <form method="post">
@@ -227,6 +230,27 @@ audio {
             {% endif %}
         </div>
     </div>
+
+    {% if profile.role == 'student' %}
+        <div class="card">
+            <h2>Request Teacher Role</h2>
+            {% if pending_teacher_request %}
+                <div>
+                    <p class="muted" style="margin-top:8px;">Teacher role request pending.</p>
+                    {% if pending_teacher_request.explanation %}
+                        <p class="muted" style="margin-top:4px;"><strong>Reason:</strong> {{ pending_teacher_request.explanation }}</p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'request_teacher_role' %}" class="teacher-request-form">
+                    {% csrf_token %}
+                    <p>If you would like to request a teacher role, please provide your reasoning below.</p>
+                    <textarea id="id_explanation" name="explanation" class="bio-input" rows="3" placeholder="Share your experience, availability, or motivation..."></textarea>
+                    <button type="submit" class="primary-btn">Request Teacher Role</button>
+                </form>
+            {% endif %}            
+        </div>
+    {% endif %}
 </div>
 </body>
 </html>
