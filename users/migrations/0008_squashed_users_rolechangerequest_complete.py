@@ -19,10 +19,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='profile',
-            name='is_djteacher',
-        ),
         migrations.AddField(
             model_name='profile',
             name='role',
