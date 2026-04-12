@@ -12,6 +12,7 @@ from django.contrib import messages
 
 from .forms import LessonForm, ClassSignupForm, ClassRequestForm, ManageClassRequestForm
 from .models import Lesson, ClassSignup, ClassRequest
+from messaging.models import Message as DirectMessage
 from users.decorators import block_user_admin
 
 # Create your views here.
@@ -146,6 +147,17 @@ def lesson_edit(request, lesson_id):
 
     lesson = get_object_or_404(Lesson, id=lesson_id, dj=request.user)
 
+    previous_state = {
+        "title": lesson.title,
+        "description": lesson.description,
+        "location": lesson.location,
+        "capacity": lesson.capacity,
+        "experience_requirements": lesson.experience_requirements,
+        "start_time": lesson.start_time,
+        "end_time": lesson.end_time,
+        "image_name": lesson.image.name if lesson.image else "",
+    }
+
     form = LessonForm(
         request.POST or None,
         request.FILES or None,
@@ -154,7 +166,53 @@ def lesson_edit(request, lesson_id):
     )
 
     if request.method == "POST" and form.is_valid():
-        form.save()
+        updated_lesson = form.save()
+
+        changed_labels = []
+        tracked_fields = [
+            ("title", "title"),
+            ("description", "description"),
+            ("location", "location"),
+            ("capacity", "capacity"),
+            ("experience_requirements", "experience requirements"),
+            ("start_time", "start time"),
+            ("end_time", "end time"),
+        ]
+
+        for field_name, label in tracked_fields:
+            if previous_state[field_name] != getattr(updated_lesson, field_name):
+                changed_labels.append(label)
+
+        updated_image_name = updated_lesson.image.name if updated_lesson.image else ""
+        if previous_state["image_name"] != updated_image_name:
+            changed_labels.append("image")
+
+        if changed_labels:
+            signed_up_students = User.objects.filter(
+                class_signups__lesson=updated_lesson,
+                class_signups__status__in=["confirmed", "waitlisted"],
+            ).distinct()
+
+            start_display = timezone.localtime(updated_lesson.start_time).strftime("%b %d, %Y %H:%M")
+            end_display = timezone.localtime(updated_lesson.end_time).strftime("%H:%M")
+            changed_text = ", ".join(changed_labels)
+            notification_text = (
+                f"[Automated Message] Update for '{updated_lesson.title}': the following details changed: {changed_text}. "
+                f"Current schedule is {start_display} - {end_display} at {updated_lesson.location}."
+            )
+
+            notified_count = 0
+            for student in signed_up_students:
+                DirectMessage.objects.create(
+                    sender=request.user,
+                    recipient=student,
+                    content=notification_text,
+                )
+                notified_count += 1
+
+            if notified_count:
+                messages.info(request, f"Notified {notified_count} signed-up student(s) about this update.")
+
         messages.success(request, "Class updated successfully!")
         return redirect("dj_class_detail", lesson_id=lesson.pk)
 
