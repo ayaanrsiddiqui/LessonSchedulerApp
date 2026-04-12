@@ -1,6 +1,7 @@
-# Add role field to Profile
+# This migration is kept as a no-op because the Profile.role field
+# is already introduced by the squashed migration 0008_squashed_users_rolechangerequest_complete.
 
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
@@ -9,15 +10,4 @@ class Migration(migrations.Migration):
         ('users', '0009_rolechangerequest'),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name='profile',
-            name='role',
-            field=models.CharField(choices=[('student', 'Student'), ('teacher', 'Teacher'), ('admin_user', 'User Administrator')], default='student', max_length=20),
-        ),
-        migrations.AlterField(
-            model_name='profile',
-            name='bio',
-            field=models.TextField(blank=True, max_length=1000),
-        ),
-    ]
+    operations = []
