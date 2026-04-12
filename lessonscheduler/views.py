@@ -71,11 +71,19 @@ def _render_dj_dashboard(request):
 
 
 def _render_student_dashboard(request):
-    my_signups = ClassSignup.objects.filter(
-        student=request.user, status="confirmed"
-    ).select_related("lesson").order_by("lesson__start_time")
+    available_lessons = Lesson.objects.filter(
+        start_time__gt=timezone.now()
+    ).select_related("dj").order_by("start_time")
+
+    my_signup_ids = set(
+        ClassSignup.objects.filter(
+            student=request.user,
+            status="confirmed",
+        ).values_list("lesson_id", flat=True)
+    )
+
     calendar_lessons = _serialize_calendar_lessons(
-        [signup.lesson for signup in my_signups],
+        available_lessons,
         is_dj=False,
     )
 
@@ -85,11 +93,11 @@ def _render_student_dashboard(request):
         {
             "account_type": "Student",
             "is_dj": False,
-            "my_signups": my_signups,
+            "available_lessons": available_lessons,
+            "my_signup_ids": my_signup_ids,
             "calendar_lessons": calendar_lessons,
         },
     )
-
 
 @login_required
 @block_user_admin

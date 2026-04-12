@@ -450,62 +450,71 @@ body {
         {% endif %}
     </div>
     {% else %}
-    <div class="card">
-        <h2>Your Upcoming Classes</h2>
+<div class="card">
+    <h2>Upcoming Classes</h2>
 
-        <div class="filters-row">
-            <div class="filter-group">
-                <label for="djFilter">Filter by DJ</label>
-                <select id="djFilter">
-                    <option value="">All DJs</option>
-                    {% for signup in my_signups %}
-                    <option value="{{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}">
-                        {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+    <div class="filters-row">
+        <div class="filter-group">
+            <label for="djFilter">Filter by DJ</label>
+            <select id="djFilter">
+                <option value="">All DJs</option>
+                {% for lesson in available_lessons %}
+                <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
+                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
 
+        <div class="filter-group">
             <div class="filter-group">
                 <label for="skillFilter">Filter by Skill Level</label>
                 <select id="skillFilter">
-                    <option value="">All Skill Levels</option>
-                    {% for signup in my_signups %}
-                    <option value="{{ signup.lesson.experience_requirements }}">
-                        {{ signup.lesson.experience_requirements }}
-                    </option>
-                    {% endfor %}
+                    <option value="">All Class Levels</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Proficient">Proficient</option>
+                    <option value="Advanced">Advanced</option>
                 </select>
             </div>
-        </div>
-
-        {% if my_signups %}
-        <ul class="item-list" id="upcomingClassList">
-            {% for signup in my_signups %}
-            <li class="item upcoming-class-item"
-                data-dj="{{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}"
-                data-skill="{{ signup.lesson.experience_requirements }}">
-                <strong>{{ signup.lesson.title }}</strong>
-                <br>
-                DJ: {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
-                <br>
-                Skill Level: {{ signup.lesson.experience_requirements }}
-                <br>
-                {{ signup.lesson.start_time|date:"M d, Y H:i" }} - {{ signup.lesson.end_time|date:"H:i" }}
-                <br>
-                Location: {{ signup.lesson.location }}
-            </li>
-            {% endfor %}
-        </ul>
-
-        <p class="muted" id="noFilteredResults" style="display:none;">
-            No upcoming classes match your filters.
-        </p>
-        {% else %}
-        <p class="muted">No upcoming classes yet. <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.</p>
-        {% endif %}
     </div>
+
+    {% if available_lessons %}
+    <ul class="item-list" id="upcomingClassList">
+        {% for lesson in available_lessons %}
+        <li class="item upcoming-class-item"
+            data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
+            data-skill="{{ lesson.experience_requirements }}">
+            <strong>{{ lesson.title }}</strong>
+            <br>
+            DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+            <br>
+            Skill Level: {{ lesson.experience_requirements }}
+            <br>
+            {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
+            <br>
+            Location: {{ lesson.location }}
+            <br>
+            {% if lesson.id in my_signup_ids %}
+                <span class="pill">Enrolled</span>
+            {% else %}
+                <a class="inline-link" href="{% url 'class_signup' lesson.id %}">Sign Up</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p class="muted" id="noFilteredResults" style="display:none;">
+        No upcoming classes match your filters.
+    </p>
+    {% else %}
+    <p class="muted">
+        No upcoming classes yet.
+        <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.
+    </p>
     {% endif %}
+</div>
+{% endif %}
 </div>
 
 {{ calendar_lessons|json_script:"lessonData" }}
