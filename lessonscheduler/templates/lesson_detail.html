@@ -87,6 +87,30 @@
         .btn-secondary:hover {
             background: #555;
         }
+        .user-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .avatar-sm {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .avatar-fallback {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #2f2f33;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -115,6 +139,9 @@
             </p>
         </div>
         <div class="btn-row">
+            {% if can_edit_lesson %}
+            <a class="btn" href="{% url 'lesson_edit' lesson.id %}">Edit Class</a>
+            {% endif %}
             <a class="btn" href="{% url 'lesson_create' %}">Post New Class</a>
             <a class="btn btn-secondary" href="{% url 'index' %}">Back to Dashboard</a>
         </div>
@@ -126,7 +153,14 @@
             <ul class="list">
                 {% for signup in confirmed_signups %}
                     <li class="list-item">
-                        <strong>{{ signup.student.get_full_name|default:signup.student.username }}</strong><br>
+                        <strong class="user-inline">
+                            {% if signup.student.profile.profile_picture %}
+                            <img class="avatar-sm" src="{{ signup.student.profile.profile_picture.url }}" alt="{{ signup.student.username }}">
+                            {% else %}
+                            <span class="avatar-fallback">{{ signup.student.username|first|upper }}</span>
+                            {% endif %}
+                            {{ signup.student.get_full_name|default:signup.student.username }}
+                        </strong><br>
                         <span class="muted">{{ signup.student.email }}</span>
                     </li>
                 {% endfor %}
@@ -142,7 +176,14 @@
             <ul class="list">
                 {% for signup in waitlisted_signups %}
                     <li class="list-item">
-                        <strong>{{ signup.student.get_full_name|default:signup.student.username }}</strong><br>
+                        <strong class="user-inline">
+                            {% if signup.student.profile.profile_picture %}
+                            <img class="avatar-sm" src="{{ signup.student.profile.profile_picture.url }}" alt="{{ signup.student.username }}">
+                            {% else %}
+                            <span class="avatar-fallback">{{ signup.student.username|first|upper }}</span>
+                            {% endif %}
+                            {{ signup.student.get_full_name|default:signup.student.username }}
+                        </strong><br>
                         <span class="muted">{{ signup.student.email }}</span>
                     </li>
                 {% endfor %}

@@ -69,6 +69,29 @@
         .detail-row span {
             color: #999;
         }
+        .user-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .avatar-sm {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .avatar-fallback {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+        }
         .form-group {
             margin-bottom: 20px;
         }
@@ -146,7 +169,14 @@
             <h3>{{ lesson.title }}</h3>
             <div class="detail-row">
                 <strong>Instructor:</strong>
-                <span>{{ lesson.dj.get_full_name|default:lesson.dj.username }}</span>
+                <span class="user-inline">
+                    {% if lesson.dj.profile.profile_picture %}
+                    <img class="avatar-sm" src="{{ lesson.dj.profile.profile_picture.url }}" alt="{{ lesson.dj.username }}">
+                    {% else %}
+                    <span class="avatar-fallback">{{ lesson.dj.username|first|upper }}</span>
+                    {% endif %}
+                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                </span>
             </div>
             <div class="detail-row">
                 <strong>Date & Time:</strong>

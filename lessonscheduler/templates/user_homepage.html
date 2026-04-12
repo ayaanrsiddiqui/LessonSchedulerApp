@@ -484,7 +484,7 @@ body {
         <p class="muted">No pending requests.</p>
         {% endif %}
     </div>
-    {% else %}
+{% else %}
 <div class="card">
     <h2>Upcoming Classes</h2>
 
@@ -522,21 +522,24 @@ body {
                 <li class="item upcoming-class-item"
                     data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
                     data-skill="{{ lesson.experience_requirements }}">
-                    <strong>{{ lesson.title }}</strong>
-                    <br>
-                    DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}
-                    <br>
-                    Skill Level: {{ lesson.experience_requirements }}
-                    <br>
-                    {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
-                    <br>
-                    Location: {{ lesson.location }}
-                    <br>
+
+                    <strong>{{ lesson.title }}</strong><br>
+
+                    DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}<br>
+
+                    Skill Level: {{ lesson.experience_requirements }}<br>
+
+                    {{ lesson.start_time|date:"M d, Y H:i" }} - 
+                    {{ lesson.end_time|date:"H:i" }}<br>
+
+                    Location: {{ lesson.location }}<br>
+
                     {% if lesson.id in my_signup_ids %}
                         <span class="pill">Enrolled</span>
                     {% else %}
                         <a class="inline-link" href="{% url 'class_signup' lesson.id %}">Sign Up</a>
                     {% endif %}
+
                 </li>
                 {% endfor %}
             </ul>
@@ -544,6 +547,7 @@ body {
             <p class="muted" id="noFilteredResults" style="display:none;">
                 No upcoming classes match your filters.
             </p>
+
             {% else %}
             <p class="muted">
                 No upcoming classes yet.
@@ -554,7 +558,6 @@ body {
 
     </div>
 </div>
-
 {% endif %}
 
 {{ calendar_lessons|json_script:"lessonData" }}

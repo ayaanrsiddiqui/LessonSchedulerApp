@@ -16,9 +16,9 @@ DIFFICULTY_CHOICES = [
 ]
 
 
-# DJ Form: Post a new class
-class LessonCreateForm(forms.ModelForm):
-    """Form for DJs to create and post a new class."""
+# DJ Form: Create or edit a class
+class LessonForm(forms.ModelForm):
+    """Form for DJs to create and edit classes."""
 
     experience_requirements = forms.ChoiceField(
         choices=DIFFICULTY_CHOICES,
@@ -61,7 +61,7 @@ class LessonCreateForm(forms.ModelForm):
         return lesson
 
 
-# Student Form: Sign up for a class (simple confirmation)
+# Student Form: Sign up for a class
 class ClassSignupForm(forms.ModelForm):
     """Form for students to sign up for a posted class."""
 
@@ -89,7 +89,7 @@ class ClassSignupForm(forms.ModelForm):
         return signup
 
 
-# Student Form: Request a specific date/time from a DJ
+# Student Form: Request a class
 class ClassRequestForm(forms.ModelForm):
     """Form for students to request a specific date/time from a DJ."""
 
@@ -119,7 +119,7 @@ class ClassRequestForm(forms.ModelForm):
         return request
 
 
-# DJ Form: Respond to student requests
+# DJ Form: Respond to requests
 class ManageClassRequestForm(forms.ModelForm):
     """Form for DJs to accept or deny class requests."""
 
