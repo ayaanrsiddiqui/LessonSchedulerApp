@@ -130,6 +130,28 @@ body {
     padding-left: 0;
     margin-bottom: 0;
 }
+
+/* 2-column grid for upcoming classes */
+#upcomingClassList{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px;
+    margin-top:0;
+}
+
+/* make each class card fill its grid cell nicely */
+.upcoming-class-item{
+    height:100%;
+    margin-bottom:0;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 6px 14px rgba(0,0,0,0.18);
+}
+
+.upcoming-class-item:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 18px rgba(0,0,0,0.24);
+}
+
 .item {
     background: rgba(255, 255, 255, 0.06);
     border-left: 4px solid #0066cc;
@@ -269,38 +291,40 @@ body {
     font-size:14px;
 }
 
-/* ===== UPCOMING LESSONS ===== */
-.lessons-card h2{
-    color:#111;
-    margin-bottom:12px;
-    font-size:28px;
+/* ===== UPCOMING CLASSES LAYOUT ===== */
+.upcoming-classes-layout{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    gap:20px;
+    align-items:start;
 }
-.lesson-list{
-    list-style:none;
-    margin-top:10px;
+
+.filters-column{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
 }
-.lesson-item{
-    background:white;
-    border:1px solid #e4e4e4;
-    border-radius:14px;
-    padding:18px;
-    margin-bottom:14px;
+
+.classes-scroll-box{
+    max-height:300px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:6px;
 }
-.lesson-item strong{
-    display:block;
-    font-size:18px;
-    color:#111;
-    margin-bottom:8px;
+
+/* Optional scrollbar styling */
+.classes-scroll-box::-webkit-scrollbar{
+    width:8px;
 }
-.lesson-item p{
-    color:#555;
-    margin-bottom:4px;
-    font-size:14px;
+
+.classes-scroll-box::-webkit-scrollbar-thumb{
+    background:#555;
+    border-radius:8px;
 }
-.empty-state{
-    color:#666;
-    font-size:15px;
-    margin-top:10px;
+
+.classes-scroll-box::-webkit-scrollbar-track{
+    background:#1f1f22;
+    border-radius:8px;
 }
 
 /* ===== FILTERS ===== */
@@ -351,6 +375,17 @@ body {
 
     .nav-right{
         width:100%;
+    }
+     #upcomingClassList{
+        grid-template-columns:1fr;
+    }
+
+    .upcoming-classes-layout{
+        grid-template-columns:1fr;
+    }
+
+    .classes-scroll-box{
+        max-height:320px;
     }
 }
 </style>
@@ -453,20 +488,21 @@ body {
 <div class="card">
     <h2>Upcoming Classes</h2>
 
-    <div class="filters-row">
-        <div class="filter-group">
-            <label for="djFilter">Filter by DJ</label>
-            <select id="djFilter">
-                <option value="">All DJs</option>
-                {% for lesson in available_lessons %}
-                <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
-                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+    <div class="upcoming-classes-layout">
 
-        <div class="filter-group">
+        <div class="filters-column">
+            <div class="filter-group">
+                <label for="djFilter">Filter by DJ</label>
+                <select id="djFilter">
+                    <option value="">All DJs</option>
+                    {% for lesson in available_lessons %}
+                    <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
+                        {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
             <div class="filter-group">
                 <label for="skillFilter">Filter by Skill Level</label>
                 <select id="skillFilter">
@@ -477,45 +513,49 @@ body {
                     <option value="Advanced">Advanced</option>
                 </select>
             </div>
-    </div>
+        </div>
 
-    {% if available_lessons %}
-    <ul class="item-list" id="upcomingClassList">
-        {% for lesson in available_lessons %}
-        <li class="item upcoming-class-item"
-            data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
-            data-skill="{{ lesson.experience_requirements }}">
-            <strong>{{ lesson.title }}</strong>
-            <br>
-            DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}
-            <br>
-            Skill Level: {{ lesson.experience_requirements }}
-            <br>
-            {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
-            <br>
-            Location: {{ lesson.location }}
-            <br>
-            {% if lesson.id in my_signup_ids %}
-                <span class="pill">Enrolled</span>
+        <div class="classes-scroll-box">
+            {% if available_lessons %}
+            <ul class="item-list" id="upcomingClassList">
+                {% for lesson in available_lessons %}
+                <li class="item upcoming-class-item"
+                    data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
+                    data-skill="{{ lesson.experience_requirements }}">
+                    <strong>{{ lesson.title }}</strong>
+                    <br>
+                    DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                    <br>
+                    Skill Level: {{ lesson.experience_requirements }}
+                    <br>
+                    {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
+                    <br>
+                    Location: {{ lesson.location }}
+                    <br>
+                    {% if lesson.id in my_signup_ids %}
+                        <span class="pill">Enrolled</span>
+                    {% else %}
+                        <a class="inline-link" href="{% url 'class_signup' lesson.id %}">Sign Up</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <p class="muted" id="noFilteredResults" style="display:none;">
+                No upcoming classes match your filters.
+            </p>
             {% else %}
-                <a class="inline-link" href="{% url 'class_signup' lesson.id %}">Sign Up</a>
+            <p class="muted">
+                No upcoming classes yet.
+                <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.
+            </p>
             {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+        </div>
 
-    <p class="muted" id="noFilteredResults" style="display:none;">
-        No upcoming classes match your filters.
-    </p>
-    {% else %}
-    <p class="muted">
-        No upcoming classes yet.
-        <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.
-    </p>
-    {% endif %}
+    </div>
 </div>
+
 {% endif %}
-</div>
 
 {{ calendar_lessons|json_script:"lessonData" }}
 <script>
