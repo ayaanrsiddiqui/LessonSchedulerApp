@@ -13,6 +13,7 @@ urlpatterns = [
     # DJ URLs
     path('dj/dashboard/', views.dj_dashboard, name='dj_dashboard'),
     path('lesson/create/', views.lesson_create, name='lesson_create'),
+    path('lesson/<int:lesson_id>/edit/', views.lesson_edit, name='lesson_edit'),
     path('lesson/<int:lesson_id>/detail/', views.dj_class_detail, name='dj_class_detail'),
     path('request/<int:request_id>/manage/', views.manage_request, name='manage_request'),
     

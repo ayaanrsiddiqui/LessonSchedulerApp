@@ -115,6 +115,7 @@
             </p>
         </div>
         <div class="btn-row">
+            <a class="btn" href="{% url 'lesson_edit' lesson.id %}">Edit Class</a>
             <a class="btn" href="{% url 'lesson_create' %}">Post New Class</a>
             <a class="btn btn-secondary" href="{% url 'index' %}">Back to Dashboard</a>
         </div>

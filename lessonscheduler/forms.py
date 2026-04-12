@@ -8,9 +8,9 @@ from django.contrib.auth.models import User
 from .models import Lesson, ClassSignup, ClassRequest
 
 
-# DJ Form: Post a new class
-class LessonCreateForm(forms.ModelForm):
-    """Form for DJs to create and post a new class."""
+# DJ Form: Create or edit a class
+class LessonForm(forms.ModelForm):
+    """Form for DJs to create and edit classes."""
     
     class Meta:
         model = Lesson

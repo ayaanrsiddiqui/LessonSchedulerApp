@@ -10,7 +10,7 @@ from django.db.models import Q, Count, F
 from django.utils import timezone
 from django.contrib import messages
 
-from .forms import LessonCreateForm, ClassSignupForm, ClassRequestForm, ManageClassRequestForm
+from .forms import LessonForm, ClassSignupForm, ClassRequestForm, ManageClassRequestForm
 from .models import Lesson, ClassSignup, ClassRequest
 from users.decorators import block_user_admin
 
@@ -127,13 +127,42 @@ def lesson_create(request):
     if not (profile and profile.role == "teacher"):
         raise Http404("Only DJs can post classes")
     
-    form = LessonCreateForm(request.POST or None, request.FILES or None, user=request.user)
+    form = LessonForm(request.POST or None, request.FILES or None, user=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Class posted successfully!")
         return redirect("dj_dashboard")
     
     return render(request, "lesson_create.html", {"form": form})
+
+
+@login_required
+@block_user_admin
+def lesson_edit(request, lesson_id):
+    """DJ: Edit details for one posted class."""
+    profile = getattr(request.user, "profile", None)
+    if not (profile and profile.role == "teacher"):
+        raise Http404("Only DJs can edit classes")
+
+    lesson = get_object_or_404(Lesson, id=lesson_id, dj=request.user)
+
+    form = LessonForm(
+        request.POST or None,
+        request.FILES or None,
+        user=request.user,
+        instance=lesson,
+    )
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Class updated successfully!")
+        return redirect("dj_class_detail", lesson_id=lesson.pk)
+
+    return render(
+        request,
+        "lesson_edit.html",
+        {"form": form, "lesson": lesson},
+    )
 
 
 @login_required
