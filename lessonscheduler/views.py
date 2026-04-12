@@ -203,6 +203,7 @@ def browse_classes(request):
         confirmed_count=Count('signups', filter=Q(signups__status='confirmed'))
     ).filter(
         dj__isnull=False,
+        start_time__gt=timezone.now(),
         confirmed_count__lt=F('capacity')
     ).order_by("start_time").select_related("dj__profile")
     
