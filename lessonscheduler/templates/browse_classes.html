@@ -32,9 +32,45 @@
             border-radius: 8px;
             margin-bottom: 30px;
         }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
+        }
+        .user-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f3f3f3;
+            color: #111;
+            border: 1px solid #d6d6d6;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .avatar-sm {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .avatar-fallback {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
         }
         .nav-buttons {
             display: flex;
@@ -92,6 +128,9 @@
             font-size: 14px;
             color: #666;
             margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .class-info {
             font-size: 13px;
@@ -171,7 +210,17 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="header-top">
             <h1>Browse Classes</h1>
+            <span class="user-chip">
+                {% if request.user.profile.profile_picture %}
+                <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
+                {% else %}
+                <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
+                {% endif %}
+                {{ request.user.username }}
+            </span>
+            </div>
             <p>Find and sign up for DJ classes</p>
             <div class="nav-buttons">
                 <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">My Classes</a>
@@ -185,6 +234,11 @@
                     <div class="class-card">
                         <h3>{{ lesson.title }}</h3>
                         <div class="dj-name">
+                            {% if lesson.dj.profile.profile_picture %}
+                            <img class="avatar-sm" src="{{ lesson.dj.profile.profile_picture.url }}" alt="{{ lesson.dj.username }}">
+                            {% else %}
+                            <span class="avatar-fallback">{{ lesson.dj.username|first|upper }}</span>
+                            {% endif %}
                             🎓 Taught by <strong>{{ lesson.dj.get_full_name|default:lesson.dj.username }}</strong>
                         </div>
                         

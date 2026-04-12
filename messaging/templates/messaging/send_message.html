@@ -27,6 +27,10 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 .send-btn{padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;cursor:pointer;font-size: 14px;}
 .top-right-btn{position:absolute;top:38px;right:40px;padding:12px 12px;border-radius:8px;background:#fff;font-size:17px;color:#111;border:1px solid #ccc;text-decoration:none;}
 .back-btn{display:inline-block;margin-top:12px;color:#111;text-decoration:none;}
+.user-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f3f3f3;color:#111;border:1px solid #d6d6d6;font-size:13px;font-weight:600;margin-right:12px;}
+.user-inline{display:inline-flex;align-items:center;gap:6px;}
+.avatar-sm{width:20px;height:20px;border-radius:50%;object-fit:cover;}
+.avatar-fallback{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:10px;font-weight:700;}
 </style>
 </head>
 <body>
@@ -37,13 +41,30 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
             <h1>Chat with {{ recipient.username }}</h1>
             <p>Messages between you and {{ recipient.username }}.</p>
         </div>
-        <a href="{% url 'inbox' %}" class="top-right-btn">Back to Inbox</a>
+        <div style="display:flex;align-items:center;">
+            <span class="user-chip">
+                {% if request.user.profile.profile_picture %}
+                <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
+                {% else %}
+                <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
+                {% endif %}
+                {{ request.user.username }}
+            </span>
+            <a href="{% url 'inbox' %}" class="top-right-btn" style="position:static;">Back to Inbox</a>
+        </div>
     </div>
     <div class="content">
         <div class="message-list">
             {% for message in messages %}
                 <div class="message-card {% if message.sender == request.user %}sent{% else %}received{% endif %}">
-                    <strong>{{ message.sender.username }}:</strong>
+                    <strong class="user-inline">
+                        {% if message.sender.profile.profile_picture %}
+                        <img class="avatar-sm" src="{{ message.sender.profile.profile_picture.url }}" alt="{{ message.sender.username }}">
+                        {% else %}
+                        <span class="avatar-fallback">{{ message.sender.username|first|upper }}</span>
+                        {% endif %}
+                        {{ message.sender.username }}:
+                    </strong>
                     <p>{{ message.content }}</p>
                     <small>{{ message.timestamp|date:"M d, Y H:i" }}</small>
                 </div>

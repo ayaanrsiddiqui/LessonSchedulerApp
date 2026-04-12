@@ -49,6 +49,38 @@ body {
 .nav-right {
     display: flex;
     align-items: center;
+    gap: 10px;
+}
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f3f3f3;
+    color: #111;
+    border: 1px solid #d6d6d6;
+    font-size: 13px;
+    font-weight: 600;
+}
+.avatar-sm {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.avatar-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
 }
 .primary-btn,
 .secondary-btn {
@@ -142,6 +174,11 @@ body {
 }
 .inline-link:hover {
     color: #a8ceff;
+}
+.user-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .calendar-shell {
@@ -363,6 +400,14 @@ body {
         </div>
     </div>
     <div class="nav-right">
+        <span class="user-chip">
+            {% if request.user.profile.profile_picture %}
+            <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
+            {% else %}
+            <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
+            {% endif %}
+            {{ request.user.username }}
+        </span>
         <a href="{% url 'account_logout' %}" class="secondary-btn">Logout</a>
     </div>
 </div>
@@ -429,7 +474,14 @@ body {
         <ul class="item-list">
             {% for req in pending_requests %}
             <li class="item">
-                {{ req.student.get_full_name|default:req.student.username }}
+                <span class="user-inline">
+                    {% if req.student.profile.profile_picture %}
+                    <img class="avatar-sm" src="{{ req.student.profile.profile_picture.url }}" alt="{{ req.student.username }}">
+                    {% else %}
+                    <span class="avatar-fallback">{{ req.student.username|first|upper }}</span>
+                    {% endif %}
+                    {{ req.student.get_full_name|default:req.student.username }}
+                </span>
                 requested {{ req.requested_start_time|date:"M d, Y H:i" }} - {{ req.requested_end_time|date:"H:i" }}
                 <br>
                 <a class="inline-link" href="{% url 'manage_request' req.id %}">Review Request</a>
@@ -449,7 +501,15 @@ body {
             <li class="item">
                 <strong>{{ signup.lesson.title }}</strong>
                 <br>
-                DJ: {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
+                DJ:
+                <span class="user-inline">
+                    {% if signup.lesson.dj.profile.profile_picture %}
+                    <img class="avatar-sm" src="{{ signup.lesson.dj.profile.profile_picture.url }}" alt="{{ signup.lesson.dj.username }}">
+                    {% else %}
+                    <span class="avatar-fallback">{{ signup.lesson.dj.username|first|upper }}</span>
+                    {% endif %}
+                    {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
+                </span>
                 <br>
                 {{ signup.lesson.start_time|date:"M d, Y H:i" }} - {{ signup.lesson.end_time|date:"H:i" }}
                 <br>
