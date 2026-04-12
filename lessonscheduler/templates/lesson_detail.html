@@ -115,7 +115,9 @@
             </p>
         </div>
         <div class="btn-row">
+            {% if can_edit_lesson %}
             <a class="btn" href="{% url 'lesson_edit' lesson.id %}">Edit Class</a>
+            {% endif %}
             <a class="btn" href="{% url 'lesson_create' %}">Post New Class</a>
             <a class="btn btn-secondary" href="{% url 'index' %}">Back to Dashboard</a>
         </div>
