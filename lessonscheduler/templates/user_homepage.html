@@ -185,7 +185,6 @@ body {
     gap: 8px;
     margin-bottom: 10px;
 }
-
 .calendar-weekdays div{
     text-align:center;
     font-size:13px;
@@ -198,7 +197,6 @@ body {
     grid-template-columns: repeat(7, 1fr);
     gap: 8px;
 }
-
 .calendar-day{
     min-height:86px;
     border:1px solid #e4e4e4;
@@ -211,34 +209,27 @@ body {
     flex-direction:column;
     justify-content:space-between;
 }
-
 .calendar-day:hover{
     background:#efefef;
 }
-
 .calendar-day.other-month{
     opacity:.35;
     cursor:default;
 }
-
 .calendar-day.today{
     border:2px solid #111;
 }
-
 .calendar-day.has-lesson{
     background:#ececec;
 }
-
 .calendar-day.selected{
     background:#111;
     color:white;
 }
-
 .calendar-day-number{
     font-weight:700;
     font-size:15px;
 }
-
 .lesson-dot{
     width:10px;
     height:10px;
@@ -246,23 +237,19 @@ body {
     background:#111;
     margin-top:8px;
 }
-
 .calendar-day.selected .lesson-dot{
     background:white;
 }
-
 .calendar-details{
     margin-top:22px;
     padding-top:18px;
     border-top:1px solid #ddd;
 }
-
 .calendar-details h4{
     font-size:20px;
     color:#111;
     margin-bottom:12px;
 }
-
 .lesson-detail-card{
     background:#f7f7f7;
     border:1px solid #e4e4e4;
@@ -270,14 +257,12 @@ body {
     padding:14px;
     margin-bottom:12px;
 }
-
 .lesson-detail-card strong{
     display:block;
     font-size:17px;
     color:#111;
     margin-bottom:8px;
 }
-
 .lesson-detail-card p{
     margin-bottom:4px;
     color:#555;
@@ -290,12 +275,10 @@ body {
     margin-bottom:12px;
     font-size:28px;
 }
-
 .lesson-list{
     list-style:none;
     margin-top:10px;
 }
-
 .lesson-item{
     background:white;
     border:1px solid #e4e4e4;
@@ -303,24 +286,48 @@ body {
     padding:18px;
     margin-bottom:14px;
 }
-
 .lesson-item strong{
     display:block;
     font-size:18px;
     color:#111;
     margin-bottom:8px;
 }
-
 .lesson-item p{
     color:#555;
     margin-bottom:4px;
     font-size:14px;
 }
-
 .empty-state{
     color:#666;
     font-size:15px;
     margin-top:10px;
+}
+
+/* ===== FILTERS ===== */
+.filters-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin:14px 0 18px;
+}
+.filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:220px;
+}
+.filter-group label{
+    font-size:13px;
+    font-weight:700;
+    color:#c9ced6;
+}
+.filter-group select{
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid #444;
+    background:#2a2a2d;
+    color:#fff;
+    font-size:14px;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -414,6 +421,8 @@ body {
                 <br>
                 Location: {{ lesson.location }}
                 <br>
+                Skill Level: {{ lesson.experience_requirements }}
+                <br>
                 <a class="inline-link" href="{% url 'dj_class_detail' lesson.id %}">View Class Details</a>
             </li>
             {% endfor %}
@@ -443,13 +452,44 @@ body {
     {% else %}
     <div class="card">
         <h2>Your Upcoming Classes</h2>
+
+        <div class="filters-row">
+            <div class="filter-group">
+                <label for="djFilter">Filter by DJ</label>
+                <select id="djFilter">
+                    <option value="">All DJs</option>
+                    {% for signup in my_signups %}
+                    <option value="{{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}">
+                        {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="skillFilter">Filter by Skill Level</label>
+                <select id="skillFilter">
+                    <option value="">All Skill Levels</option>
+                    {% for signup in my_signups %}
+                    <option value="{{ signup.lesson.experience_requirements }}">
+                        {{ signup.lesson.experience_requirements }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
         {% if my_signups %}
-        <ul class="item-list">
+        <ul class="item-list" id="upcomingClassList">
             {% for signup in my_signups %}
-            <li class="item">
+            <li class="item upcoming-class-item"
+                data-dj="{{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}"
+                data-skill="{{ signup.lesson.experience_requirements }}">
                 <strong>{{ signup.lesson.title }}</strong>
                 <br>
                 DJ: {{ signup.lesson.dj.get_full_name|default:signup.lesson.dj.username }}
+                <br>
+                Skill Level: {{ signup.lesson.experience_requirements }}
                 <br>
                 {{ signup.lesson.start_time|date:"M d, Y H:i" }} - {{ signup.lesson.end_time|date:"H:i" }}
                 <br>
@@ -457,6 +497,10 @@ body {
             </li>
             {% endfor %}
         </ul>
+
+        <p class="muted" id="noFilteredResults" style="display:none;">
+            No upcoming classes match your filters.
+        </p>
         {% else %}
         <p class="muted">No upcoming classes yet. <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.</p>
         {% endif %}
@@ -608,6 +652,60 @@ body {
     });
 
     renderCalendar(currentMonth, currentYear);
+})();
+
+(function () {
+    const djFilter = document.getElementById("djFilter");
+    const skillFilter = document.getElementById("skillFilter");
+    const classItems = document.querySelectorAll(".upcoming-class-item");
+    const noResults = document.getElementById("noFilteredResults");
+
+    if (!djFilter || !skillFilter || !classItems.length) return;
+
+    function dedupeSelectOptions(selectEl) {
+        const seen = new Set();
+        const options = Array.from(selectEl.options);
+        options.forEach((option, index) => {
+            if (index === 0) return;
+            const value = option.value.trim();
+            if (!value || seen.has(value)) {
+                option.remove();
+            } else {
+                seen.add(value);
+            }
+        });
+    }
+
+    dedupeSelectOptions(djFilter);
+    dedupeSelectOptions(skillFilter);
+
+    function applyUpcomingClassFilters() {
+        const selectedDj = djFilter.value.trim().toLowerCase();
+        const selectedSkill = skillFilter.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        classItems.forEach((item) => {
+            const itemDj = (item.dataset.dj || "").trim().toLowerCase();
+            const itemSkill = (item.dataset.skill || "").trim().toLowerCase();
+
+            const matchesDj = !selectedDj || itemDj === selectedDj;
+            const matchesSkill = !selectedSkill || itemSkill === selectedSkill;
+
+            if (matchesDj && matchesSkill) {
+                item.style.display = "";
+                visibleCount++;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        if (noResults) {
+            noResults.style.display = visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    djFilter.addEventListener("change", applyUpcomingClassFilters);
+    skillFilter.addEventListener("change", applyUpcomingClassFilters);
 })();
 </script>
 </body>

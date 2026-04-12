@@ -8,19 +8,40 @@ from django.contrib.auth.models import User
 from .models import Lesson, ClassSignup, ClassRequest
 
 
+DIFFICULTY_CHOICES = [
+    ("Beginner", "Beginner"),
+    ("Intermediate", "Intermediate"),
+    ("Proficient", "Proficient"),
+    ("Advanced", "Advanced"),
+]
+
+
 # DJ Form: Post a new class
 class LessonCreateForm(forms.ModelForm):
     """Form for DJs to create and post a new class."""
-    
+
+    experience_requirements = forms.ChoiceField(
+        choices=DIFFICULTY_CHOICES,
+        label="Skill Level",
+        widget=forms.Select()
+    )
+
     class Meta:
         model = Lesson
-        fields = ["title", "description","image", "location", "capacity", "experience_requirements", "start_time", "end_time"]
+        fields = [
+            "title",
+            "description",
+            "location",
+            "capacity",
+            "experience_requirements",
+            "start_time",
+            "end_time",
+        ]
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "e.g., 'House Music Basics'"}),
             "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Describe your class..."}),
             "location": forms.TextInput(attrs={"placeholder": "e.g., 'Studio A, Downtown'"}),
             "capacity": forms.NumberInput(attrs={"min": 1}),
-            "experience_requirements": forms.Textarea(attrs={"rows": 2, "placeholder": "e.g., 'Beginner', 'Must know basic mixing'"}),
             "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
@@ -28,8 +49,7 @@ class LessonCreateForm(forms.ModelForm):
     def __init__(self, *args, user, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
-        
-        # Ensure all fields are required
+
         for field in self.fields:
             self.fields[field].required = True
 
@@ -44,18 +64,17 @@ class LessonCreateForm(forms.ModelForm):
 # Student Form: Sign up for a class (simple confirmation)
 class ClassSignupForm(forms.ModelForm):
     """Form for students to sign up for a posted class."""
-    
+
     class Meta:
         model = ClassSignup
-        fields = []  # No required fields from model
-    
+        fields = []
+
     def __init__(self, *args, user, lesson, status="confirmed", **kwargs):
         self.user = user
         self.lesson = lesson
         self.status = status
         super().__init__(*args, **kwargs)
 
-        # Bind required model fields before validation since this form has no fields.
         self.instance.student = self.user
         self.instance.lesson = self.lesson
         self.instance.status = self.status
@@ -73,7 +92,7 @@ class ClassSignupForm(forms.ModelForm):
 # Student Form: Request a specific date/time from a DJ
 class ClassRequestForm(forms.ModelForm):
     """Form for students to request a specific date/time from a DJ."""
-    
+
     class Meta:
         model = ClassRequest
         fields = ["requested_start_time", "requested_end_time", "description"]
@@ -103,7 +122,7 @@ class ClassRequestForm(forms.ModelForm):
 # DJ Form: Respond to student requests
 class ManageClassRequestForm(forms.ModelForm):
     """Form for DJs to accept or deny class requests."""
-    
+
     class Meta:
         model = ClassRequest
         fields = ["status"]

@@ -8,6 +8,12 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from users.models import Profile
 
+DIFFICULTY_CHOICES = [
+    ("Beginner", "Beginner"),
+    ("Intermediate", "Intermediate"),
+    ("Proficient", "Proficient"),
+    ("Advanced", "Advanced"),
+]
 
 # Refactored for asymmetrical DJ/Student workflow (March 29, 2026)
 class Lesson(models.Model):
@@ -17,10 +23,13 @@ class Lesson(models.Model):
     image = models.ImageField(upload_to="lesson_images/", blank=True, null=True)
     location = models.CharField(max_length=300, default="TBD")
     capacity = models.PositiveIntegerField(default=10)
-    experience_requirements = models.TextField(
-        default="No specific requirements",
-        help_text="e.g., 'Beginner', 'Intermediate', or specific skills needed"
+    
+
+    experience_requirements = models.CharField(
+        max_length=30,
+        choices=DIFFICULTY_CHOICES
     )
+    
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     
