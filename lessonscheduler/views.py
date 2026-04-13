@@ -47,7 +47,8 @@ def _serialize_calendar_lessons(lessons, is_dj):
 
 
 def _render_dj_dashboard(request):
-    posted_classes = Lesson.objects.filter(dj=request.user).order_by("-created_at")
+    posted_classes = Lesson.objects.filter(dj=request.user,end_time__gt=timezone.now()).order_by("start_time")
+
     pending_requests = ClassRequest.objects.filter(
         dj=request.user, status="pending"
     ).order_by("-created_at")
