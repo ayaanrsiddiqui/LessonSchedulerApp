@@ -89,5 +89,46 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const startInput = document.getElementById("id_start_time");
+    const endInput = document.getElementById("id_end_time");
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const localMin =
+        now.getFullYear() + "-" +
+        pad(now.getMonth() + 1) + "-" +
+        pad(now.getDate()) + "T" +
+        pad(now.getHours()) + ":" +
+        pad(now.getMinutes());
+
+    if (startInput) startInput.min = localMin;
+    if (endInput) endInput.min = localMin;
+
+    function setCustomMessage(input) {
+        input.addEventListener("invalid", function () {
+            if (input.validity.valueMissing) {
+                input.setCustomValidity("Please fill out this field.");
+            } else if (input.validity.rangeUnderflow) {
+                input.setCustomValidity("Time must be in the future.");
+            } else {
+                input.setCustomValidity("");
+            }
+        });
+
+        input.addEventListener("input", function () {
+            input.setCustomValidity("");
+        });
+    }
+
+    if (startInput) setCustomMessage(startInput);
+    if (endInput) setCustomMessage(endInput);
+});
+</script>
+
+
 </body>
 </html>

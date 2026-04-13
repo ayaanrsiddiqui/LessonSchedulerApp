@@ -47,7 +47,12 @@ def _serialize_calendar_lessons(lessons, is_dj):
 
 
 def _render_dj_dashboard(request):
-    posted_classes = Lesson.objects.filter(dj=request.user,end_time__gt=timezone.now()).order_by("start_time")
+    today = timezone.localdate()
+
+    posted_classes = Lesson.objects.filter(
+        dj=request.user,
+        start_time__date__gte=today,
+    ).order_by("start_time")
 
     pending_requests = ClassRequest.objects.filter(
         dj=request.user, status="pending"
@@ -73,8 +78,10 @@ def _render_dj_dashboard(request):
 
 
 def _render_student_dashboard(request):
+    today = timezone.localdate()
+
     available_lessons = Lesson.objects.filter(
-        start_time__gt=timezone.now()
+        start_time__date__gte=today
     ).select_related("dj").order_by("start_time")
 
     my_signup_ids = set(
@@ -276,19 +283,21 @@ def browse_classes(request):
     profile = getattr(request.user, "profile", None)
     if profile and profile.role == "teacher":
         raise Http404("Only students can browse classes")
-    
-    # Show all posted classes that still have available spots.
+
+    today = timezone.localdate()
+
     available_classes = Lesson.objects.annotate(
         confirmed_count=Count('signups', filter=Q(signups__status='confirmed'))
     ).filter(
         dj__isnull=False,
-        start_time__gt=timezone.now(),
+        start_time__date__gte=today,
         confirmed_count__lt=F('capacity')
     ).order_by("start_time").select_related("dj__profile")
-    
-    # Get classes student is already signed up for
-    my_signups = ClassSignup.objects.filter(student=request.user).values_list('lesson_id', flat=True)
-    
+
+    my_signups = ClassSignup.objects.filter(
+        student=request.user
+    ).values_list('lesson_id', flat=True)
+
     return render(request, "browse_classes.html", {
         "available_classes": available_classes,
         "my_signup_ids": my_signups,
