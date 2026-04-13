@@ -170,8 +170,8 @@ def lesson_edit(request, lesson_id):
         return redirect("dj_dashboard")
 
     
-    if lesson.end_time <= timezone.now() and request.method != "POST":
-        messages.error(request, "This class has already ended and can no longer be edited.")
+    if lesson.start_time.date() < timezone.localdate() and request.method != "POST":
+        messages.error(request, "Past classes can no longer be edited.")
         return redirect("dj_class_detail", lesson_id=lesson.pk)
     
     previous_state = {
@@ -271,7 +271,7 @@ def dj_class_detail(request, lesson_id):
             "lesson": lesson,
             "confirmed_signups": confirmed_signups,
             "waitlisted_signups": waitlisted_signups,
-            "can_edit_lesson": lesson.end_time > timezone.now(),
+            "can_edit_lesson": lesson.start_time.date() >= timezone.localdate(),
         },
     )
 
