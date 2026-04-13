@@ -110,6 +110,10 @@ class ClassRequestForm(forms.ModelForm):
         self.user = user
         self.dj = dj
         super().__init__(*args, **kwargs)
+
+        self.instance.student = self.user
+        self.instance.dj = self.dj
+        
         self.fields["requested_start_time"].required = True
         self.fields["requested_end_time"].required = True
         self.fields["description"].required = True

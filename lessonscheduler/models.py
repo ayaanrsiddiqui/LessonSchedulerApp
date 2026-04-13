@@ -144,20 +144,29 @@ class ClassRequest(models.Model):
 
     def clean(self):
         errors = {}
-        if self.student == self.dj:
+
+        student_id = getattr(self, "student_id", None)
+        dj_id = getattr(self, "dj_id", None)
+
+        if student_id and dj_id and student_id == dj_id:
             errors["student"] = "Cannot request a class from yourself."
+
         if (
             self.requested_start_time
             and self.requested_end_time
             and self.requested_start_time >= self.requested_end_time
         ):
             errors["requested_end_time"] = "Requested end time must be after start time."
-        if self.dj and not Profile.objects.filter(
-            user_id=self.dj.pk, role='teacher'
+
+        if dj_id and not Profile.objects.filter(
+            user_id=dj_id, role='teacher'
         ).exists():
             errors["dj"] = "Selected user is not a DJ."
+
         if errors:
             raise ValidationError(errors)
+
+        
 
     def save(self, *args, **kwargs):
         self.full_clean()
