@@ -155,10 +155,17 @@ def lesson_edit(request, lesson_id):
 
     lesson = get_object_or_404(Lesson, id=lesson_id, dj=request.user)
 
-    if lesson.end_time <= timezone.now():
+     #delete button right here
+    if request.method == "POST" and "delete" in request.POST:
+        lesson.delete()
+        messages.success(request, "Class deleted successfully!")
+        return redirect("dj_dashboard")
+
+    
+    if lesson.end_time <= timezone.now() and request.method != "POST":
         messages.error(request, "This class has already ended and can no longer be edited.")
         return redirect("dj_class_detail", lesson_id=lesson.pk)
-
+    
     previous_state = {
         "title": lesson.title,
         "description": lesson.description,
@@ -177,7 +184,7 @@ def lesson_edit(request, lesson_id):
         instance=lesson,
     )
 
-    if request.method == "POST" and form.is_valid():
+    if request.method == "POST" and "delete" not in request.POST and form.is_valid():
         updated_lesson = form.save()
 
         changed_labels = []
