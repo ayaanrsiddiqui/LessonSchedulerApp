@@ -31,6 +31,7 @@ class LessonForm(forms.ModelForm):
         fields = [
             "title",
             "description",
+            "image",
             "location",
             "capacity",
             "experience_requirements",
@@ -40,6 +41,7 @@ class LessonForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "e.g., 'House Music Basics'"}),
             "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Describe your class..."}),
+            "image": forms.ClearableFileInput(),
             "location": forms.TextInput(attrs={"placeholder": "e.g., 'Studio A, Downtown'"}),
             "capacity": forms.NumberInput(attrs={"min": 1}),
             "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
@@ -52,6 +54,8 @@ class LessonForm(forms.ModelForm):
 
         for field in self.fields:
             self.fields[field].required = True
+        
+        self.fields["image"].required = False
 
     def save(self, commit=True):
         lesson = super().save(commit=False)
