@@ -535,9 +535,23 @@ body {
                     Location: {{ lesson.location }}<br>
 
                     {% if lesson.id in my_signup_ids %}
-                        <span class="pill">Enrolled</span>
+                        <span class="pill">Enrolled</span><br>
+                        <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="display:inline; margin-top:8px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'index' %}">
+                            <button type="submit" class="inline-btn"
+                                    onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                Cancel Booking
+                            </button>
+                        </form>
                     {% else %}
-                        <a class="inline-link" href="{% url 'class_signup' lesson.id %}">Sign Up</a>
+                        <form method="post" action="{% url 'class_signup' lesson.id %}" style="display:inline; margin-top:8px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'index' %}">
+                            <button type="submit" class="inline-btn">
+                                Sign Up
+                            </button>
+                        </form>
                     {% endif %}
 
                 </li>

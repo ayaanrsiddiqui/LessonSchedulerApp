@@ -271,10 +271,25 @@
                         
                         {% if lesson.id in my_signup_ids %}
                             <div class="enrolled-badge">✓ Already Enrolled</div>
+                            <div class="actions" style="margin-top:10px;">
+                                <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="width:100%;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'browse_classes' %}">
+                                    <button type="submit" class="request-btn" style="width:100%;"
+                                        onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                        Cancel Booking
+                                    </button>
+                                </form>
+                            </div>
+
                         {% else %}
                             <div class="actions">
                                 {% if lesson.spots_available > 0 %}
-                                    <a href="{% url 'class_signup' lesson.id %}" class="signup-btn">Sign Up</a>
+                                    <form method="post" action="{% url 'class_signup' lesson.id %}" style="flex:1;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{% url 'browse_classes' %}">
+                                        <button type="submit" class="signup-btn" style="width:100%;">Sign Up</button>
+                                    </form>
                                 {% else %}
                                     <button class="signup-btn" disabled>Class Full</button>
                                 {% endif %}

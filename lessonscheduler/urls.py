@@ -23,6 +23,10 @@ urlpatterns = [
     path('class/<int:lesson_id>/signup/', views.class_signup, name='class_signup'),
     path('dj/<int:dj_id>/request/', views.request_class, name='request_class'),
     
+    ##cancel
+    path('class/<int:lesson_id>/cancel/', views.cancel_booking, name='cancel_booking'),
+
+    
     # Auth URLs
     path('accounts/', include('allauth.urls')),
 ]

@@ -87,7 +87,7 @@ def _render_student_dashboard(request):
     my_signup_ids = set(
         ClassSignup.objects.filter(
             student=request.user,
-            status="confirmed",
+            status__in=["confirmed", "waitlisted"],
         ).values_list("lesson_id", flat=True)
     )
 
@@ -276,6 +276,7 @@ def dj_class_detail(request, lesson_id):
     )
 
 
+
 @login_required
 @block_user_admin
 def browse_classes(request):
@@ -295,7 +296,8 @@ def browse_classes(request):
     ).order_by("start_time").select_related("dj__profile")
 
     my_signups = ClassSignup.objects.filter(
-        student=request.user
+        student=request.user,
+        status__in=["confirmed", "waitlisted"],
     ).values_list('lesson_id', flat=True)
 
     return render(request, "browse_classes.html", {
@@ -311,14 +313,22 @@ def class_signup(request, lesson_id):
     profile = getattr(request.user, "profile", None)
     if profile and profile.role == "teacher":
         raise Http404("Only students can sign up for classes")
-    
+
     lesson = get_object_or_404(Lesson, id=lesson_id)
-    
-    # Check if already signed up
-    if ClassSignup.objects.filter(student=request.user, lesson=lesson).exists():
+
+    # If user clicked on signup from home page or browse page it stays there, god willing
+    redirect_target = request.POST.get("next") or request.GET.get("next") or "index"
+
+    # Check if already signed up in an active status
+    existing_signup = ClassSignup.objects.filter(
+        student=request.user,
+        lesson=lesson,
+        status__in=["confirmed", "waitlisted"],
+    ).first()
+    if existing_signup:
         messages.warning(request, "You are already enrolled in this class!")
-        return redirect("browse_classes")
-    
+        return redirect(redirect_target)
+
     # Check if class is full
     confirmed_count = ClassSignup.objects.filter(
         lesson=lesson,
@@ -329,24 +339,39 @@ def class_signup(request, lesson_id):
         status = "waitlisted"
     else:
         status = "confirmed"
-    
+
     if request.method == "POST":
-        form = ClassSignupForm(
-            request.POST or None,
-            user=request.user,
+        # If student cancelled before and is signing up again, reactivate that row
+        cancelled_signup = ClassSignup.objects.filter(
+            student=request.user,
             lesson=lesson,
-            status=status,
-        )
-        if form.is_valid():
-            form.save()
-            if status == "confirmed":
-                messages.success(request, "Successfully signed up for the class!")
+            status="cancelled",
+        ).first()
+
+        if cancelled_signup:
+            cancelled_signup.status = status
+            cancelled_signup.save()
+        else:
+            form = ClassSignupForm(
+                request.POST or None,
+                user=request.user,
+                lesson=lesson,
+                status=status,
+            )
+            if form.is_valid():
+                form.save()
             else:
-                messages.success(request, "Class is full. You have been added to the waitlist.")
-            return redirect("index")
-    else:
-        form = ClassSignupForm(user=request.user, lesson=lesson, status=status)
-    
+                messages.error(request, "Could not sign up for this class.")
+                return redirect(redirect_target)
+
+        if status == "confirmed":
+            messages.success(request, "Successfully signed up for the class!")
+        else:
+            messages.success(request, "Class is full. You have been added to the waitlist.")
+        return redirect(redirect_target)
+
+    # Keep the old confirmation page only if someone visits the URL directly
+    form = ClassSignupForm(user=request.user, lesson=lesson, status=status)
     return render(request, "class_signup.html", {
         "lesson": lesson,
         "form": form,
@@ -394,3 +419,27 @@ def manage_request(request, request_id):
         "class_request": class_request,
         "form": form,
     })
+
+@login_required
+@block_user_admin
+def cancel_booking(request, lesson_id):
+    """Student: Cancel a booked class."""
+    profile = getattr(request.user, "profile", None)
+    if profile and profile.role == "teacher":
+        raise Http404("Only students can cancel bookings")
+
+    signup = get_object_or_404(
+        ClassSignup,
+        student=request.user,
+        lesson_id=lesson_id,
+        status__in=["confirmed", "waitlisted"],
+    )
+
+    redirect_target = request.POST.get("next") or "index"
+
+    if request.method == "POST":
+        signup.status = "cancelled"
+        signup.save()
+        messages.success(request, "Booking cancelled successfully.")
+
+    return redirect(redirect_target)
