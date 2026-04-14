@@ -275,6 +275,30 @@ def dj_class_detail(request, lesson_id):
         },
     )
 
+@login_required
+@block_user_admin
+def student_class_detail(request, lesson_id):
+    """Student: View class details for a lesson."""
+    profile = getattr(request.user, "profile", None)
+    if profile and profile.role == "teacher":
+        raise Http404("Only students can view student class details")
+
+    lesson = get_object_or_404(Lesson, id=lesson_id)
+
+    signups = ClassSignup.objects.filter(lesson=lesson).select_related("student")
+    confirmed_signups = signups.filter(status="confirmed").order_by("signed_up_at")
+
+    return render(
+        request,
+        "lesson_detail.html",
+        {
+            "lesson": lesson,
+            "confirmed_signups": confirmed_signups,
+            "waitlisted_signups": [],
+            "can_edit_lesson": False,
+            "is_student_view": True,
+        },
+    )
 
 
 @login_required

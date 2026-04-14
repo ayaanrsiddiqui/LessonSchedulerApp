@@ -232,7 +232,11 @@
             {% if available_classes %}
                 {% for lesson in available_classes %}
                     <div class="class-card">
-                        <h3>{{ lesson.title }}</h3>
+                        <h3>
+                            <a href="{% url 'student_class_detail' lesson.id %}" style="color:#0066cc; text-decoration:none;">
+                                {{ lesson.title }}
+                            </a>
+                        </h3>
                         <div class="dj-name">
                             {% if lesson.dj.profile.profile_picture %}
                             <img class="avatar-sm" src="{{ lesson.dj.profile.profile_picture.url }}" alt="{{ lesson.dj.username }}">

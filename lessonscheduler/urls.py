@@ -22,6 +22,8 @@ urlpatterns = [
     path('classes/browse/', views.browse_classes, name='browse_classes'),
     path('class/<int:lesson_id>/signup/', views.class_signup, name='class_signup'),
     path('dj/<int:dj_id>/request/', views.request_class, name='request_class'),
+    path('lesson/<int:lesson_id>/student-detail/', views.student_class_detail, name='student_class_detail'),
+    
     
     ##cancel
     path('class/<int:lesson_id>/cancel/', views.cancel_booking, name='cancel_booking'),

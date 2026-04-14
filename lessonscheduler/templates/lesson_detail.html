@@ -139,10 +139,14 @@
             </p>
         </div>
         <div class="btn-row">
-            {% if can_edit_lesson %}
+            {% if not is_student_view and can_edit_lesson %}
             <a class="btn" href="{% url 'lesson_edit' lesson.id %}">Edit Class</a>
             {% endif %}
+
+            {% if not is_student_view %}
             <a class="btn" href="{% url 'lesson_create' %}">Post New Class</a>
+            {% endif %}
+
             <a class="btn btn-secondary" href="{% url 'index' %}">Back to Dashboard</a>
         </div>
     </div>
@@ -170,6 +174,7 @@
         {% endif %}
     </div>
 
+    {% if not is_student_view %}
     <div class="card">
         <h2>Waitlisted Students</h2>
         {% if waitlisted_signups %}
@@ -192,6 +197,8 @@
             <p class="muted">No waitlisted students.</p>
         {% endif %}
     </div>
+</div>
+{% endif %}
 </div>
 </body>
 </html>

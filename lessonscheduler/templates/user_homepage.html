@@ -450,7 +450,12 @@ body {
         <ul class="item-list">
             {% for lesson in posted_classes %}
             <li class="item">
-                <strong>{{ lesson.title }}</strong> ({{ lesson.confirmed_count }}/{{ lesson.capacity }} confirmed)
+                <strong>
+                    <a href="{% url 'dj_class_detail' lesson.id %}" class="inline-link">
+                        {{ lesson.title }}
+                    </a>
+                </strong>
+                ({{ lesson.confirmed_count }}/{{ lesson.capacity }} confirmed)
                 <br>
                 {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
                 <br>
@@ -458,7 +463,6 @@ body {
                 <br>
                 Skill Level: {{ lesson.experience_requirements }}
                 <br>
-                <a class="inline-link" href="{% url 'dj_class_detail' lesson.id %}">View Class Details</a>
             </li>
             {% endfor %}
         </ul>
@@ -523,8 +527,11 @@ body {
                     data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
                     data-skill="{{ lesson.experience_requirements }}">
 
-                    <strong>{{ lesson.title }}</strong><br>
-
+                    <strong>
+                        <a href="{% url 'student_class_detail' lesson.id %}" class="inline-link">
+                            {{ lesson.title }}
+                        </a>
+                    </strong><br>
                     DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}<br>
 
                     Skill Level: {{ lesson.experience_requirements }}<br>
