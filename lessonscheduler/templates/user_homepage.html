@@ -481,7 +481,9 @@ body {
                 {{ req.student.get_full_name|default:req.student.username }}
                 requested {{ req.requested_start_time|date:"M d, Y H:i" }} - {{ req.requested_end_time|date:"H:i" }}
                 <br>
-                <a class="inline-link" href="{% url 'manage_request' req.id %}">Review Request</a>
+                <a class="inline-btn" href="{% url 'manage_request' req.id %}">
+                    Review Request
+                </a>
             </li>
             {% endfor %}
         </ul>
