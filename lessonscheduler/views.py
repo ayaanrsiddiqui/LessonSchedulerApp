@@ -151,15 +151,54 @@ def lesson_create(request):
     profile = getattr(request.user, "profile", None)
     if not (profile and profile.role == "teacher"):
         raise Http404("Only DJs can post classes")
-    
-    form = LessonForm(request.POST or None, request.FILES or None, user=request.user)
+
+    request_id = request.GET.get("request_id")
+    initial = {}
+    source_request = None
+
+    if request_id:
+        source_request = get_object_or_404(
+            ClassRequest,
+            id=request_id,
+            dj=request.user,
+            status="accepted",
+            request_type="new",
+        )
+        initial = {
+            "location": source_request.requested_location,
+            "experience_requirements": source_request.requested_skill_level,
+            "start_time": timezone.localtime(source_request.requested_start_time).strftime("%Y-%m-%dT%H:%M"),
+            "end_time": timezone.localtime(source_request.requested_end_time).strftime("%Y-%m-%dT%H:%M"),
+            "description": (
+                f"{source_request.description}\n\nRequested equipment: {source_request.requested_equipment}"
+            ),
+        }
+
+    form = LessonForm(
+        request.POST or None,
+        request.FILES or None,
+        user=request.user,
+        initial=initial if request.method == "GET" else None,
+    )
+
     if request.method == "POST" and form.is_valid():
-        form.save()
+        lesson = form.save()
+
+        if source_request:
+            DirectMessage.objects.create(
+                sender=request.user,
+                recipient=source_request.student,
+                content=(
+                    f"[Automated Message] Your accepted class request has now been scheduled as '{lesson.title}' "
+                    f"for {timezone.localtime(lesson.start_time).strftime('%b %d, %Y %H:%M')} - "
+                    f"{timezone.localtime(lesson.end_time).strftime('%H:%M')} at {lesson.location}."
+                ),
+            )
+
         messages.success(request, "Class posted successfully!")
         return redirect("dj_dashboard")
-    
-    return render(request, "lesson_create.html", {"form": form})
 
+    return render(request, "lesson_create.html", {"form": form})
 
 @login_required
 @block_user_admin
@@ -193,15 +232,52 @@ def lesson_edit(request, lesson_id):
         "image_name": lesson.image.name if lesson.image else "",
     }
 
+    request_id = request.GET.get("request_id")
+    source_request = None
+
+    if request_id:
+        source_request = get_object_or_404(
+            ClassRequest,
+            id=request_id,
+            dj=request.user,
+            lesson=lesson,
+            status="accepted",
+            request_type="edit",
+        )
+
+        form_initial = None
+    if request.method == "GET" and source_request:
+        form_initial = {
+            "location": source_request.requested_location or lesson.location,
+            "experience_requirements": source_request.requested_skill_level or lesson.experience_requirements,
+            "start_time": timezone.localtime(source_request.requested_start_time).strftime("%Y-%m-%dT%H:%M"),
+            "end_time": timezone.localtime(source_request.requested_end_time).strftime("%Y-%m-%dT%H:%M"),
+            "description": (
+                f"{source_request.description}\n\nRequested equipment: {source_request.requested_equipment}"
+            ),
+        }
+
     form = LessonForm(
         request.POST or None,
         request.FILES or None,
         user=request.user,
         instance=lesson,
+        initial=form_initial,
     )
 
     if request.method == "POST" and "delete" not in request.POST and form.is_valid():
         updated_lesson = form.save()
+
+        if source_request:
+            DirectMessage.objects.create(
+                sender=request.user,
+                recipient=source_request.student,
+                content=(
+                    f"[Automated Message] Your accepted request to update '{updated_lesson.title}' has been applied. "
+                    f"New schedule: {timezone.localtime(updated_lesson.start_time).strftime('%b %d, %Y %H:%M')} - "
+                    f"{timezone.localtime(updated_lesson.end_time).strftime('%H:%M')} at {updated_lesson.location}."
+                ),
+            )
 
         changed_labels = []
         tracked_fields = [
@@ -430,7 +506,8 @@ def request_class(request):
     if profile and profile.role == "teacher":
         raise Http404("Only students can request classes")
 
-    lesson_id = request.GET.get("lesson_id")
+    lesson_id = request.GET.get("lesson_id") or request.POST.get("lesson_id")
+    lesson = None
     initial = {}
     next_target = request.GET.get("next") or request.POST.get("next") or "browse_classes"
 
@@ -443,7 +520,7 @@ def request_class(request):
             "requested_skill_level": lesson.experience_requirements,
             "requested_location": lesson.location,
             "requested_equipment": "",
-            "description": f"I'd like to request a class similar to '{lesson.title}'.",
+            "description": f"I'd like to request changes to '{lesson.title}'.",
         }
 
     form = ClassRequestForm(
@@ -453,7 +530,11 @@ def request_class(request):
     )
 
     if request.method == "POST" and form.is_valid():
-        class_request = form.save()
+        class_request = form.save(commit=False)
+        class_request.lesson = lesson
+        class_request.request_type = "edit" if lesson else "new"
+        class_request.save()
+
         messages.success(
             request,
             f"Class request sent to {class_request.dj.get_full_name() or class_request.dj.username}!"
@@ -467,6 +548,7 @@ def request_class(request):
             "form": form,
             "next_target": next_target,
             "prefill_lesson_id": lesson_id,
+            "prefill_lesson": lesson,
         },
     )
 
@@ -477,23 +559,65 @@ def manage_request(request, request_id):
     profile = getattr(request.user, "profile", None)
     if not (profile and profile.role == "teacher"):
         raise Http404("Only DJs can manage requests")
-    
+
     class_request = get_object_or_404(ClassRequest, id=request_id, dj=request.user)
-    
     form = ManageClassRequestForm(request.POST or None, instance=class_request)
+
     if request.method == "POST" and form.is_valid():
-        form.save()
-        status_text = "accepted" if class_request.status == "accepted" else "denied"
-        messages.success(request, f"Request {status_text}!")
+        updated_request = form.save()
+
+        student = updated_request.student
+        start_display = timezone.localtime(updated_request.requested_start_time).strftime("%b %d, %Y %H:%M")
+        end_display = timezone.localtime(updated_request.requested_end_time).strftime("%H:%M")
+
+        if updated_request.status == "accepted":
+            if updated_request.request_type == "edit" and updated_request.lesson:
+                DirectMessage.objects.create(
+                    sender=request.user,
+                    recipient=student,
+                    content=(
+                        f"[Automated Message] Your request to update '{updated_request.lesson.title}' was accepted. "
+                        f"The DJ is now reviewing your requested changes for {start_display} - {end_display} at "
+                        f"{updated_request.requested_location or updated_request.lesson.location}."
+                    ),
+                )
+
+                messages.success(request, "Request accepted! You can now update the class.")
+                return redirect(
+                    f"{redirect('lesson_edit', lesson_id=updated_request.lesson.id).url}"
+                    f"?request_id={updated_request.id}"
+                )
+
+            DirectMessage.objects.create(
+                sender=request.user,
+                recipient=student,
+                content=(
+                    f"[Automated Message] Your class request was accepted. "
+                    f"The DJ is now creating your requested class for {start_display} - {end_display} at "
+                    f"{updated_request.requested_location}."
+                ),
+            )
+
+            messages.success(request, "Request accepted! You can now create the class.")
+            return redirect(f"{redirect('lesson_create').url}?request_id={updated_request.id}")
+
+        DirectMessage.objects.create(
+            sender=request.user,
+            recipient=student,
+            content=(
+                f"[Automated Message] Your class request was denied. "
+                f"Requested time was {start_display} - {end_display}."
+            ),
+        )
+
+        messages.success(request, "Request denied.")
         return redirect("dj_dashboard")
-    
+
     return render(request, "manage_request.html", {
         "class_request": class_request,
         "form": form,
     })
 
-@login_required
-@block_user_admin
 def cancel_booking(request, lesson_id):
     """Student: Cancel a booked class."""
     profile = getattr(request.user, "profile", None)

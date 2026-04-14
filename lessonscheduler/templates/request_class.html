@@ -124,6 +124,9 @@
         <form method="POST" novalidate>
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ next_target }}">
+            {% if prefill_lesson_id %}
+            <input type="hidden" name="lesson_id" value="{{ prefill_lesson_id }}">
+            {% endif %}
 
             <div class="form-group">
                 <label for="id_dj">{{ form.dj.label }}</label>

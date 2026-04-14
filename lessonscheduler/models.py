@@ -136,12 +136,33 @@ class ClassRequest(models.Model):
         ("denied", "Denied"),
     ]
 
+    REQUEST_TYPE_CHOICES = [
+    ("new", "New Class"),
+    ("edit", "Edit Existing Class"),
+
+    ]
+
     student = models.ForeignKey(
         User, related_name="class_requests", on_delete=models.CASCADE
     )
     dj = models.ForeignKey(
         User, related_name="received_requests", on_delete=models.CASCADE
     )
+
+    lesson = models.ForeignKey(
+        Lesson,
+        related_name="class_requests",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    request_type = models.CharField(
+        max_length=10,
+        choices=REQUEST_TYPE_CHOICES,
+        default="new",
+    )
+
     requested_start_time = models.DateTimeField()
     requested_end_time = models.DateTimeField()
     requested_skill_level = models.CharField(
@@ -168,11 +189,12 @@ class ClassRequest(models.Model):
         if student_id and dj_id and student_id == dj_id:
             errors["student"] = "Cannot request a class from yourself."
 
-        if self.requested_start_time and self.requested_start_time <= now:
-            errors["requested_start_time"] = "Requested start time must be in the future."
+        if self.status == "pending":
+            if self.requested_start_time and self.requested_start_time <= now:
+                errors["requested_start_time"] = "Requested start time must be in the future."
 
-        if self.requested_end_time and self.requested_end_time <= now:
-            errors["requested_end_time"] = "Requested end time must be in the future."
+            if self.requested_end_time and self.requested_end_time <= now:
+                errors["requested_end_time"] = "Requested end time must be in the future."
 
         if (
             self.requested_start_time

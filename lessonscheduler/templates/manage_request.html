@@ -177,7 +177,22 @@
                 <strong>Requested:</strong>
                 <span>{{ class_request.created_at|date:"M d, Y H:i" }}</span>
             </div>
-            
+
+            <div class="detail-row">
+                <strong>Requested Skill Level:</strong>
+                <span>{{ class_request.requested_skill_level }}</span>
+            </div>
+
+            <div class="detail-row">
+                <strong>Requested Location:</strong>
+                <span>{{ class_request.requested_location }}</span>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <strong style="color:#ddd;">Requested Equipment:</strong>
+                <p style="color:#bbb; margin-top:6px;">{{ class_request.requested_equipment }}</p>
+            </div>
+        
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                 <div style="color: #ddd; font-weight: bold; margin-bottom: 8px;">Message:</div>
                 <p style="color: #bbb; line-height: 1.6;">{{ class_request.description }}</p>
