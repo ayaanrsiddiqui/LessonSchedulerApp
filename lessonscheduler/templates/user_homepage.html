@@ -399,6 +399,7 @@ body {
             <a href="{% url 'lesson_create' %}" class="primary-btn">Post New Class</a>
             {% else %}
             <a href="{% url 'browse_classes' %}" class="primary-btn">Browse Classes</a>
+            <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Class</a>
             {% endif %}
             <a href="{% url 'inbox' %}" class="secondary-btn">View Messages</a>
             <a href="{% url 'profile' %}" class="secondary-btn">Go to Profile</a>

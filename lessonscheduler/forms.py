@@ -95,36 +95,51 @@ class ClassSignupForm(forms.ModelForm):
 
 # Student Form: Request a class
 class ClassRequestForm(forms.ModelForm):
-    """Form for students to request a specific date/time from a DJ."""
+
+    dj = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        label="DJ",
+        widget=forms.Select()
+    )
 
     class Meta:
         model = ClassRequest
-        fields = ["requested_start_time", "requested_end_time", "description"]
+        fields = [
+            "dj",
+            "requested_start_time",
+            "requested_end_time",
+            "requested_skill_level",
+            "requested_location",
+            "requested_equipment",
+            "description",
+        ]
         widgets = {
             "requested_start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "requested_end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Explain why you need this specific time..."}),
+            "requested_skill_level": forms.Select(choices=DIFFICULTY_CHOICES),
+            "requested_location": forms.TextInput(attrs={"placeholder": "e.g., Studio A, Downtown"}),
+            "requested_equipment": forms.Textarea(attrs={"rows": 3, "placeholder": "e.g., Controller, speakers, headphones"}),
+            "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Explain your request..."}),
         }
 
-    def __init__(self, *args, user, dj, **kwargs):
+    def __init__(self, *args, user, **kwargs):
         self.user = user
-        self.dj = dj
         super().__init__(*args, **kwargs)
 
         self.instance.student = self.user
-        self.instance.dj = self.dj
-        
-        self.fields["requested_start_time"].required = True
-        self.fields["requested_end_time"].required = True
-        self.fields["description"].required = True
+
+        self.fields["dj"].queryset = User.objects.filter(profile__role="teacher").order_by("first_name", "username")
+
+        for field_name in self.fields:
+            self.fields[field_name].required = True
 
     def save(self, commit=True):
-        request = super().save(commit=False)
-        request.student = self.user
-        request.dj = self.dj
+        request_obj = super().save(commit=False)
+        request_obj.student = self.user
+        request_obj.dj = self.cleaned_data["dj"]
         if commit:
-            request.save()
-        return request
+            request_obj.save()
+        return request_obj
 
 
 # DJ Form: Respond to requests

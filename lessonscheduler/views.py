@@ -424,22 +424,51 @@ def class_signup(request, lesson_id):
 
 @login_required
 @block_user_admin
-def request_class(request, dj_id):
-    """Student: Request a class at a specific date/time from a DJ."""
+def request_class(request):
+    """Student: Request a class, optionally prefilled from an existing lesson."""
     profile = getattr(request.user, "profile", None)
     if profile and profile.role == "teacher":
         raise Http404("Only students can request classes")
-    
-    dj_user = get_object_or_404(User, id=dj_id, profile__role='teacher')
-    
-    form = ClassRequestForm(request.POST or None, user=request.user, dj=dj_user)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, f"Class request sent to {dj_user.get_full_name()}!")
-        return redirect("browse_classes")
-    
-    return render(request, "request_class.html", {"dj": dj_user, "form": form})
 
+    lesson_id = request.GET.get("lesson_id")
+    initial = {}
+    next_target = request.GET.get("next") or request.POST.get("next") or "browse_classes"
+
+    if lesson_id:
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        initial = {
+            "dj": lesson.dj,
+            "requested_start_time": timezone.localtime(lesson.start_time).strftime("%Y-%m-%dT%H:%M"),
+            "requested_end_time": timezone.localtime(lesson.end_time).strftime("%Y-%m-%dT%H:%M"),
+            "requested_skill_level": lesson.experience_requirements,
+            "requested_location": lesson.location,
+            "requested_equipment": "",
+            "description": f"I'd like to request a class similar to '{lesson.title}'.",
+        }
+
+    form = ClassRequestForm(
+        request.POST or None,
+        user=request.user,
+        initial=initial if request.method == "GET" else None,
+    )
+
+    if request.method == "POST" and form.is_valid():
+        class_request = form.save()
+        messages.success(
+            request,
+            f"Class request sent to {class_request.dj.get_full_name() or class_request.dj.username}!"
+        )
+        return redirect(next_target)
+
+    return render(
+        request,
+        "request_class.html",
+        {
+            "form": form,
+            "next_target": next_target,
+            "prefill_lesson_id": lesson_id,
+        },
+    )
 
 @login_required
 @block_user_admin

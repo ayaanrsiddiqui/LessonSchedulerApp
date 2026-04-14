@@ -44,6 +44,13 @@ class Lesson(models.Model):
         errors = {}
 
         dj_id = getattr(self, "dj_id", None)
+        now = timezone.now()
+
+        if self.start_time and self.start_time <= now:
+            errors["start_time"] = "Start time must be in the future."
+
+        if self.end_time and self.end_time <= now:
+            errors["end_time"] = "End time must be in the future."
 
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             errors["end_time"] = "End time must be after start time."
@@ -137,6 +144,15 @@ class ClassRequest(models.Model):
     )
     requested_start_time = models.DateTimeField()
     requested_end_time = models.DateTimeField()
+    requested_skill_level = models.CharField(
+        max_length=30,
+        choices=DIFFICULTY_CHOICES,
+        blank=True,
+        default="Beginner",
+    )
+    requested_location = models.CharField(max_length=300, blank=True, default="")
+    requested_equipment = models.TextField(blank=True, default="")
+
     description = models.TextField(help_text="Why you need this specific time/date")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(default=timezone.now)
@@ -147,9 +163,16 @@ class ClassRequest(models.Model):
 
         student_id = getattr(self, "student_id", None)
         dj_id = getattr(self, "dj_id", None)
+        now = timezone.now()
 
         if student_id and dj_id and student_id == dj_id:
             errors["student"] = "Cannot request a class from yourself."
+
+        if self.requested_start_time and self.requested_start_time <= now:
+            errors["requested_start_time"] = "Requested start time must be in the future."
+
+        if self.requested_end_time and self.requested_end_time <= now:
+            errors["requested_end_time"] = "Requested end time must be in the future."
 
         if (
             self.requested_start_time

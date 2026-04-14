@@ -310,7 +310,7 @@
                                 {% else %}
                                     <button class="signup-btn" disabled>Class Full</button>
                                 {% endif %}
-                                <a href="{% url 'request_class' lesson.dj.id %}" class="request-btn">Request Custom Date</a>
+                                <a href="{% url 'request_class' %}?lesson_id={{ lesson.id }}&next={% url 'browse_classes' %}" class="request-btn"> Request Custom Date </a>
                             </div>
                         {% endif %}
                     </div>
