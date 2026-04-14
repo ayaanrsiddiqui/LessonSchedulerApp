@@ -273,7 +273,20 @@
                             <div class="capacity-fill" data-fill-percent="{{ fill_percent }}"></div>
                         </div>
                         
-                        {% if lesson.id in my_signup_ids %}
+                        {% if lesson.id in waitlisted_signup_ids %}
+                            <div class="enrolled-badge">✓ Waitlisted</div>
+                            <div class="actions" style="margin-top:10px;">
+                                <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="width:100%;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'browse_classes' %}">
+                                    <button type="submit" class="request-btn" style="width:100%;"
+                                        onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                        Cancel Booking
+                                    </button>
+                                </form>
+                            </div>
+
+                        {% elif lesson.id in confirmed_signup_ids %}
                             <div class="enrolled-badge">✓ Already Enrolled</div>
                             <div class="actions" style="margin-top:10px;">
                                 <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="width:100%;">

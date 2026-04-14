@@ -84,10 +84,17 @@ def _render_student_dashboard(request):
         start_time__date__gte=today
     ).select_related("dj").order_by("start_time")
 
-    my_signup_ids = set(
+    confirmed_signup_ids = set(
         ClassSignup.objects.filter(
             student=request.user,
-            status__in=["confirmed", "waitlisted"],
+            status="confirmed",
+        ).values_list("lesson_id", flat=True)
+    )
+
+    waitlisted_signup_ids = set(
+        ClassSignup.objects.filter(
+            student=request.user,
+            status="waitlisted",
         ).values_list("lesson_id", flat=True)
     )
 
@@ -103,7 +110,8 @@ def _render_student_dashboard(request):
             "account_type": "Student",
             "is_dj": False,
             "available_lessons": available_lessons,
-            "my_signup_ids": my_signup_ids,
+            "confirmed_signup_ids": confirmed_signup_ids,
+            "waitlisted_signup_ids": waitlisted_signup_ids,
             "calendar_lessons": calendar_lessons,
         },
     )
@@ -287,6 +295,7 @@ def student_class_detail(request, lesson_id):
 
     signups = ClassSignup.objects.filter(lesson=lesson).select_related("student")
     confirmed_signups = signups.filter(status="confirmed").order_by("signed_up_at")
+    waitlisted_signups = signups.filter(status="waitlisted").order_by("signed_up_at")
 
     return render(
         request,
@@ -294,7 +303,7 @@ def student_class_detail(request, lesson_id):
         {
             "lesson": lesson,
             "confirmed_signups": confirmed_signups,
-            "waitlisted_signups": [],
+            "waitlisted_signups": waitlisted_signups,
             "can_edit_lesson": False,
             "is_student_view": True,
         },
@@ -319,14 +328,24 @@ def browse_classes(request):
         confirmed_count__lt=F('capacity')
     ).order_by("start_time").select_related("dj__profile")
 
-    my_signups = ClassSignup.objects.filter(
-        student=request.user,
-        status__in=["confirmed", "waitlisted"],
-    ).values_list('lesson_id', flat=True)
+    confirmed_signup_ids = set(
+        ClassSignup.objects.filter(
+            student=request.user,
+            status="confirmed",
+        ).values_list("lesson_id", flat=True)
+    )
+
+    waitlisted_signup_ids = set(
+        ClassSignup.objects.filter(
+            student=request.user,
+            status="waitlisted",
+        ).values_list("lesson_id", flat=True)
+    )
 
     return render(request, "browse_classes.html", {
         "available_classes": available_classes,
-        "my_signup_ids": my_signups,
+        "confirmed_signup_ids": confirmed_signup_ids,
+        "waitlisted_signup_ids": waitlisted_signup_ids,
     })
 
 

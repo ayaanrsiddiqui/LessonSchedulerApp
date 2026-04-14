@@ -174,7 +174,6 @@
         {% endif %}
     </div>
 
-    {% if not is_student_view %}
     <div class="card">
         <h2>Waitlisted Students</h2>
         {% if waitlisted_signups %}
@@ -197,8 +196,6 @@
             <p class="muted">No waitlisted students.</p>
         {% endif %}
     </div>
-</div>
-{% endif %}
 </div>
 </body>
 </html>
