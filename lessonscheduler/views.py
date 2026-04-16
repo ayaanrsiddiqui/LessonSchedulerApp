@@ -18,6 +18,68 @@ from users.decorators import block_user_admin
 # Create your views here.
 
 
+def _format_lesson_update_value(field_name, value):
+    if field_name in {"start_time", "end_time"} and value:
+        return timezone.localtime(value).strftime("%b %d, %Y %H:%M")
+
+    if field_name == "image_name":
+        if not value:
+            return "No image"
+        return value.rsplit("/", 1)[-1]
+
+    if value in (None, ""):
+        return "None"
+
+    return str(value)
+
+
+def _build_lesson_update_notification(lesson, previous_state):
+    tracked_fields = [
+        ("title", "title", "Title"),
+        ("description", "description", "Description"),
+        ("location", "location", "Location"),
+        ("capacity", "capacity", "Capacity"),
+        ("experience_requirements", "experience_requirements", "Experience requirements"),
+        ("start_time", "start_time", "Start time"),
+        ("end_time", "end_time", "End time"),
+        ("image_name", "image", "Image"),
+    ]
+
+    change_lines = []
+
+    for previous_key, current_attr, label in tracked_fields:
+        if current_attr == "image":
+            current_value = lesson.image.name if lesson.image else ""
+        else:
+            current_value = getattr(lesson, current_attr)
+
+        previous_value = previous_state[previous_key]
+
+        if previous_value != current_value:
+            change_lines.append(
+                f"- {label}\n"
+                f"  Before: {_format_lesson_update_value(previous_key, previous_value)}\n"
+                f"  After: {_format_lesson_update_value(previous_key, current_value)}"
+            )
+
+    if not change_lines:
+        return None
+
+    start_display = timezone.localtime(lesson.start_time).strftime("%b %d, %Y %H:%M")
+    end_display = timezone.localtime(lesson.end_time).strftime("%H:%M")
+
+    return (
+        f"[Automated Message] The class '{lesson.title}' was updated.\n\n"
+        f"What changed:\n"
+        f"{chr(10).join(change_lines)}\n\n"
+        f"Current class details:\n"
+        f"- Schedule: {start_display} - {end_display}\n"
+        f"- Location: {lesson.location}\n"
+        f"- Capacity: {lesson.capacity}\n"
+        f"- Skill level: {lesson.experience_requirements}"
+    )
+
+
 def _serialize_calendar_lessons(lessons, is_dj):
     serialized = []
     for lesson in lessons:
@@ -245,7 +307,7 @@ def lesson_edit(request, lesson_id):
             request_type="edit",
         )
 
-        form_initial = None
+    form_initial = None
     if request.method == "GET" and source_request:
         form_initial = {
             "location": source_request.requested_location or lesson.location,
@@ -304,22 +366,17 @@ def lesson_edit(request, lesson_id):
                 class_signups__status__in=["confirmed", "waitlisted"],
             ).distinct()
 
-            start_display = timezone.localtime(updated_lesson.start_time).strftime("%b %d, %Y %H:%M")
-            end_display = timezone.localtime(updated_lesson.end_time).strftime("%H:%M")
-            changed_text = ", ".join(changed_labels)
-            notification_text = (
-                f"[Automated Message] Update for '{updated_lesson.title}': the following details changed: {changed_text}. "
-                f"Current schedule is {start_display} - {end_display} at {updated_lesson.location}."
-            )
+            notification_text = _build_lesson_update_notification(updated_lesson, previous_state)
 
             notified_count = 0
-            for student in signed_up_students:
-                DirectMessage.objects.create(
-                    sender=request.user,
-                    recipient=student,
-                    content=notification_text,
-                )
-                notified_count += 1
+            if notification_text:
+                for student in signed_up_students:
+                    DirectMessage.objects.create(
+                        sender=request.user,
+                        recipient=student,
+                        content=notification_text,
+                    )
+                    notified_count += 1
 
             if notified_count:
                 messages.info(request, f"Notified {notified_count} signed-up student(s) about this update.")
