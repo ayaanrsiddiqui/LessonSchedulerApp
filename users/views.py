@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .forms import ProfileBioForm
@@ -19,12 +19,27 @@ def profile_view(request):
     else:
         bio_form = ProfileBioForm(instance=profile)
 
-    pending_teacher_request = profile.role_requests.filter(status="pending", requested_role="teacher").first() if profile.role == 'student' else None
+    pending_teacher_request = RoleChangeRequest.objects.filter(
+        profile=profile,
+        status="pending",
+        requested_role="teacher",
+    ).first() if profile.role == 'student' else None
 
     return render(request, "users/profile.html", {
         "profile": profile,
         "bio_form": bio_form,
         "pending_teacher_request": pending_teacher_request,
+    })
+
+
+@login_required
+def public_profile_view(request, username):
+    profile = get_object_or_404(Profile.objects.select_related("user"), user__username=username)
+
+    return render(request, "users/public_profile.html", {
+        "profile": profile,
+        "viewed_user": profile.user,
+        "is_own_profile": profile.user == request.user,
     })
 
 # Profile Picture and Audio upload

@@ -38,7 +38,7 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 <div class="page-container">
     <div class="header" style="position:relative;display:flex;align-items:center;justify-content:space-between;">
         <div>
-            <h1>Chat with {{ recipient.username }}</h1>
+            <h1>Chat with <a href="{% url 'public_profile' recipient.username %}" style="color:inherit;text-decoration:none;">{{ recipient.username }}</a></h1>
             <p>Messages between you and {{ recipient.username }}.</p>
         </div>
         <div style="display:flex;align-items:center;">
@@ -63,7 +63,7 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
                         {% else %}
                         <span class="avatar-fallback">{{ message.sender.username|first|upper }}</span>
                         {% endif %}
-                        {{ message.sender.username }}:
+                        <a href="{% url 'public_profile' message.sender.username %}" style="color:inherit;text-decoration:none;">{{ message.sender.username }}</a>:
                     </strong>
                     <p>{{ message.content }}</p>
                     <small>{{ message.timestamp|date:"M d, Y H:i" }}</small>

@@ -175,7 +175,7 @@
                     {% else %}
                     <span class="avatar-fallback">{{ lesson.dj.username|first|upper }}</span>
                     {% endif %}
-                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                    <a href="{% url 'public_profile' lesson.dj.username %}" style="color:inherit;text-decoration:none;">{{ lesson.dj.get_full_name|default:lesson.dj.username }}</a>
                 </span>
             </div>
             <div class="detail-row">

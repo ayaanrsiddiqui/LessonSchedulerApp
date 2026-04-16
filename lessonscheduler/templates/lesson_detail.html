@@ -163,7 +163,7 @@
                             {% else %}
                             <span class="avatar-fallback">{{ signup.student.username|first|upper }}</span>
                             {% endif %}
-                            {{ signup.student.get_full_name|default:signup.student.username }}
+                            <a href="{% url 'public_profile' signup.student.username %}" style="color:inherit;text-decoration:none;">{{ signup.student.get_full_name|default:signup.student.username }}</a>
                         </strong><br>
                         <span class="muted">{{ signup.student.email }}</span>
                     </li>
@@ -186,7 +186,7 @@
                             {% else %}
                             <span class="avatar-fallback">{{ signup.student.username|first|upper }}</span>
                             {% endif %}
-                            {{ signup.student.get_full_name|default:signup.student.username }}
+                            <a href="{% url 'public_profile' signup.student.username %}" style="color:inherit;text-decoration:none;">{{ signup.student.get_full_name|default:signup.student.username }}</a>
                         </strong><br>
                         <span class="muted">{{ signup.student.email }}</span>
                     </li>

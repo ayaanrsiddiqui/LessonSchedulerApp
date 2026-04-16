@@ -165,7 +165,7 @@
                 {% else %}
                 <span class="avatar-fallback">{{ class_request.student.username|first|upper }}</span>
                 {% endif %}
-                Request from {{ class_request.student.get_full_name|default:class_request.student.username }}
+                Request from <a href="{% url 'public_profile' class_request.student.username %}" style="color:inherit;text-decoration:none;">{{ class_request.student.get_full_name|default:class_request.student.username }}</a>
             </h3>
             
             <div class="detail-row">

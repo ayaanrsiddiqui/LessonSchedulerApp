@@ -73,6 +73,14 @@ body {
     align-items: center;
     gap: 8px;
 }
+.profile-link {
+    color: #7cb6ff;
+    text-decoration: none;
+    font-weight: 600;
+}
+.profile-link:hover {
+    color: #a8ceff;
+}
 .avatar-sm {
     width: 22px;
     height: 22px;
@@ -257,7 +265,7 @@ body {
                             {% else %}
                             <span class="avatar-fallback">{{ role_request.profile.user.username|first|upper }}</span>
                             {% endif %}
-                            {{ role_request.profile.user.username }}
+                            <a class="profile-link" href="{% url 'public_profile' role_request.profile.user.username %}">{{ role_request.profile.user.username }}</a>
                         </span>
                     </td>
                     <td>{{ role_request.profile.user.email }}</td>
@@ -298,7 +306,7 @@ body {
                 {% else %}
                 <span class="avatar-fallback">{{ user.user.username|first|upper }}</span>
                 {% endif %}
-                {{ user.user.username }}
+                <a class="profile-link" href="{% url 'public_profile' user.user.username %}">{{ user.user.username }}</a>
             </span>
             <select class="select-input" name="role">
                 <option value="student" {% if user.role == "student" %}selected{% endif %}>Student</option>
