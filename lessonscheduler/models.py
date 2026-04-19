@@ -3,9 +3,11 @@
 # Prompt: build asymmetrical DJ/student class posting, signup, and request flow
 
 from django.db import models
+from django.db import transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from messaging.models import Message as DirectMessage
 from users.models import Profile
 
 DIFFICULTY_CHOICES = [
@@ -64,11 +66,58 @@ class Lesson(models.Model):
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        previous_capacity = None
+        if self.pk:
+            previous_capacity = Lesson.objects.filter(pk=self.pk).values_list("capacity", flat=True).first()
+
         self.full_clean()
         super().save(*args, **kwargs)
 
+        if previous_capacity is None or self.capacity > previous_capacity:
+            self.promote_waitlisted_students()
+
     def __str__(self):
         return self.title
+
+    def promote_waitlisted_students(self):
+        """Fill newly opened seats by promoting earliest waitlisted students."""
+        with transaction.atomic():
+            lesson = Lesson.objects.select_for_update().get(pk=self.pk)
+            confirmed_count = ClassSignup.objects.filter(
+                lesson=lesson,
+                status="confirmed",
+            ).count()
+            available_spots = max(0, lesson.capacity - confirmed_count)
+
+            if available_spots == 0:
+                return 0
+
+            waitlisted_signups = list(
+                ClassSignup.objects.select_for_update().filter(
+                    lesson=lesson,
+                    status="waitlisted",
+                ).select_related("student").order_by("signed_up_at", "pk")[:available_spots]
+            )
+
+            if not waitlisted_signups:
+                return 0
+
+            waitlisted_ids = [signup.pk for signup in waitlisted_signups]
+            promoted_count = ClassSignup.objects.filter(pk__in=waitlisted_ids).update(status="confirmed")
+
+            start_display = timezone.localtime(lesson.start_time).strftime("%b %d, %Y %H:%M")
+            end_display = timezone.localtime(lesson.end_time).strftime("%H:%M")
+            for signup in waitlisted_signups:
+                DirectMessage.objects.create(
+                    sender=lesson.dj,
+                    recipient=signup.student,
+                    content=(
+                        f"[Automated Message] You have been moved from the waitlist and are confirmed for "
+                        f"'{lesson.title}'. Class time: {start_display} - {end_display} at {lesson.location}."
+                    ),
+                )
+
+            return promoted_count
 
     @property
     def current_enrollment_count(self):
@@ -104,6 +153,12 @@ class ClassSignup(models.Model):
     class Meta:
         unique_together = ("student", "lesson")
 
+    @staticmethod
+    def _promote_waitlist_for_lesson_id(lesson_id):
+        lesson = Lesson.objects.filter(pk=lesson_id).first()
+        if lesson:
+            lesson.promote_waitlisted_students()
+
     def clean(self):
         errors = {}
 
@@ -121,8 +176,33 @@ class ClassSignup(models.Model):
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        previous_status = None
+        previous_lesson_id = None
+        current_lesson_id = getattr(self, "lesson_id", None)
+        if self.pk:
+            previous = ClassSignup.objects.filter(pk=self.pk).values("status", "lesson_id").first()
+            if previous:
+                previous_status = previous["status"]
+                previous_lesson_id = previous["lesson_id"]
+
         self.full_clean()
         super().save(*args, **kwargs)
+
+        confirmed_seat_opened = previous_status == "confirmed" and (
+            self.status != "confirmed" or current_lesson_id != previous_lesson_id
+        )
+        if confirmed_seat_opened and previous_lesson_id:
+            self._promote_waitlist_for_lesson_id(previous_lesson_id)
+
+    def delete(self, *args, **kwargs):
+        lesson_id = getattr(self, "lesson_id", None)
+        was_confirmed = self.status == "confirmed"
+        deleted = super().delete(*args, **kwargs)
+
+        if was_confirmed and lesson_id:
+            self._promote_waitlist_for_lesson_id(lesson_id)
+
+        return deleted
 
     def __str__(self):
         return f"{self.student.username} -> {self.lesson.title}"
