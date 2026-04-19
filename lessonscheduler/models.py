@@ -62,6 +62,16 @@ class Lesson(models.Model):
         ).exists():
             errors["dj"] = "Only DJ accounts can post classes."
 
+        if self.pk:
+            confirmed_count = ClassSignup.objects.filter(
+                lesson=self,
+                status="confirmed",
+            ).count()
+            if self.capacity < confirmed_count:
+                errors["capacity"] = (
+                    f"Capacity cannot be lower than currently confirmed enrollment ({confirmed_count})."
+                )
+
         if errors:
             raise ValidationError(errors)
 
