@@ -3,7 +3,7 @@
 # Generated with Copilot on March 29, 2026
 # Prompt: use one cohesive dashboard UI where both roles can use the calendar without duplicate separate interfaces
 -->
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -393,7 +393,7 @@ body {
 <body>
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link">SHHO</a>
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:50px;width:50px;object-fit:contain;border-radius:8px;"></a>
         <div class="nav-buttons">
             {% if is_dj %}
             <a href="{% url 'lesson_create' %}" class="primary-btn">Post New Class</a>

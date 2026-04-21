@@ -1,4 +1,4 @@
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +166,7 @@ audio {
 <body>
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link">SHHO</a>
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:50px;width:50px;object-fit:contain;border-radius:8px;"></a>
         <a href="{% url 'index' %}" class="secondary-btn">Back to Dashboard</a>
     </div>
     <form method="post" action="{% url 'account_logout' %}">
