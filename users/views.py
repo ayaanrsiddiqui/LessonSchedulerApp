@@ -119,7 +119,7 @@ def update_role(request, user_id):
         try:
             profile = Profile.objects.get(user__id=user_id)
             new_role = request.POST.get("role")
-            if new_role in ["student", "teacher"]:
+            if new_role in ["student", "teacher", "producer"]:
                 profile.role = new_role
                 profile.save()
         except Profile.DoesNotExist:

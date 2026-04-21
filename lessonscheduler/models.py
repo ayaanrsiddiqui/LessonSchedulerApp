@@ -58,7 +58,7 @@ class Lesson(models.Model):
             errors["end_time"] = "End time must be after start time."
 
         if dj_id and not Profile.objects.filter(
-            user_id=dj_id, role='teacher'
+            user_id=dj_id, role__in=('teacher', 'producer')
         ).exists():
             errors["dj"] = "Only DJ accounts can post classes."
 
@@ -294,7 +294,7 @@ class ClassRequest(models.Model):
             errors["requested_end_time"] = "Requested end time must be after start time."
 
         if dj_id and not Profile.objects.filter(
-            user_id=dj_id, role='teacher'
+            user_id=dj_id, role__in=('teacher', 'producer')
         ).exists():
             errors["dj"] = "Selected user is not a DJ."
 

@@ -183,7 +183,7 @@ def index(request):
     """Home page with integrated DJ/student dashboard for authenticated users."""
     if request.user.is_authenticated:
         profile = getattr(request.user, "profile", None)
-        is_dj = profile and profile.role == "teacher"
+        is_dj = profile and profile.role in ("teacher", "producer")
         if is_dj:
             return _render_dj_dashboard(request)
         return _render_student_dashboard(request)
@@ -210,7 +210,7 @@ def student_dashboard(request):
 def lesson_create(request):
     """DJ: Create and post a new class."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.role == "teacher"):
+    if not (profile and profile.role in ("teacher", "producer")):
         raise Http404("Only DJs can post classes")
 
     request_id = request.GET.get("request_id")
@@ -266,7 +266,7 @@ def lesson_create(request):
 def lesson_edit(request, lesson_id):
     """DJ: Edit details for one posted class."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.role == "teacher"):
+    if not (profile and profile.role in ("teacher", "producer")):
         raise Http404("Only DJs can edit classes")
 
     lesson = get_object_or_404(Lesson, id=lesson_id, dj=request.user)
@@ -395,7 +395,7 @@ def lesson_edit(request, lesson_id):
 def dj_class_detail(request, lesson_id):
     """DJ: View class details and signup roster for one posted class."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.role == "teacher"):
+    if not (profile and profile.role in ("teacher", "producer")):
         raise Http404("Only DJs can view class details")
 
     lesson = get_object_or_404(Lesson, id=lesson_id, dj=request.user)
@@ -420,7 +420,7 @@ def dj_class_detail(request, lesson_id):
 def student_class_detail(request, lesson_id):
     """Student: View class details for a lesson."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.role == "teacher":
+    if profile and profile.role in ("teacher", "producer"):
         raise Http404("Only students can view student class details")
 
     lesson = get_object_or_404(Lesson, id=lesson_id)
@@ -447,7 +447,7 @@ def student_class_detail(request, lesson_id):
 def browse_classes(request):
     """Student: Browse available classes."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.role == "teacher":
+    if profile and profile.role in ("teacher", "producer"):
         raise Http404("Only students can browse classes")
 
     today = timezone.localdate()
@@ -486,7 +486,7 @@ def browse_classes(request):
 def class_signup(request, lesson_id):
     """Student: Sign up for a class."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.role == "teacher":
+    if profile and profile.role in ("teacher", "producer"):
         raise Http404("Only students can sign up for classes")
 
     lesson = get_object_or_404(Lesson, id=lesson_id)
@@ -559,7 +559,7 @@ def class_signup(request, lesson_id):
 def request_class(request):
     """Student: Request a class, optionally prefilled from an existing lesson."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.role == "teacher":
+    if profile and profile.role in ("teacher", "producer"):
         raise Http404("Only students can request classes")
 
     lesson_id = request.GET.get("lesson_id") or request.POST.get("lesson_id")
@@ -613,7 +613,7 @@ def request_class(request):
 def manage_request(request, request_id):
     """DJ: Accept or deny a class request."""
     profile = getattr(request.user, "profile", None)
-    if not (profile and profile.role == "teacher"):
+    if not (profile and profile.role in ("teacher", "producer")):
         raise Http404("Only DJs can manage requests")
 
     class_request = get_object_or_404(ClassRequest, id=request_id, dj=request.user)
@@ -677,7 +677,7 @@ def manage_request(request, request_id):
 def cancel_booking(request, lesson_id):
     """Student: Cancel a booked class."""
     profile = getattr(request.user, "profile", None)
-    if profile and profile.role == "teacher":
+    if profile and profile.role in ("teacher", "producer"):
         raise Http404("Only students can cancel bookings")
 
     signup = get_object_or_404(

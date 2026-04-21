@@ -21,7 +21,8 @@ class Profile(models.Model):
     # role choice for user type
     ROLE_CHOICES = [
         ("student", "Student"),
-        ("teacher", "Teacher"),
+        ("teacher", "Teacher (DJ)"),
+        ("producer", "Teacher (Producer)"),
         ("admin_user", "User Administrator"),
     ]
 
@@ -34,7 +35,7 @@ class Profile(models.Model):
         return self.role == "admin_user"
 
     def has_pending_teacher_request(self):
-        return self.role_requests.filter(status="pending", requested_role="teacher").exists()
+        return self.role_requests.filter(status="pending", requested_role__in=["teacher", "producer"]).exists()
 
 
 class RoleChangeRequest(models.Model):
@@ -45,7 +46,7 @@ class RoleChangeRequest(models.Model):
     ]
 
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="role_requests")
-    requested_role = models.CharField(max_length=20, choices=[("teacher", "Teacher")], default="teacher")
+    requested_role = models.CharField(max_length=20, choices=[("teacher", "Teacher (DJ)"), ("producer", "Teacher (Producer)")], default="teacher")
     explanation = models.TextField(blank=True, max_length=1000)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     submitted_at = models.DateTimeField(auto_now_add=True)

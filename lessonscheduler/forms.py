@@ -128,7 +128,7 @@ class ClassRequestForm(forms.ModelForm):
 
         self.instance.student = self.user
 
-        self.fields["dj"].queryset = User.objects.filter(profile__role="teacher").order_by("first_name", "username")
+        self.fields["dj"].queryset = User.objects.filter(profile__role__in=["teacher", "producer"]).order_by("first_name", "username")
 
         for field_name in self.fields:
             self.fields[field_name].required = True
