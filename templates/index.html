@@ -22,16 +22,6 @@ body{
     justify-content:center;
     padding:30px;
 
-    background:
-        linear-gradient(
-        rgba(0,0,0,0.75),
-        rgba(0,0,0,0.75)
-        ),
-    url('{% static "images/djBackground3.PNG" %}');
-        
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-position: center 75%;
 }
 
 /* logo top left */
@@ -136,7 +126,15 @@ background:rgb(255, 255, 255);
 </head>
 
 
-<body>
+
+<body style="
+    background:
+        linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)),
+        url('{% static "images/djBackground3.PNG" %}');
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center 75%;
+">    
 
 {% load static %}
 <a href="{% url 'index' %}">

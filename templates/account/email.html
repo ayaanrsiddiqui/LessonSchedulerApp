@@ -117,8 +117,9 @@ padding-top: 1;
 </head>
 <body>
 
+{% load static %}
 <a href="{% url 'index' %}">
-    <img src="/static/images/shhoLogo.png" class="corner-logo">
+    <img src="{% static 'images/shhoLogo.png' %}" class="corner-logo">
 </a>
 
 
