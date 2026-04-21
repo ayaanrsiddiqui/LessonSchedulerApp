@@ -178,7 +178,6 @@ def _render_student_dashboard(request):
         },
     )
 
-@login_required
 @block_user_admin
 def index(request):
     """Home page with integrated DJ/student dashboard for authenticated users."""

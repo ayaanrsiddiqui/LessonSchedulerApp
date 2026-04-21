@@ -18,27 +18,47 @@ font-family:Arial, sans-serif;
 }
 
 body{
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);
-padding:30px;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+
+    background:
+        linear-gradient(
+        rgba(0,0,0,0.75),
+        rgba(0,0,0,0.75)
+        ),
+    url('/static/images/djBackground3.PNG');
+        
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center 75%;
 }
+
+
+
 
 /* LOGO */
 
 .corner-logo{
-position:fixed;
-top:30px;
-left:40px;
-width:110px;
-background:white;
-padding:8px;
-border-radius:10px;
-box-shadow:0 6px 18px rgba(0,0,0,.35);
-z-index:999;
+    position: fixed;
+    top: 30px;
+    left: 40px;
+
+    width: 90px;     
+    height: 90px;     
+
+    padding: 8px;
+    border-radius: 10px;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    z-index: 999;
+
+    display: block;
 }
+
+
 
 /* PAGE LAYOUT */
 
@@ -49,7 +69,7 @@ max-width:100%;
 min-height:560px;
 border-radius:18px;
 overflow:hidden;
-background:#f5f5f5;
+background: rgba(245,245,245,0.85);
 box-shadow:0 18px 50px rgba(0,0,0,0.35);
 }
 
@@ -57,27 +77,32 @@ box-shadow:0 18px 50px rgba(0,0,0,0.35);
 
 .left-panel{
 flex:1;
-background:linear-gradient(160deg,#111111,#1d1d1f 55%,#2c2c2f);
+background:linear-gradient(160deg,#111,#111 100%,#000000);
 color:white;
 display:flex;
 flex-direction:column;
-align-items:flex-start;
+align-items:center;
 justify-content:center;
 padding:60px 50px;
 }
 
 .left-panel h1{
-font-size:44px;
+
+font-size:50px;
 font-weight:700;
-letter-spacing:1px;
-margin-bottom:18px;
+letter-spacing:0.5px;
+margin-top: 0.1px;
+justify-content: flex-start;
+padding: 1px
 }
 
 .left-panel p{
-font-size:17px;
+font-size:14px;
 line-height:1.6;
 color:#d7d7d7;
 max-width:360px;
+margin-top: 0;
+padding-top: 1;
 }
 
 /* LOGIN PANEL */
@@ -250,10 +275,12 @@ flex-direction:column;
 .left-panel,
 .login-panel{
 width:100%;
+
 }
 
 .left-panel{
 padding:40px 30px;
+
 }
 
 .login-panel{
@@ -267,18 +294,27 @@ padding:36px 24px;
 
 <body>
 
+
 <a href="{% url 'index' %}">
-<img src="{% static 'images/shho-logo.png' %}" class="corner-logo">
+    <img src="/static/images/shhoLogo.png" class="corner-logo">
 </a>
 
 <div class="page-container">
 
 <div class="left-panel">
 
-<h1>TITLE</h1>
+<h1>SHHO</h1>
+
+<h1>Lesson Hub</h1>
+
+<div style="height: 40px;"></div>
 
 <p>
-Schedule With The Best DJs at UVA!
+Schedule Lessons with the Student Hip Hop Organization
+</p>
+
+<p class="p2">
+The Best DJs at UVA!
 </p>
 
 </div>
@@ -288,7 +324,7 @@ Schedule With The Best DJs at UVA!
 <div class="login-wrapper">
 
 <h2>Welcome</h2>
-<p class="subtitle">We are happy to have you back</p>
+<p class="subtitle">Let's get you signed in! </p>
 
 <form method="post" action="{% url 'account_login' %}">
 
