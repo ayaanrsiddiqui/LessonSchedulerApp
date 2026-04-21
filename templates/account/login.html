@@ -6,7 +6,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>{% trans "Sign In" %}</title>
+<title>{% trans "Login" %}</title>
 
 <style>
 
@@ -324,7 +324,7 @@ The Best DJs at UVA!
 <div class="login-wrapper">
 
 <h2>Welcome</h2>
-<p class="subtitle">Let's get you signed in! </p>
+<p class="subtitle">Let's get you logged in! </p>
 
 <form method="post" action="{% url 'account_login' %}">
 
@@ -360,7 +360,7 @@ Forgot password?
 {% endif %}
 
 <button class="signin-btn" type="submit">
-{% trans "Sign In" %}
+{% trans "Login" %}
 </button>
 
 </form>
@@ -368,7 +368,7 @@ Forgot password?
 <div class="divider">Or</div>
 
 <a class="google-btn" href="{% provider_login_url 'google' %}">
-Sign In with Google
+Login with Google
 </a>
 
 <p class="signup-text">
