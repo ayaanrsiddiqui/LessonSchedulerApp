@@ -21,7 +21,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
+    padding: 15px 40px 15px 20px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 .nav-left {
@@ -166,7 +166,7 @@ audio {
 <body>
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:50px;width:50px;object-fit:contain;border-radius:8px;"></a>
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
         <a href="{% url 'index' %}" class="secondary-btn">Back to Dashboard</a>
     </div>
     <form method="post" action="{% url 'account_logout' %}">
