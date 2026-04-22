@@ -40,13 +40,17 @@ body::before{
 }
 
 .top-bar {
-    width: 100%;
-    background: #ffffff;
+     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 40px 15px 20px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    padding: 16px 40px;
+
+    background: #000000;
+
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 }
 .nav-left {
     display: flex;
@@ -54,11 +58,9 @@ body::before{
     gap: 20px;
 }
 .brand-link {
-    color: #111;
-    text-decoration: none;
+    color: #ffffff;
     font-weight: 700;
-    font-size: 18px;
-    letter-spacing: 0.4px;
+    letter-spacing: 1px;
 }
 .nav-buttons {
     display: flex;
@@ -75,24 +77,26 @@ body::before{
     border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 16px;
     transition: 0.2s ease;
     display: inline-block;
 }
 .primary-btn {
-    background: #111;
-    color: #fff;
+    background: transparent;
+    color: #ffffff;
+    border: none;
 }
 .primary-btn:hover {
-    background: #2a2a2a;
+    color: #ffffff;
 }
 .secondary-btn {
-    background: #fff;
-    color: #111;
-    border: 1px solid #ccc;
+    background: transparent;
+    color: #ffffff;
+    border: none;
 }
+
 .secondary-btn:hover {
-    background: #f3f3f3;
+    color: #ffffff;
 }
 .container {
     max-width: 1080px;
@@ -415,20 +419,20 @@ body::before{
 
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
-        <div class="nav-buttons">
-            {% if is_dj %}
-            <a href="{% url 'lesson_create' %}" class="primary-btn">Post New Class</a>
-            {% else %}
-            <a href="{% url 'browse_classes' %}" class="primary-btn">Browse Classes</a>
-            <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Class</a>
-            {% endif %}
-            <a href="{% url 'inbox' %}" class="secondary-btn">View Messages</a>
-            <a href="{% url 'profile' %}" class="secondary-btn">Go to Profile</a>
-        </div>
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:8px;"></a>
     </div>
     <div class="nav-right">
-        <a href="{% url 'account_logout' %}" class="secondary-btn">Logout</a>
+        <div class="nav-buttons">
+            {% if is_dj %}
+            <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>
+            {% else %}
+            <a href="{% url 'browse_classes' %}" class="primary-btn">Lessons</a>
+            <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Lessons </a>
+            {% endif %}
+            <a href="{% url 'inbox' %}" class="secondary-btn"> Messages</a>
+            <a href="{% url 'profile' %}" class="secondary-btn">Profile</a>
+            <a href="{% url 'account_logout' %}" class="secondary-btn">Logout</a>
+        </div>
     </div>
 </div>
 
