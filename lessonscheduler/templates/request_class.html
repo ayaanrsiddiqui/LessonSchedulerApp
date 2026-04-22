@@ -1,0 +1,196 @@
+<!--
+# Description: Student request form for asking a DJ to teach at a requested start/end time
+# Generated with Copilot on April 14, 2026
+# Prompt: allow students to request a custom class date/time from a DJ. allow them to request equipment, level, and description
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Class</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        .container {
+            background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #bbb;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ddd;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .help-text {
+            color: #999;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background-color: #0066cc;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0052a3;
+        }
+        .btn-secondary {
+            background-color: #666;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Request a Class</h1>
+            <p>Request a custom lesson with your preferred details</p>
+        </div>
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next_target }}">
+            {% if prefill_lesson_id %}
+            <input type="hidden" name="lesson_id" value="{{ prefill_lesson_id }}">
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_dj">{{ form.dj.label }}</label>
+                {{ form.dj }}
+                {% if form.dj.errors %}
+                    <div class="error-message">{{ form.dj.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_requested_start_time">{{ form.requested_start_time.label }}</label>
+                {{ form.requested_start_time }}
+                {% if form.requested_start_time.errors %}
+                    <div class="error-message">{{ form.requested_start_time.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_requested_end_time">{{ form.requested_end_time.label }}</label>
+                {{ form.requested_end_time }}
+                {% if form.requested_end_time.errors %}
+                    <div class="error-message">{{ form.requested_end_time.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_requested_skill_level">Requested Skill Level</label>
+                {{ form.requested_skill_level }}
+                {% if form.requested_skill_level.errors %}
+                    <div class="error-message">{{ form.requested_skill_level.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_requested_location">Requested Location</label>
+                {{ form.requested_location }}
+                {% if form.requested_location.errors %}
+                    <div class="error-message">{{ form.requested_location.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_requested_equipment">Requested Equipment</label>
+                {{ form.requested_equipment }}
+                {% if form.requested_equipment.errors %}
+                    <div class="error-message">{{ form.requested_equipment.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_description">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error-message">{{ form.description.errors.0 }}</div>
+                {% endif %}
+                <div class="help-text">Add any extra details for the DJ.</div>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="btn btn-primary">Send Request</button>
+                <a href="{% url 'index' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

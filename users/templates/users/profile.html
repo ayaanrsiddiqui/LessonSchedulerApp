@@ -1,11 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Profile</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+    color: #e5e7eb;
+}
+.top-bar {
+    width: 100%;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.brand-link {
+    color: #111;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+.secondary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
+    display: inline-block;
+    background: #fff;
+    color: #111;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+.secondary-btn:hover {
+    background: #f3f3f3;
+}
+.container {
+    max-width: 900px;
+    margin: 28px auto;
+    padding: 0 18px 36px;
+}
+.card {
+    background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.card h1,
+.card h2 {
+    margin-top: 0;
+    color: #ffffff;
+}
+.muted {
+    color: #c9ced6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.role-row {
+    margin: 6px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.inline-link {
+    color: #7cb6ff;
+    text-decoration: none;
+}
+.inline-link:hover {
+    color: #a8ceff;
+}
+.field-label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ffffff;
+}
+.bio-input {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    padding: 10px 12px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+.bio-input::placeholder {
+    color: #b7bcc4;
+}
+.error-list {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: #ffb4b4;
+}
+.media-card {
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 4px solid #0066cc;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.remove-photo-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+.action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.primary-btn {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #0066cc;
+    color: #fff;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+}
+.primary-btn:hover {
+    background: #0052a3;
+}
+audio {
+    width: 100%;
+    margin-top: 8px;
+}
+@media (max-width: 800px) {
+    .top-bar {
+        padding: 15px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
+        <a href="{% url 'index' %}" class="secondary-btn">Back to Dashboard</a>
+    </div>
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="secondary-btn">Logout</button>
+    </form>
+</div>
 
+<div class="container">
+    <div class="card">
+        <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
+        <p class="muted">Email: {{ request.user.email }}</p>
+        <p class="muted">Role: {{ profile.get_role_display }}</p>
+        <p class="muted">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
 
-<h1>{{ request.user.first_name }} {{ request.user.last_name }}</h1>
-<p>Email: {{ request.user.email }}</p>
+        <form method="post">
+            {% csrf_token %}
+            <label class="field-label" for="id_bio">Edit Bio</label>
+            <textarea id="id_bio" name="bio" class="bio-input" rows="4" maxlength="1000" placeholder="Tell people a little about yourself...">{{ bio_form.bio.value|default_if_none:"" }}</textarea>
+            {% if bio_form.bio.errors %}
+            <ul class="error-list">
+                {% for error in bio_form.bio.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <div class="action-row">
+                <button type="submit" class="primary-btn">Save Bio</button>
+            </div>
+        </form>
+    </div>
 
-{% if profile.profile_picture %}
-<img src="{{ profile.profile_picture }}" alt="Profile Picture" width="150">
-{% endif %}
+    <div class="card">
+        <h2>Profile Media</h2>
 
-<p>Bio: {{ profile.bio }}</p>
-<p>Role: {% if profile.is_teacher %}Teacher{% else %}Student{% endif %}</p>
+        <div class="media-card">
+            <strong>Profile Picture</strong>
+            <form id="profile-picture-form" method="post" action="{% url 'upload_profile_files' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="profile-picture-input" type="file" name="profile_picture" accept="image/*" hidden>
+            {% if profile.profile_picture %}
+            <div style="position:relative; display:inline-block;">
+                <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="Profile Picture">
+                <button type="submit" name="remove_profile_picture" value="1" class="remove-photo-btn">×</button>
+            </div>
+            <div class="action-row">
+                <button type="button" class="primary-btn" id="edit-profile-picture-btn">Edit Profile Picture</button>
+            </div>
+            {% else %}
+            <p class="muted">No profile picture uploaded.</p>
+            <button type="button" class="primary-btn" id="edit-profile-picture-btn">+ Add Profile Picture</button>
+            {% endif %}
+            </form>
+        </div>
+
+        <div class="media-card">
+            <strong>Intro Audio</strong>
+            <form id="intro-audio-form" method="post" action="{% url 'upload_profile_files' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="intro-audio-input" type="file" name="intro_audio" accept="audio/*" hidden>
+            {% if profile.intro_audio %}
+            <audio controls>
+                <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <button type="submit" name="remove_intro_audio" value="1" style="background:#c0392b; color:white; border:none; border-radius:4px; cursor:pointer; margin-left:8px; width: 100px; height: 30px; font-size: 14px;">× Remove</button>
+            <div class="action-row">
+                <button type="button" class="primary-btn" id="edit-intro-audio-btn">Edit Intro Audio</button>
+            </div>
+            {% else %}
+            <p class="muted">No intro audio uploaded.</p>
+            <button type="button" class="primary-btn" id="edit-intro-audio-btn">+ Add Intro Audio</button>
+            {% endif %}
+            </form>
+        </div>
+    </div>
+
+    {% if profile.role == 'student' %}
+        <div class="card">
+            <h2>Request Teacher Role</h2>
+            {% if pending_teacher_request %}
+                <div>
+                    <p class="muted" style="margin-top:8px;">Teacher role request pending.</p>
+                    {% if pending_teacher_request.explanation %}
+                        <p class="muted" style="margin-top:4px;">Reason: {{ pending_teacher_request.explanation }}</p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'request_teacher_role' %}" class="teacher-request-form">
+                    {% csrf_token %}
+                    <p>If you would like to request a teacher role, please provide your reasoning below.</p>
+                    <textarea id="id_explanation" name="explanation" class="bio-input" rows="3" maxlength="1000" placeholder="Share your experience, availability, or motivation..."></textarea>
+                    <button type="submit" class="primary-btn">Request Teacher Role</button>
+                </form>
+            {% endif %}            
+        </div>
+    {% endif %}
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Profile Picture
+        var editPicBtn = document.getElementById("edit-profile-picture-btn");
+        var picFileInput = document.getElementById("profile-picture-input");
+        var picForm = document.getElementById("profile-picture-form");
+
+        if (editPicBtn && picFileInput && picForm) {
+            editPicBtn.addEventListener("click", function() {
+                picFileInput.click();
+            });
+
+            picFileInput.addEventListener("change", function() {
+                if (picFileInput.files.length) {
+                    picForm.submit();
+                }
+            });
+        }
+
+        // Intro Audio
+        var editAudioBtn = document.getElementById("edit-intro-audio-btn");
+        var audioFileInput = document.getElementById("intro-audio-input");
+        var audioForm = document.getElementById("intro-audio-form");
+
+        if (editAudioBtn && audioFileInput && audioForm) {
+            editAudioBtn.addEventListener("click", function() {
+                audioFileInput.click();
+            });
+
+            audioFileInput.addEventListener("change", function() {
+                if (audioFileInput.files.length) {
+                    audioForm.submit();
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

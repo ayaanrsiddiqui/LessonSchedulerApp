@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ viewed_user.username }}'s Profile</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+    color: #e5e7eb;
+}
+.top-bar {
+    width: 100%;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.brand-link {
+    color: #111;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+.secondary-btn,
+.primary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
+    display: inline-block;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+.secondary-btn {
+    background: #fff;
+    color: #111;
+}
+.secondary-btn:hover {
+    background: #f3f3f3;
+}
+.primary-btn {
+    background: #0066cc;
+    color: #fff;
+    border-color: #0066cc;
+}
+.primary-btn:hover {
+    background: #0052a3;
+}
+.container {
+    max-width: 900px;
+    margin: 28px auto;
+    padding: 0 18px 36px;
+}
+.card {
+    background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.card h1,
+.card h2 {
+    margin-top: 0;
+    color: #ffffff;
+}
+.muted {
+    color: #c9ced6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+.profile-pic {
+    width: 132px;
+    height: 132px;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.avatar-fallback {
+    width: 132px;
+    height: 132px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 42px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.media-card {
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 4px solid #0066cc;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+audio {
+    width: 100%;
+    margin-top: 8px;
+}
+.action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+@media (max-width: 800px) {
+    .top-bar {
+        padding: 15px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
+        <a href="{% url 'profile' %}" class="secondary-btn">My Profile</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="profile-header">
+            {% if profile.profile_picture %}
+            <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="{{ viewed_user.username }}">
+            {% else %}
+            <span class="avatar-fallback">{{ viewed_user.username|first|upper }}</span>
+            {% endif %}
+            <div>
+                <h1>{{ viewed_user.get_full_name|default:viewed_user.username }}</h1>
+                <p class="muted">@{{ viewed_user.username }}</p>
+                <p class="muted">Role: {{ profile.get_role_display }}</p>
+                {% if viewed_user.email %}
+                <p class="muted">Email: {{ viewed_user.email }}</p>
+                {% endif %}
+                
+            </div>
+            
+        </div>
+        {% if is_own_profile %}
+    <a href="{% url 'profile' %}" class="primary-btn">Edit Profile</a>
+    {% else %}
+    <a href="{% url 'send_message' viewed_user.username %}" class="primary-btn">Message User</a>
+    {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>About</h2>
+        <p class="muted">{{ profile.bio|default:"No bio added yet." }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Profile Media</h2>
+
+
+        <div class="media-card">
+            <strong>Intro Audio</strong>
+            {% if profile.intro_audio %}
+            <audio controls>
+                <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            {% else %}
+            <p class="muted">No intro audio uploaded.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

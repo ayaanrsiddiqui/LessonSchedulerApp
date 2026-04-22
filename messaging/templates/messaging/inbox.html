@@ -1,0 +1,171 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inbox</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);padding:30px;}
+.corner-logo{position:fixed;top:30px;left:40px;width:110px;background:white;padding:8px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:999;}
+.page-container{display:flex;flex-direction:column;width:950px;max-width:100%;height:90vh;border-radius:18px;overflow:hidden;background:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,0.35);}
+.header{background:#111;color:#fff;padding:30px 40px;}
+.header h1{font-size:32px;margin-bottom:8px;}
+.header p{font-size:15px;color:#cfcfcf;}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.content{padding:28px 40px;display:flex;flex-direction:column;flex:1;}
+.send-btn{display:inline-block;margin-bottom:18px;padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;text-decoration:none;width:381px;margin-left: 32px;}
+.dropdown{position:relative;display:inline-block;}
+.dropdown-content{display:none;position:absolute;background-color:#f9f9f9;min-width:160px;box-shadow:0px 8px 16px 0px rgba(0,0,0,0.2);z-index:1;border-radius:8px;margin-left: 32px;}
+.dropdown-content a{color:black;padding:8px 16px;text-decoration:none;display:block;border-radius:8px;}
+.dropdown-content a:hover{background-color:#f1f1f1;}
+.dropdown-btn{cursor:pointer;font-size: 16px;}
+.dropdown-header{font-weight:bold;padding:8px 16px;background-color:#e0e0e0;border-bottom:1px solid #bbb;border-radius:8px 8px 0 0;}
+.search-input{width:100%;padding:8px 16px;box-sizing:border-box;border:none;border-bottom:1px solid #ccc;font-size:16px;}
+.no-users{padding:8px 16px;color:#777;font-size:16px;}
+.conversation-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 5px 10px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;}
+.conversation-card-content{flex:1;}
+.conversation-card strong{font-size:16px;}
+.conversation-card p{margin:8px 0;color:#333;}
+.conversation-card small{color:#777;}
+.open-chat-btn{display:inline-block;padding:8px 14px;border-radius:8px;background:#2a2a2a;color:white;text-decoration:none;font-size:15px;margin-left:16px;white-space:nowrap;margin-right:8px;}
+.user-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f3f3f3;color:#111;border:1px solid #d6d6d6;font-size:13px;font-weight:600;}
+.user-inline{display:inline-flex;align-items:center;gap:8px;}
+.avatar-sm{width:22px;height:22px;border-radius:50%;object-fit:cover;}
+.avatar-fallback{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:11px;font-weight:700;}
+</style>
+</head>
+
+<body>
+<a href="{% url 'index' %}"><img src="{% static 'images/shhoLogo.png' %}" class="corner-logo"></a>
+<div class="page-container">
+    <div class="header">
+        <div class="header-top">
+        <div>
+        <h1>Inbox</h1>
+        <p>View your conversations with other users here.</p>
+        </div>
+        <span class="user-chip">
+            {% if request.user.profile.profile_picture %}
+            <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
+            {% else %}
+            <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
+            {% endif %}
+            {{ request.user.username }}
+        </span>
+        </div>
+    </div>
+    <div class="content">
+        <div style="display:flex;gap:10px;margin-bottom:18px;">
+            <div class="dropdown">
+                <button class="send-btn dropdown-btn" onclick="toggleDropdown('studentDropdown')">Message a Student</button>
+                <div id="studentDropdown" class="dropdown-content">
+                    <div class="dropdown-header">Students</div>
+                    {% if students %}
+                    <input type="text" class="search-input" placeholder="Search students..." onkeyup="filterUsers(this, 'studentDropdown')">
+                    {% endif %}
+                    {% for user in students %}
+                        <a href="{% url 'send_message' user.username %}">{{ user.username }}</a>
+                    {% empty %}
+                        <div class="no-users">No students yet</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="send-btn dropdown-btn" onclick="toggleDropdown('teacherDropdown')">Message a Teacher</button>
+                <div id="teacherDropdown" class="dropdown-content">
+                    <div class="dropdown-header">Teachers</div>
+                    {% if teachers %}
+                    <input type="text" class="search-input" placeholder="Search teachers..." onkeyup="filterUsers(this, 'teacherDropdown')">
+                    {% endif %}
+                    {% for user in teachers %}
+                        <a href="{% url 'send_message' user.username %}">{{ user.username }}</a>
+                    {% empty %}
+                        <div class="no-users">No teachers yet</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% if conversations %}
+            {% for convo in conversations %}
+                <div class="conversation-card">
+                    <div class="conversation-card-content">
+                        {% if convo.peer in students %}
+                            <strong class="user-inline">
+                                {% if convo.peer.profile.profile_picture %}
+                                <img class="avatar-sm" src="{{ convo.peer.profile.profile_picture.url }}" alt="{{ convo.peer.username }}">
+                                {% else %}
+                                <span class="avatar-fallback">{{ convo.peer.username|first|upper }}</span>
+                                {% endif %}
+                                <a href="{% url 'public_profile' convo.peer.username %}" style="color:inherit;text-decoration:none;">{{ convo.peer.username }}</a>
+                            </strong> (Student)
+                        {% elif convo.peer in teachers %}
+                            <strong class="user-inline">
+                                {% if convo.peer.profile.profile_picture %}
+                                <img class="avatar-sm" src="{{ convo.peer.profile.profile_picture.url }}" alt="{{ convo.peer.username }}">
+                                {% else %}
+                                <span class="avatar-fallback">{{ convo.peer.username|first|upper }}</span>
+                                {% endif %}
+                                <a href="{% url 'public_profile' convo.peer.username %}" style="color:inherit;text-decoration:none;">{{ convo.peer.username }}</a>
+                            </strong> (Teacher)
+                        {% else %}
+                            <strong class="user-inline">
+                                {% if convo.peer.profile.profile_picture %}
+                                <img class="avatar-sm" src="{{ convo.peer.profile.profile_picture.url }}" alt="{{ convo.peer.username }}">
+                                {% else %}
+                                <span class="avatar-fallback">{{ convo.peer.username|first|upper }}</span>
+                                {% endif %}
+                                <a href="{% url 'public_profile' convo.peer.username %}" style="color:inherit;text-decoration:none;">{{ convo.peer.username }}</a>
+                            </strong>
+                        {% endif %}
+                        <p>{{ convo.message.content|truncatechars:68 }}</p>
+                        <small>{{ convo.message.timestamp|date:"M d, Y H:i" }}</small>
+                    </div>
+                    <a href="{% url 'send_message' convo.peer.username %}" class="open-chat-btn">Open Chat</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No conversations yet.</p>
+        {% endif %}
+    </div>
+</div>
+<script>
+function toggleDropdown(id) {
+    var dropdown = document.getElementById(id);
+    if (dropdown.style.display === "block") {
+        dropdown.style.display = "none";
+    } else {
+        dropdown.style.display = "block";
+    }
+}
+
+function filterUsers(input, dropdownId) {
+    var filter = input.value.toUpperCase();
+    var dropdown = document.getElementById(dropdownId);
+    var links = dropdown.getElementsByTagName("a");
+    for (var i = 0; i < links.length; i++) {
+        var txtValue = links[i].textContent || links[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            links[i].style.display = "";
+        } else {
+            links[i].style.display = "none";
+        }
+    }
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+    if (!event.target.matches('.dropdown-btn') && !event.target.matches('.search-input') && !event.target.closest('.dropdown-content')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.style.display === "block") {
+                openDropdown.style.display = "none";
+            }
+        }
+    }
+}
+</script>
+</body>
+</html>

@@ -9,12 +9,80 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
-body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);padding:30px;}
-.corner-logo{position:fixed;top:30px;left:40px;width:110px;background:white;padding:8px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:999;}
+
+body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+
+    background:
+        linear-gradient(
+        rgba(0,0,0,0.75),
+        rgba(0,0,0,0.75)
+        ),
+    url('/static/images/djBackground3.PNG');
+        
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: center 75%;
+}
+
+.corner-logo{
+    position: fixed;
+    top: 30px;
+    left: 40px;
+
+    width: 90px;     
+    height: 90px;     
+
+    padding: 8px;
+    border-radius: 10px;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    z-index: 999;
+
+    display: block;
+}
+
+
+
 .page-container{display:flex;width:1050px;max-width:100%;min-height:560px;border-radius:18px;overflow:hidden;background:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,0.35);}
-.left-panel{flex:1;background:linear-gradient(160deg,#111111,#1d1d1f 55%,#2c2c2f);color:white;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:60px 50px;}
-.left-panel h1{font-size:44px;font-weight:700;letter-spacing:1px;margin-bottom:18px;}
-.left-panel p{font-size:17px;line-height:1.6;color:#d7d7d7;max-width:360px;}
+
+
+
+.left-panel{
+flex:1;
+background:linear-gradient(160deg,#111,#111 100%,#000000);
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:60px 50px;
+}
+
+.left-panel h1{
+
+font-size:50px;
+font-weight:700;
+letter-spacing:0.5px;
+margin-top: 0.1px;
+justify-content: flex-start;
+padding: 1px
+}
+
+.left-panel p{
+font-size:14px;
+line-height:1.6;
+color:#d7d7d7;
+max-width:360px;
+margin-top: 0;
+padding-top: 1;
+}
+
+
 .login-panel{flex:1.2;background:white;display:flex;align-items:center;justify-content:center;padding:50px 40px;}
 .login-wrapper{width:100%;max-width:460px;}
 .login-wrapper h2{font-size:32px;margin-bottom:10px;color:#111;}
@@ -49,14 +117,28 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 </head>
 <body>
 
+{% load static %}
 <a href="{% url 'index' %}">
-<img src="{% static 'images/shho-logo.png' %}" class="corner-logo">
+    <img src="{% static 'images/shhoLogo.png' %}" class="corner-logo">
 </a>
 
+
 <div class="page-container">
+
   <div class="left-panel">
-    <h1>TITLE</h1>
-    <p>Schedule With The Best DJs at UVA!</p>
+    <h1>SHHO</h1>
+
+    <h1>Lesson Hub</h1>
+
+    <div style="height: 40px;"></div>
+
+    <p>
+    Schedule Lessons with the Student Hip Hop Organization
+    </p>
+
+<p class="p2">
+The Best DJs at UVA!
+</p>
   </div>
 
   <div class="login-panel">

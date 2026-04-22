@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Roles</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+    color: #e5e7eb;
+}
+.top-bar {
+    width: 100%;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.brand-link {
+    color: #111;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+.secondary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
+    display: inline-block;
+    background: #fff;
+    color: #111;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+.secondary-btn:hover {
+    background: #f3f3f3;
+}
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f3f3f3;
+    color: #111;
+    border: 1px solid #d6d6d6;
+    font-size: 13px;
+    font-weight: 600;
+}
+.user-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-link {
+    color: #7cb6ff;
+    text-decoration: none;
+    font-weight: 600;
+}
+.profile-link:hover {
+    color: #a8ceff;
+}
+.avatar-sm {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.avatar-fallback {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #111;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+.container {
+    max-width: 1000px;
+    margin: 28px auto;
+    padding: 0 18px 36px;
+}
+.card {
+    background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.card h1,
+.card h2 {
+    margin-top: 0;
+    color: #ffffff;
+}
+.muted {
+    color: #c9ced6;
+}
+.role-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+}
+.role-table th,
+.role-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: left;
+    font-size: 14px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.role-table th {
+    font-weight: 700;
+    color: #d7dce1;
+    background: rgba(0,0,0,0.2);
+}
+.role-table tbody tr:hover {
+    background: rgba(255,255,255,0.04);
+}
+.inline-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.inline-actions form {
+    display: inline;
+}
+.select-input {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    padding: 10px 12px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+.select-input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+.primary-btn {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #0066cc;
+    color: #fff;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+.primary-btn:hover {
+    background: #0052a3;
+}
+.user-form {
+    display: grid;
+    gap: 12px;
+    align-items: center;
+    grid-template-columns: 1fr 150px 110px;
+    margin-bottom: 14px;
+    padding: 12px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.user-form span {
+    color: #e5e7eb;
+    font-weight: 500;
+}
+@media (max-width: 760px) {
+    .top-bar {
+        padding: 15px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .role-table {
+        font-size: 12px;
+    }
+    .role-table th,
+    .role-table td {
+        padding: 10px 6px;
+    }
+    .user-form {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link">SHHO</a>
+    </div>
+    <div class="nav-right">
+        <span class="user-chip">
+            {% if request.user.profile.profile_picture %}
+            <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
+            {% else %}
+            <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
+            {% endif %}
+            {{ request.user.username }}
+        </span>
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="secondary-btn">Logout</button>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h1>Manage Roles</h1>
+        <p class="muted">Review pending teacher requests and update user roles in one place.</p>
+    </div>
+
+    <div class="card">
+        <h2>Pending Teacher Role Requests</h2>
+        {% if pending_requests %}
+        <table class="role-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Explanation</th>
+                    <th>Submitted</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role_request in pending_requests %}
+                <tr>
+                    <td>
+                        <span class="user-inline">
+                            {% if role_request.profile.profile_picture %}
+                            <img class="avatar-sm" src="{{ role_request.profile.profile_picture.url }}" alt="{{ role_request.profile.user.username }}">
+                            {% else %}
+                            <span class="avatar-fallback">{{ role_request.profile.user.username|first|upper }}</span>
+                            {% endif %}
+                            <a class="profile-link" href="{% url 'public_profile' role_request.profile.user.username %}">{{ role_request.profile.user.username }}</a>
+                        </span>
+                    </td>
+                    <td>{{ role_request.profile.user.email }}</td>
+                    <td>{{ role_request.explanation|default:'No explanation provided.' }}</td>
+                    <td>{{ role_request.submitted_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <div class="inline-actions">
+                            <form method="post" action="{% url 'handle_role_request' role_request.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve">
+                                <button type="submit" class="primary-btn">Approve</button>
+                            </form>
+                            <form method="post" action="{% url 'handle_role_request' role_request.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="deny">
+                                <button type="submit" class="secondary-btn">Deny</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="muted">No pending teacher role requests.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Manual Role Controls</h2>
+        <p class="muted">You can still change student and teacher roles for any non-admin user.</p>
+        {% for user in users %}
+        <form class="user-form" method="POST" action="{% url 'update_role' user.user.id %}">
+            {% csrf_token %}
+            <span class="user-inline">
+                {% if user.profile_picture %}
+                <img class="avatar-sm" src="{{ user.profile_picture.url }}" alt="{{ user.user.username }}">
+                {% else %}
+                <span class="avatar-fallback">{{ user.user.username|first|upper }}</span>
+                {% endif %}
+                <a class="profile-link" href="{% url 'public_profile' user.user.username %}">{{ user.user.username }}</a>
+            </span>
+            <select class="select-input" name="role">
+                <option value="student" {% if user.role == "student" %}selected{% endif %}>Student</option>
+                <option value="teacher" {% if user.role == "teacher" %}selected{% endif %}>Teacher</option>
+            </select>
+            <button type="submit" class="primary-btn">Update</button>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

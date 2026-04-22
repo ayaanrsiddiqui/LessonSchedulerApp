@@ -1,0 +1,799 @@
+<!--
+# Description: Unified root dashboard with shared calendar view for both DJ and student users
+# Generated with Copilot on March 29, 2026
+# Prompt: use one cohesive dashboard UI where both roles can use the calendar without duplicate separate interfaces
+-->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
+    color: #e5e7eb;
+}
+.top-bar {
+    width: 100%;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px 15px 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.brand-link {
+    color: #111;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+.nav-buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+.primary-btn,
+.secondary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
+    display: inline-block;
+}
+.primary-btn {
+    background: #111;
+    color: #fff;
+}
+.primary-btn:hover {
+    background: #2a2a2a;
+}
+.secondary-btn {
+    background: #fff;
+    color: #111;
+    border: 1px solid #ccc;
+}
+.secondary-btn:hover {
+    background: #f3f3f3;
+}
+.container {
+    max-width: 1080px;
+    margin: 28px auto;
+    padding: 0 18px 36px;
+}
+.card {
+    background: linear-gradient(160deg, #111111, #1d1d1f 55%, #2c2c2f);
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.card h1,
+.card h2,
+.card h3 {
+    margin-top: 0;
+    color: #ffffff;
+}
+.top-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+.top-links a,
+.inline-btn {
+    display: inline-block;
+    padding: 9px 13px;
+    border-radius: 6px;
+    background: #0066cc;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    border: none;
+}
+.top-links a:hover,
+.inline-btn:hover {
+    background: #0052a3;
+}
+.muted {
+    color: #c9ced6;
+}
+.pill {
+    display: inline-block;
+    background: #2f2f33;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+.item-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+/* 2-column grid for upcoming classes */
+#upcomingClassList{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px;
+    margin-top:0;
+}
+
+/* make each class card fill its grid cell nicely */
+.upcoming-class-item{
+    height:100%;
+    margin-bottom:0;
+    transition:transform .2s ease, box-shadow .2s ease;
+    box-shadow:0 6px 14px rgba(0,0,0,0.18);
+}
+
+.upcoming-class-item:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 18px rgba(0,0,0,0.24);
+}
+
+.item {
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 4px solid #0066cc;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+.inline-link {
+    color: #7cb6ff;
+}
+.inline-link:hover {
+    color: #a8ceff;
+}
+
+.calendar-shell {
+    background: #f6f6f6;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #e4e4e4;
+    color: #111;
+}
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.calendar-header h3 {
+    margin: 0;
+    color: #111;
+}
+.calendar-controls {
+    display: flex;
+    gap: 8px;
+}
+.calendar-nav {
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+}
+.calendar-nav:hover {
+    background: #2a2a2a;
+}
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.calendar-weekdays div{
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:#666;
+    padding:8px 0;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+.calendar-day{
+    min-height:86px;
+    border:1px solid #e4e4e4;
+    border-radius:12px;
+    background:#fafafa;
+    padding:10px;
+    cursor:pointer;
+    transition:.2s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+.calendar-day:hover{
+    background:#efefef;
+}
+.calendar-day.other-month{
+    opacity:.35;
+    cursor:default;
+}
+.calendar-day.today{
+    border:2px solid #111;
+}
+.calendar-day.has-lesson{
+    background:#ececec;
+}
+.calendar-day.selected{
+    background:#111;
+    color:white;
+}
+.calendar-day-number{
+    font-weight:700;
+    font-size:15px;
+}
+.lesson-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+    background:#111;
+    margin-top:8px;
+}
+.calendar-day.selected .lesson-dot{
+    background:white;
+}
+.calendar-details{
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px solid #ddd;
+}
+.calendar-details h4{
+    font-size:20px;
+    color:#111;
+    margin-bottom:12px;
+}
+.lesson-detail-card{
+    background:#f7f7f7;
+    border:1px solid #e4e4e4;
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:12px;
+}
+.lesson-detail-card strong{
+    display:block;
+    font-size:17px;
+    color:#111;
+    margin-bottom:8px;
+}
+.lesson-detail-card p{
+    margin-bottom:4px;
+    color:#555;
+    font-size:14px;
+}
+
+/* ===== UPCOMING CLASSES LAYOUT ===== */
+.upcoming-classes-layout{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    gap:20px;
+    align-items:start;
+}
+
+.filters-column{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.classes-scroll-box{
+    max-height:300px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:6px;
+}
+
+/* Optional scrollbar styling */
+.classes-scroll-box::-webkit-scrollbar{
+    width:8px;
+}
+
+.classes-scroll-box::-webkit-scrollbar-thumb{
+    background:#555;
+    border-radius:8px;
+}
+
+.classes-scroll-box::-webkit-scrollbar-track{
+    background:#1f1f22;
+    border-radius:8px;
+}
+
+/* ===== FILTERS ===== */
+.filters-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin:14px 0 18px;
+}
+.filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:220px;
+}
+.filter-group label{
+    font-size:13px;
+    font-weight:700;
+    color:#c9ced6;
+}
+.filter-group select{
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid #444;
+    background:#2a2a2d;
+    color:#fff;
+    font-size:14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:800px){
+    .top-bar{
+        padding:15px 20px;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    .nav-left{
+        flex-direction:column;
+        align-items:flex-start;
+        width:100%;
+    }
+
+    .nav-buttons{
+        width:100%;
+    }
+
+    .nav-right{
+        width:100%;
+    }
+     #upcomingClassList{
+        grid-template-columns:1fr;
+    }
+
+    .upcoming-classes-layout{
+        grid-template-columns:1fr;
+    }
+
+    .classes-scroll-box{
+        max-height:320px;
+    }
+}
+</style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
+        <div class="nav-buttons">
+            {% if is_dj %}
+            <a href="{% url 'lesson_create' %}" class="primary-btn">Post New Class</a>
+            {% else %}
+            <a href="{% url 'browse_classes' %}" class="primary-btn">Browse Classes</a>
+            <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Class</a>
+            {% endif %}
+            <a href="{% url 'inbox' %}" class="secondary-btn">View Messages</a>
+            <a href="{% url 'profile' %}" class="secondary-btn">Go to Profile</a>
+        </div>
+    </div>
+    <div class="nav-right">
+        <a href="{% url 'account_logout' %}" class="secondary-btn">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h1>Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
+        <p class="muted">Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
+        <p class="muted">Email: {{ request.user.email }}</p>
+        <p>Account Type: <span class="pill">{{ account_type }}</span></p>
+    </div>
+
+    <div class="card">
+        <h2>Calendar</h2>
+        <div class="calendar-shell">
+            <div class="calendar-header">
+                <h3 id="calendarMonthYear">Month Year</h3>
+                <div class="calendar-controls">
+                    <button id="prevMonth" class="calendar-nav" type="button">&lt;</button>
+                    <button id="nextMonth" class="calendar-nav" type="button">&gt;</button>
+                </div>
+            </div>
+
+            <div class="calendar-weekdays">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid"></div>
+
+            <div class="calendar-details">
+                <h4 id="selectedDateTitle">Select a date</h4>
+                <div id="selectedDateLessons">
+                    <p class="muted">Click a highlighted day to see classes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_dj %}
+    <div class="card">
+        <h2>Your Posted Classes</h2>
+        {% if posted_classes %}
+        <ul class="item-list">
+            {% for lesson in posted_classes %}
+            <li class="item">
+                <strong>
+                    <a href="{% url 'dj_class_detail' lesson.id %}" class="inline-link">
+                        {{ lesson.title }}
+                    </a>
+                </strong>
+                ({{ lesson.confirmed_count }}/{{ lesson.capacity }} confirmed)
+                <br>
+                {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
+                <br>
+                Location: {{ lesson.location }}
+                <br>
+                Skill Level: {{ lesson.experience_requirements }}
+                <br>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">You have not posted any classes yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Pending Student Requests</h2>
+        {% if pending_requests %}
+        <ul class="item-list">
+            {% for req in pending_requests %}
+            <li class="item">
+                {{ req.student.get_full_name|default:req.student.username }}
+                requested {{ req.requested_start_time|date:"M d, Y H:i" }} - {{ req.requested_end_time|date:"H:i" }}
+                <br>
+                <a class="inline-btn" href="{% url 'manage_request' req.id %}">
+                    Review Request
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No pending requests.</p>
+        {% endif %}
+    </div>
+{% else %}
+<div class="card">
+    <h2>Upcoming Classes</h2>
+
+    <div class="upcoming-classes-layout">
+
+        <div class="filters-column">
+            <div class="filter-group">
+                <label for="djFilter">Filter by DJ</label>
+                <select id="djFilter">
+                    <option value="">All DJs</option>
+                    {% for lesson in available_lessons %}
+                    <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
+                        {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="skillFilter">Filter by Skill Level</label>
+                <select id="skillFilter">
+                    <option value="">All Class Levels</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Proficient">Proficient</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="classes-scroll-box">
+            {% if available_lessons %}
+            <ul class="item-list" id="upcomingClassList">
+                {% for lesson in available_lessons %}
+                <li class="item upcoming-class-item"
+                    data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
+                    data-skill="{{ lesson.experience_requirements }}">
+
+                    <strong>
+                        <a href="{% url 'student_class_detail' lesson.id %}" class="inline-link">
+                            {{ lesson.title }}
+                        </a>
+                    </strong><br>
+                    DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}<br>
+
+                    Skill Level: {{ lesson.experience_requirements }}<br>
+
+                    {{ lesson.start_time|date:"M d, Y H:i" }} - 
+                    {{ lesson.end_time|date:"H:i" }}<br>
+
+                    Location: {{ lesson.location }}<br>
+
+                   {% if lesson.id in waitlisted_signup_ids %}
+                        <span class="pill">Waitlisted</span><br>
+                        <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="display:inline; margin-top:8px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'index' %}">
+                            <button type="submit" class="inline-btn"
+                                    onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                Cancel Booking
+                            </button>
+                        </form>
+
+                    {% elif lesson.id in confirmed_signup_ids %}
+                        <span class="pill">Enrolled</span><br>
+                        <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="display:inline; margin-top:8px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'index' %}">
+                            <button type="submit" class="inline-btn"
+                                    onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                Cancel Booking
+                            </button>
+                        </form>
+
+                    {% else %}
+                        <form method="post" action="{% url 'class_signup' lesson.id %}" style="display:inline; margin-top:8px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'index' %}">
+                            <button type="submit" class="inline-btn">
+                                Sign Up
+                            </button>
+                        </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <p class="muted" id="noFilteredResults" style="display:none;">
+                No upcoming classes match your filters.
+            </p>
+
+            {% else %}
+            <p class="muted">
+                No upcoming classes yet.
+                <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.
+            </p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endif %}
+
+{{ calendar_lessons|json_script:"lessonData" }}
+<script>
+(function () {
+    const lessonDataEl = document.getElementById("lessonData");
+    if (!lessonDataEl) return;
+
+    const lessons = JSON.parse(lessonDataEl.textContent || "[]");
+    const lessonsByDate = {};
+
+    lessons.forEach((lesson) => {
+        if (!lessonsByDate[lesson.date_key]) {
+            lessonsByDate[lesson.date_key] = [];
+        }
+        lessonsByDate[lesson.date_key].push(lesson);
+    });
+
+    const monthYearEl = document.getElementById("calendarMonthYear");
+    const gridEl = document.getElementById("calendarGrid");
+    const selectedDateTitleEl = document.getElementById("selectedDateTitle");
+    const selectedDateLessonsEl = document.getElementById("selectedDateLessons");
+    const prevBtn = document.getElementById("prevMonth");
+    const nextBtn = document.getElementById("nextMonth");
+
+    const today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    let selectedDate = null;
+
+    function formatDateKey(year, month, day) {
+        const mm = String(month + 1).padStart(2, "0");
+        const dd = String(day).padStart(2, "0");
+        return `${year}-${mm}-${dd}`;
+    }
+
+    function formatReadableDate(dateKey) {
+        const d = new Date(dateKey + "T00:00:00");
+        return d.toLocaleDateString(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+    }
+
+    function renderLessonDetails(dateKey) {
+        selectedDate = dateKey;
+        selectedDateTitleEl.textContent = formatReadableDate(dateKey);
+        const dayLessons = lessonsByDate[dateKey] || [];
+
+        if (!dayLessons.length) {
+            selectedDateLessonsEl.innerHTML = '<p class="muted">No classes scheduled for this day.</p>';
+            return;
+        }
+
+        selectedDateLessonsEl.innerHTML = dayLessons.map((lesson) => `
+            <div class="lesson-detail-card">
+                <strong>${lesson.title}</strong>
+                <p><strong>Starts:</strong> ${lesson.start_display}</p>
+                <p><strong>Ends:</strong> ${lesson.end_display}</p>
+                <p><strong>${lesson.role_line.includes('DJ:') ? 'DJ' : 'Enrollment'}:</strong> ${lesson.role_line.replace('DJ: ', '')}</p>
+                <p><strong>Location:</strong> ${lesson.location}</p>
+            </div>
+        `).join("");
+    }
+
+    function renderCalendar(month, year) {
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        monthYearEl.textContent = new Date(year, month).toLocaleDateString(undefined, {
+            month: "long",
+            year: "numeric"
+        });
+
+        gridEl.innerHTML = "";
+
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const dayNum = daysInPrevMonth - i;
+            const dayEl = document.createElement("div");
+            dayEl.className = "calendar-day other-month";
+            dayEl.innerHTML = `<div class="calendar-day-number">${dayNum}</div>`;
+            gridEl.appendChild(dayEl);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = formatDateKey(year, month, day);
+            const isToday =
+                day === today.getDate() &&
+                month === today.getMonth() &&
+                year === today.getFullYear();
+
+            const hasLesson = !!lessonsByDate[dateKey];
+            const isSelected = selectedDate === dateKey;
+
+            const dayEl = document.createElement("div");
+            dayEl.className = "calendar-day";
+            if (isToday) dayEl.classList.add("today");
+            if (hasLesson) dayEl.classList.add("has-lesson");
+            if (isSelected) dayEl.classList.add("selected");
+
+            dayEl.innerHTML = `
+                <div class="calendar-day-number">${day}</div>
+                ${hasLesson ? '<div class="lesson-dot"></div>' : ''}
+            `;
+
+            dayEl.addEventListener("click", function () {
+                renderLessonDetails(dateKey);
+                renderCalendar(currentMonth, currentYear);
+            });
+
+            gridEl.appendChild(dayEl);
+        }
+
+        const totalCells = firstDay + daysInMonth;
+        const trailingDays = (7 - (totalCells % 7)) % 7;
+
+        for (let day = 1; day <= trailingDays; day++) {
+            const dayEl = document.createElement("div");
+            dayEl.className = "calendar-day other-month";
+            dayEl.innerHTML = `<div class="calendar-day-number">${day}</div>`;
+            gridEl.appendChild(dayEl);
+        }
+    }
+
+    prevBtn.addEventListener("click", function () {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    nextBtn.addEventListener("click", function () {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar(currentMonth, currentYear);
+    });
+
+    renderCalendar(currentMonth, currentYear);
+})();
+
+(function () {
+    const djFilter = document.getElementById("djFilter");
+    const skillFilter = document.getElementById("skillFilter");
+    const classItems = document.querySelectorAll(".upcoming-class-item");
+    const noResults = document.getElementById("noFilteredResults");
+
+    if (!djFilter || !skillFilter || !classItems.length) return;
+
+    function dedupeSelectOptions(selectEl) {
+        const seen = new Set();
+        const options = Array.from(selectEl.options);
+        options.forEach((option, index) => {
+            if (index === 0) return;
+            const value = option.value.trim();
+            if (!value || seen.has(value)) {
+                option.remove();
+            } else {
+                seen.add(value);
+            }
+        });
+    }
+
+    dedupeSelectOptions(djFilter);
+    dedupeSelectOptions(skillFilter);
+
+    function applyUpcomingClassFilters() {
+        const selectedDj = djFilter.value.trim().toLowerCase();
+        const selectedSkill = skillFilter.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        classItems.forEach((item) => {
+            const itemDj = (item.dataset.dj || "").trim().toLowerCase();
+            const itemSkill = (item.dataset.skill || "").trim().toLowerCase();
+
+            const matchesDj = !selectedDj || itemDj === selectedDj;
+            const matchesSkill = !selectedSkill || itemSkill === selectedSkill;
+
+            if (matchesDj && matchesSkill) {
+                item.style.display = "";
+                visibleCount++;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        if (noResults) {
+            noResults.style.display = visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    djFilter.addEventListener("change", applyUpcomingClassFilters);
+    skillFilter.addEventListener("change", applyUpcomingClassFilters);
+})();
+</script>
+</body>
+</html>
