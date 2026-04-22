@@ -17,9 +17,28 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
     color: #e5e7eb;
 }
+
+.bg-image{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 75%;
+    z-index: -2;
+}
+
+body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: -1;
+}
+
 .top-bar {
     width: 100%;
     background: #ffffff;
@@ -391,6 +410,9 @@ body {
 </style>
 </head>
 <body>
+
+<img src="{% static 'images/djbackground3.png' %}" class="bg-image">
+
 <div class="top-bar">
     <div class="nav-left">
         <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
