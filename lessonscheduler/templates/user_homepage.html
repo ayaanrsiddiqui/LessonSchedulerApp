@@ -18,6 +18,7 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
     color: #e5e7eb;
+    padding: 150px;
 }
 
 .bg-image{
@@ -29,6 +30,7 @@ body {
     object-fit: cover;
     object-position: center 75%;
     z-index: -2;
+
 }
 
 body::before{
@@ -46,11 +48,18 @@ body::before{
     align-items: center;
     padding: 16px 40px;
 
-    background: #000000;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(2px);
 
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 
     box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 .nav-left {
     display: flex;
