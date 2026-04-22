@@ -119,6 +119,18 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
                 charCount.textContent = this.value.length;
             });
         }
+
+        var form = textarea ? textarea.closest('form') : null;
+
+    if (textarea && form) {
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    }
+
     });
 </script>
 </body>
