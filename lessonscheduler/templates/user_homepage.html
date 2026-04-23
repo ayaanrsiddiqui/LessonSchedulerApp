@@ -215,6 +215,39 @@ body::before{
     text-decoration: none;
 }
 
+.calendar-details .inline-link {
+    color: #111;  
+    font-size: 18px; 
+}
+
+.calendar-details .inline-link:hover{
+    color: #a8ceff;
+    text-decoration: none; 
+}
+
+
+.calendar-details .pill {
+    background: #ffffff;
+    color: rgb(0, 0, 0);
+}
+
+.calendar-details .lesson-detail-card p {
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.calendar-details .lesson-info-row {
+    font-size: 13px;
+}
+
+.calendar-details .dj-link {
+    color: #111;  
+}
+
+.calendar-details .dj-link:hover {
+    color: #0066cc;   
+}
+
 
 .calendar-shell {
     background: #f6f6f6;
@@ -583,33 +616,44 @@ body::before{
 <div class="card">
     <h2>Upcoming Lessons</h2>
 
-    <div class="upcoming-classes-layout">
+     <div class="upcoming-classes-layout">
 
-        <div class="filters-column">
-            <div class="filter-group">
-                <label for="djFilter">Filter by DJ</label>
-                <select id="djFilter">
-                    <option value="">All DJs</option>
-                    {% for lesson in available_lessons %}
-                    <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
-                        {{ lesson.dj.get_full_name|default:lesson.dj.username }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+    <div class="filters-column">
 
-            <div class="filter-group">
-                <label for="skillFilter">Filter by Skill Level</label>
-                <select id="skillFilter">
-                    <option value="">All Class Levels</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Proficient">Proficient</option>
-                    <option value="Advanced">Advanced</option>
-                </select>
-            </div>
+        <div class="filter-group">
+            <label for="statusFilter">Filter by Lesson Status</label>
+            <select id="statusFilter">
+                <option value="">All Statuses</option>
+                <option value="enrolled">Enrolled</option>
+                <option value="waitlisted">Waitlisted</option>
+                <option value="none">Not Enrolled</option>
+            </select>
         </div>
 
+        <div class="filter-group">
+            <label for="djFilter">Filter by DJ</label>
+            <select id="djFilter">
+                <option value="">All DJs</option>
+                {% for lesson in available_lessons %}
+                <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
+                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="skillFilter">Filter by Skill Level</label>
+            <select id="skillFilter">
+                <option value="">All Class Levels</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Proficient">Proficient</option>
+                <option value="Advanced">Advanced</option>
+            </select>
+        </div>
+
+    </div>
         <div class="classes-scroll-box">
             {% if available_lessons %}
             <ul class="item-list" id="upcomingClassList">
@@ -617,8 +661,17 @@ body::before{
                 
                 
                 <li class="item upcoming-class-item"
-                data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
-                data-skill="{{ lesson.experience_requirements }}">
+                    data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
+                    data-skill="{{ lesson.experience_requirements }}"
+                    data-status="
+                        {% if lesson.id in confirmed_signup_ids %}
+                            enrolled
+                        {% elif lesson.id in waitlisted_signup_ids %}
+                            waitlisted
+                        {% else %}
+                            none
+                        {% endif %}
+                    ">
 
                 <strong>
                     <a href="{% url 'student_class_detail' lesson.id %}" class="inline-link">
@@ -679,12 +732,12 @@ body::before{
             </ul>
 
             <p class="muted" id="noFilteredResults" style="display:none;">
-                No upcoming classes match your filters.
+                No upcoming lessons match your filters.
             </p>
 
             {% else %}
             <p class="muted">
-                No upcoming classes yet.
+                No upcoming lessons yet.
                 <a class="inline-link" href="{% url 'browse_classes' %}">Find a class</a>.
             </p>
             {% endif %}
@@ -693,6 +746,11 @@ body::before{
     </div>
 </div>
 {% endif %}
+
+
+<script>
+    const csrfToken = "{{ csrf_token }}";
+</script>
 
 {{ calendar_lessons|json_script:"lessonData" }}
 <script>
@@ -739,25 +797,85 @@ body::before{
     }
 
     function renderLessonDetails(dateKey) {
-        selectedDate = dateKey;
-        selectedDateTitleEl.textContent = formatReadableDate(dateKey);
-        const dayLessons = lessonsByDate[dateKey] || [];
+    selectedDate = dateKey;
+    selectedDateTitleEl.textContent = formatReadableDate(dateKey);
+    const dayLessons = lessonsByDate[dateKey] || [];
 
-        if (!dayLessons.length) {
-            selectedDateLessonsEl.innerHTML = '<p class="muted">No classes scheduled for this day.</p>';
-            return;
+    if (!dayLessons.length) {
+        selectedDateLessonsEl.innerHTML = '<p class="muted">No classes scheduled for this day.</p>';
+        return;
+    }
+
+    selectedDateLessonsEl.innerHTML = dayLessons.map((lesson) => {
+        let buttonHtml = "";
+
+        if (lesson.signup_state === "waitlisted") {
+            buttonHtml = `
+                <div class="button-area">
+                    <span class="pill">Waitlisted</span><br>
+                    <form method="post" action="/class/${lesson.id}/cancel/" style="display:inline; margin-top:8px;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                        <input type="hidden" name="next" value="{% url 'index' %}">
+                        <button type="submit" class="inline-btn"
+                                onclick="return confirm('Are you sure you want to cancel this booking?');">
+                            Cancel Booking
+                        </button>
+                    </form>
+                </div>
+            `;
+        } else if (lesson.signup_state === "confirmed") {
+            buttonHtml = `
+                <div class="button-area">
+                    <span class="pill">Enrolled</span><br>
+                    <form method="post" action="/class/${lesson.id}/cancel/" style="display:inline; margin-top:8px;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                        <input type="hidden" name="next" value="{% url 'index' %}">
+                        <button type="submit" class="inline-btn"
+                                onclick="return confirm('Are you sure you want to cancel this booking?');">
+                            Cancel Booking
+                        </button>
+                    </form>
+                </div>
+            `;
+        } else {
+            buttonHtml = `
+                <div class="button-area">
+                    <form method="post" action="/class/${lesson.id}/signup/" style="display:inline; margin-top:8px;">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                        <input type="hidden" name="next" value="{% url 'index' %}">
+                        <button type="submit" class="inline-btn">
+                            Sign Up
+                        </button>
+                    </form>
+                </div>
+            `;
         }
 
-        selectedDateLessonsEl.innerHTML = dayLessons.map((lesson) => `
-            <div class="lesson-detail-card">
-                <strong>${lesson.title}</strong>
-                <p><strong>Starts:</strong> ${lesson.start_display}</p>
-                <p><strong>Ends:</strong> ${lesson.end_display}</p>
-                <p><strong>${lesson.role_line.includes('DJ:') ? 'DJ' : 'Enrollment'}:</strong> ${lesson.role_line.replace('DJ: ', '')}</p>
-                <p><strong>Location:</strong> ${lesson.location}</p>
+        return `
+            <div class="item upcoming-class-item">
+                <strong>
+                    <a href="/lesson/${lesson.id}/student-detail/" class="inline-link">
+                        ${lesson.title}
+                    </a>
+                </strong>
+
+                <div class="lesson-info-row">
+                    <strong>DJ:</strong>
+                    <a href="/profile/${lesson.dj_username}/" class="dj-link">
+                        ${lesson.dj_name}
+                    </a>
+                </div>
+                <div class="lesson-info-row"><strong>Confirmed:</strong> ${lesson.confirmed_count}/${lesson.capacity}</div>
+                <div class="lesson-info-row"><strong>Date:</strong> ${lesson.start_display}</div>
+                <div class="lesson-info-row"><strong>Time:</strong> ${lesson.time_display}</div>
+                <div class="lesson-info-row"><strong>Location:</strong> ${lesson.location}</div>
+                <div class="lesson-info-row"><strong>Skill Level:</strong> ${lesson.experience_requirements}</div>
+
+                ${buttonHtml}
             </div>
-        `).join("");
-    }
+        `;
+    }).join("");
+}
 
     function renderCalendar(month, year) {
         const firstDay = new Date(year, month, 1).getDay();
@@ -841,6 +959,7 @@ body::before{
 })();
 
 (function () {
+    const statusFilter = document.getElementById("statusFilter");
     const djFilter = document.getElementById("djFilter");
     const skillFilter = document.getElementById("skillFilter");
     const classItems = document.querySelectorAll(".upcoming-class-item");
@@ -868,16 +987,19 @@ body::before{
     function applyUpcomingClassFilters() {
         const selectedDj = djFilter.value.trim().toLowerCase();
         const selectedSkill = skillFilter.value.trim().toLowerCase();
+        const selectedStatus = statusFilter.value.trim().toLowerCase();
         let visibleCount = 0;
 
         classItems.forEach((item) => {
+            const itemStatus = (item.dataset.status || "").trim().toLowerCase();
             const itemDj = (item.dataset.dj || "").trim().toLowerCase();
             const itemSkill = (item.dataset.skill || "").trim().toLowerCase();
 
+            const matchesStatus = !selectedStatus || itemStatus === selectedStatus;
             const matchesDj = !selectedDj || itemDj === selectedDj;
             const matchesSkill = !selectedSkill || itemSkill === selectedSkill;
 
-            if (matchesDj && matchesSkill) {
+            if (matchesStatus && matchesDj && matchesSkill) {
                 item.style.display = "";
                 visibleCount++;
             } else {
@@ -890,8 +1012,10 @@ body::before{
         }
     }
 
+    statusFilter.addEventListener("change", applyUpcomingClassFilters);
     djFilter.addEventListener("change", applyUpcomingClassFilters);
     skillFilter.addEventListener("change", applyUpcomingClassFilters);
+    
 })();
 </script>
 </body>

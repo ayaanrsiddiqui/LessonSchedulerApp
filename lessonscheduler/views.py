@@ -80,7 +80,15 @@ def _build_lesson_update_notification(lesson, previous_state):
     )
 
 
-def _serialize_calendar_lessons(lessons, is_dj):
+def _serialize_calendar_lessons(
+    lessons,
+    is_dj,
+    confirmed_signup_ids=None,
+    waitlisted_signup_ids=None,
+):
+    confirmed_signup_ids = confirmed_signup_ids or set()
+    waitlisted_signup_ids = waitlisted_signup_ids or set()
+
     serialized = []
     for lesson in lessons:
         start_local = timezone.localtime(lesson.start_time)
@@ -91,18 +99,30 @@ def _serialize_calendar_lessons(lessons, is_dj):
                 lesson=lesson,
                 status="confirmed",
             ).count()
-            role_line = f"Confirmed: {confirmed_count}/{lesson.capacity}"
+            signup_state = ""
         else:
-            role_line = f"DJ: {lesson.dj.get_full_name() or lesson.dj.username}"
+            confirmed_count = getattr(lesson, "confirmed_count", 0)
+            if lesson.id in waitlisted_signup_ids:
+                signup_state = "waitlisted"
+            elif lesson.id in confirmed_signup_ids:
+                signup_state = "confirmed"
+            else:
+                signup_state = "none"
 
         serialized.append(
             {
+                "id": lesson.id,
                 "date_key": start_local.date().isoformat(),
                 "title": lesson.title,
-                "start_display": start_local.strftime("%b %d, %Y %H:%M"),
-                "end_display": end_local.strftime("%H:%M"),
+                "start_display": start_local.strftime("%b %d, %Y"),
+                "time_display": f"{start_local.strftime('%I:%M %p').lstrip('0')} - {end_local.strftime('%I:%M %p').lstrip('0')}",
                 "location": lesson.location,
-                "role_line": role_line,
+                "dj_name": lesson.dj.get_full_name() or lesson.dj.username,
+                "experience_requirements": lesson.experience_requirements,
+                "confirmed_count": confirmed_count,
+                "capacity": lesson.capacity,
+                "signup_state": signup_state,
+                "dj_username": lesson.dj.username,
             }
         )
     return serialized
@@ -165,7 +185,9 @@ def _render_student_dashboard(request):
     calendar_lessons = _serialize_calendar_lessons(
         available_lessons,
         is_dj=False,
-    )
+        confirmed_signup_ids=confirmed_signup_ids,
+        waitlisted_signup_ids=waitlisted_signup_ids,
+)
 
     return render(
         request,
