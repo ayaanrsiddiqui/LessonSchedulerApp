@@ -401,7 +401,7 @@ body::before{
 .upcoming-classes-layout{
     display:grid;
     grid-template-columns: 300px 1fr;
-    gap:20px;
+    gap:30px;
     align-items:start;
 }
 
@@ -488,6 +488,15 @@ body::before{
     background:#2a2a2d;
     color:#fff;
     font-size:14px;
+}
+
+.filter-group input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #2a2a2d;
+    color: #fff;
+    font-size: 14px;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -648,17 +657,12 @@ body::before{
     <div class="filters-column">
 
         <div class="filter-group">
-            <label for="statusFilter">Filter by Lesson Status</label>
-            <select id="statusFilter">
-                <option value="">All Statuses</option>
-                <option value="enrolled">Enrolled</option>
-                <option value="waitlisted">Waitlisted</option>
-                <option value="none">Not Enrolled</option>
-            </select>
+            <label for="titleSearch">Search</label>
+            <input type="text" id="titleSearch" placeholder="Search lessons...">
         </div>
 
         <div class="filter-group">
-            <label for="djFilter">Filter by DJ</label>
+            <label for="djFilter">DJ</label>
             <select id="djFilter">
                 <option value="">All DJs</option>
                 {% for lesson in available_lessons %}
@@ -670,7 +674,18 @@ body::before{
         </div>
 
         <div class="filter-group">
-            <label for="skillFilter">Filter by Skill Level</label>
+            <label for="statusFilter">Lesson Status</label>
+            <select id="statusFilter">
+                <option value="">All Statuses</option>
+                <option value="enrolled">Enrolled</option>
+                <option value="waitlisted">Waitlisted</option>
+                <option value="none">Not Enrolled</option>
+            </select>
+        </div>
+
+
+        <div class="filter-group">
+            <label for="skillFilter">Skill Level</label>
             <select id="skillFilter">
                 <option value="">All Class Levels</option>
                 <option value="Beginner">Beginner</option>
@@ -688,6 +703,7 @@ body::before{
                 
                 
                 <li class="item upcoming-class-item"
+                    data-title="{{ lesson.title }}"
                     data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
                     data-skill="{{ lesson.experience_requirements }}"
                     data-status="
@@ -986,13 +1002,14 @@ body::before{
 })();
 
 (function () {
+    const titleSearch = document.getElementById("titleSearch");
     const statusFilter = document.getElementById("statusFilter");
     const djFilter = document.getElementById("djFilter");
     const skillFilter = document.getElementById("skillFilter");
     const classItems = document.querySelectorAll(".upcoming-class-item");
     const noResults = document.getElementById("noFilteredResults");
 
-    if (!djFilter || !skillFilter || !classItems.length) return;
+    if (!titleSearch || !statusFilter || !djFilter || !skillFilter || !classItems.length) return;
 
     function dedupeSelectOptions(selectEl) {
         const seen = new Set();
@@ -1015,18 +1032,22 @@ body::before{
         const selectedDj = djFilter.value.trim().toLowerCase();
         const selectedSkill = skillFilter.value.trim().toLowerCase();
         const selectedStatus = statusFilter.value.trim().toLowerCase();
+        const selectedTitle = titleSearch.value.trim().toLowerCase();
         let visibleCount = 0;
 
         classItems.forEach((item) => {
+            const itemTitle = (item.dataset.title || "").trim().toLowerCase();
             const itemStatus = (item.dataset.status || "").trim().toLowerCase();
             const itemDj = (item.dataset.dj || "").trim().toLowerCase();
             const itemSkill = (item.dataset.skill || "").trim().toLowerCase();
-
+            
+            const matchesTitle = !selectedTitle || itemTitle.includes(selectedTitle);
             const matchesStatus = !selectedStatus || itemStatus === selectedStatus;
             const matchesDj = !selectedDj || itemDj === selectedDj;
             const matchesSkill = !selectedSkill || itemSkill === selectedSkill;
+            
 
-            if (matchesStatus && matchesDj && matchesSkill) {
+            if (matchesTitle && matchesStatus && matchesDj && matchesSkill) {
                 item.style.display = "";
                 visibleCount++;
             } else {
@@ -1039,6 +1060,7 @@ body::before{
         }
     }
 
+    titleSearch.addEventListener("input", applyUpcomingClassFilters);
     statusFilter.addEventListener("change", applyUpcomingClassFilters);
     djFilter.addEventListener("change", applyUpcomingClassFilters);
     skillFilter.addEventListener("change", applyUpcomingClassFilters);
