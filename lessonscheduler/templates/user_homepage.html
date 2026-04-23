@@ -61,10 +61,12 @@ body::before{
     right: 0;
     z-index: 1000;
 }
+
+
 .nav-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 5px;
 }
 .brand-link {
     color: #ffffff;
@@ -140,8 +142,9 @@ body::before{
     background: #0066cc;
     color: #ffffff;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 16px;
     border: none;
+    text-align: center;
 }
 .top-links a:hover,
 .inline-btn:hover {
@@ -177,11 +180,16 @@ body::before{
     margin-bottom:0;
     transition:transform .2s ease, box-shadow .2s ease;
     box-shadow:0 6px 14px rgba(0,0,0,0.18);
+
 }
 
 .upcoming-class-item:hover{
     transform:translateY(-2px);
     box-shadow:0 10px 18px rgba(0,0,0,0.24);
+}
+
+.upcoming-class-item form {
+    text-align: center;
 }
 
 .item {
@@ -191,12 +199,22 @@ body::before{
     border-radius: 6px;
     margin-bottom: 12px;
 }
+
+/* title button */
 .inline-link {
-    color: #7cb6ff;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: 700;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+    
 }
 .inline-link:hover {
     color: #a8ceff;
+    text-decoration: none;
 }
+
 
 .calendar-shell {
     background: #f6f6f6;
@@ -277,8 +295,9 @@ body::before{
     background:#ececec;
 }
 .calendar-day.selected{
-    background:#111;
-    color:white;
+        background: #0066cc;   /* blue background */
+    color: white;
+    border: 2px solid #000000;  /* blue outline */
 }
 .calendar-day-number{
     font-weight:700;
@@ -331,6 +350,36 @@ body::before{
     align-items:start;
 }
 
+.upcoming-class-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+}
+
+ /* the blue signup button and cancel enroll */
+.button-area {
+    margin-top: auto;  
+}
+
+.lesson-info-row {
+    text-align: left;
+    margin-bottom: 6px;
+}
+
+.lesson-info-row strong {
+    margin-right: 4px;
+}
+
+.dj-link {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.dj-link:hover {
+    color: #a8ceff;
+    text-decoration: underline;
+}
+
 .filters-column{
     display:flex;
     flex-direction:column;
@@ -375,7 +424,7 @@ body::before{
 .filter-group label{
     font-size:13px;
     font-weight:700;
-    color:#c9ced6;
+    color:#ffffff;
 }
 .filter-group select{
     padding:10px 12px;
@@ -428,14 +477,15 @@ body::before{
 
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:8px;"></a>
+        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:20px;">
+        </a>
     </div>
     <div class="nav-right">
         <div class="nav-buttons">
             {% if is_dj %}
             <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>
             {% else %}
-            <a href="{% url 'browse_classes' %}" class="primary-btn">Lessons</a>
+            <a href="{% url 'browse_classes' %}" class="primary-btn"> View Lessons</a>
             <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Lessons </a>
             {% endif %}
             <a href="{% url 'inbox' %}" class="secondary-btn"> Messages</a>
@@ -481,7 +531,7 @@ body::before{
 
     {% if is_dj %}
     <div class="card">
-        <h2>Your Posted Classes</h2>
+        <h2>Your Posted Lessons</h2>
         {% if posted_classes %}
         <ul class="item-list">
             {% for lesson in posted_classes %}
@@ -491,13 +541,16 @@ body::before{
                         {{ lesson.title }}
                     </a>
                 </strong>
-                ({{ lesson.confirmed_count }}/{{ lesson.capacity }} confirmed)
                 <br>
-                {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}
+                <strong>Confirmed:</strong> {{ lesson.confirmed_count }}/{{ lesson.capacity }}
                 <br>
-                Location: {{ lesson.location }}
+                <strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}
                 <br>
-                Skill Level: {{ lesson.experience_requirements }}
+                <strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}
+                <br>
+                <strong>Location:</strong> {{ lesson.location }}
+                <br>
+                <strong>Skill Level:</strong> {{ lesson.experience_requirements }}
                 <br>
             </li>
             {% endfor %}
@@ -528,7 +581,7 @@ body::before{
     </div>
 {% else %}
 <div class="card">
-    <h2>Upcoming Classes</h2>
+    <h2>Upcoming Lessons</h2>
 
     <div class="upcoming-classes-layout">
 
@@ -561,25 +614,33 @@ body::before{
             {% if available_lessons %}
             <ul class="item-list" id="upcomingClassList">
                 {% for lesson in available_lessons %}
+                
+                
                 <li class="item upcoming-class-item"
-                    data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
-                    data-skill="{{ lesson.experience_requirements }}">
+                data-dj="{{ lesson.dj.get_full_name|default:lesson.dj.username }}"
+                data-skill="{{ lesson.experience_requirements }}">
 
-                    <strong>
-                        <a href="{% url 'student_class_detail' lesson.id %}" class="inline-link">
-                            {{ lesson.title }}
-                        </a>
-                    </strong><br>
-                    DJ: {{ lesson.dj.get_full_name|default:lesson.dj.username }}<br>
+                <strong>
+                    <a href="{% url 'student_class_detail' lesson.id %}" class="inline-link">
+                        {{ lesson.title }}
+                    </a>
+                </strong>
 
-                    Skill Level: {{ lesson.experience_requirements }}<br>
+                <div class="lesson-info-row">
+                <strong>DJ:</strong>
+                    <a href="{% url 'public_profile' lesson.dj.username %}" class="dj-link">
+                        {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                    </a>
+                </div>
 
-                    {{ lesson.start_time|date:"M d, Y H:i" }} - 
-                    {{ lesson.end_time|date:"H:i" }}<br>
+                <div class="lesson-info-row"><strong>Confirmed:</strong>  {{ lesson.confirmed_count }}/{{ lesson.capacity }}</div>
+                <div class="lesson-info-row"><strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}</div>
+                <div class="lesson-info-row"><strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</div>
+                <div class="lesson-info-row"><strong>Location:</strong> {{ lesson.location }}</div>
+                <div class="lesson-info-row"><strong>Skill Level:</strong> {{ lesson.experience_requirements }}</div>
 
-                    Location: {{ lesson.location }}<br>
-
-                   {% if lesson.id in waitlisted_signup_ids %}
+                <div class="button-area">
+                    {% if lesson.id in waitlisted_signup_ids %}
                         <span class="pill">Waitlisted</span><br>
                         <form method="post" action="{% url 'cancel_booking' lesson.id %}" style="display:inline; margin-top:8px;">
                             {% csrf_token %}
@@ -610,7 +671,10 @@ body::before{
                             </button>
                         </form>
                     {% endif %}
-                </li>
+                </div>
+            </li>
+
+
                 {% endfor %}
             </ul>
 

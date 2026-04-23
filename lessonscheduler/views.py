@@ -142,8 +142,10 @@ def _render_dj_dashboard(request):
 def _render_student_dashboard(request):
     today = timezone.localdate()
 
-    available_lessons = Lesson.objects.filter(
-        start_time__date__gte=today
+    available_lessons = Lesson.objects.annotate(
+    confirmed_count=Count("signups", filter=Q(signups__status="confirmed"))
+    ).filter(
+    start_time__date__gte=today
     ).select_related("dj").order_by("start_time")
 
     confirmed_signup_ids = set(
