@@ -166,6 +166,28 @@ body::before{
     margin-bottom: 0;
 }
 
+/* welcome card */
+
+.welcome-card {
+    position: relative;
+    padding: 30px;
+}
+
+.welcome-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+    font-size: 16px;
+    color: #cfcfcf;
+    letter-spacing: 0.3px;
+}
+
+
+
 /* 2-column grid for upcoming classes */
 #upcomingClassList{
     display:grid;
@@ -529,12 +551,17 @@ body::before{
 </div>
 
 <div class="container">
-    <div class="card">
-        <h1>Welcome, {{ request.user.first_name|default:request.user.username }}!</h1>
-        <p class="muted">Name: {{ request.user.first_name }} {{ request.user.last_name }}</p>
-        <p class="muted">Email: {{ request.user.email }}</p>
-        <p>Account Type: <span class="pill">{{ account_type }}</span></p>
-    </div>
+    <div class="card welcome-card">
+    <h1 class="welcome-title">
+        Welcome, {{ request.user.first_name|default:request.user.username }} 
+    </h1>
+
+    <p class="welcome-subtitle">
+       Discover and book DJ lessons with SHHO on Grounds!
+    </p>
+
+    <div class="welcome-accent"></div>
+</div>
 
     <div class="card">
         <h2>Calendar</h2>
@@ -589,7 +616,7 @@ body::before{
             {% endfor %}
         </ul>
         {% else %}
-        <p class="muted">You have not posted any classes yet.</p>
+        <p class="muted">You have not posted any lessons yet.</p>
         {% endif %}
     </div>
 
@@ -802,7 +829,7 @@ body::before{
     const dayLessons = lessonsByDate[dateKey] || [];
 
     if (!dayLessons.length) {
-        selectedDateLessonsEl.innerHTML = '<p class="muted">No classes scheduled for this day.</p>';
+        selectedDateLessonsEl.innerHTML = '<p class="muted">No lessons scheduled for this day.</p>';
         return;
     }
 
