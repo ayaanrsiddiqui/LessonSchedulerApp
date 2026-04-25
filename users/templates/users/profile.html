@@ -152,6 +152,9 @@ body {
     flex-wrap: wrap;
     margin-top: 10px;
 }
+.hidden {
+    display: none !important;
+}
 .primary-btn {
     display: inline-block;
     padding: 10px 14px;
@@ -165,6 +168,13 @@ body {
 }
 .primary-btn:hover {
     background: #0052a3;
+}
+.cancel-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 audio {
     width: 100%;
@@ -197,9 +207,11 @@ audio {
         <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
         <p class="muted">Email: {{ request.user.email }}</p>
         <p class="muted">Role: {{ profile.get_role_display }}</p>
-        <p class="muted">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
+        <p class="muted" id="bio-display">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
 
-        <form method="post">
+        <button type="button" id="edit-bio-btn" class="primary-btn {% if bio_form.bio.errors %}hidden{% endif %}">Edit Bio</button>
+
+        <form method="post" id="bio-edit-form" class="{% if not bio_form.bio.errors %}hidden{% endif %}">
             {% csrf_token %}
             <label class="field-label" for="id_bio">Edit Bio</label>
             <textarea id="id_bio" name="bio" class="bio-input" rows="4" maxlength="1000" placeholder="Tell people a little about yourself...">{{ bio_form.bio.value|default_if_none:"" }}</textarea>
@@ -212,6 +224,7 @@ audio {
             {% endif %}
             <div class="action-row">
                 <button type="submit" class="primary-btn">Save Bio</button>
+                <button type="button" id="cancel-bio-btn" class="primary-btn cancel-btn">Cancel</button>
             </div>
         </form>
     </div>
@@ -315,6 +328,32 @@ audio {
                 if (audioFileInput.files.length) {
                     audioForm.submit();
                 }
+            });
+        }
+
+        // Bio editor toggle
+        var editBioBtn = document.getElementById("edit-bio-btn");
+        var bioEditForm = document.getElementById("bio-edit-form");
+        var cancelBioBtn = document.getElementById("cancel-bio-btn");
+        var bioInput = document.getElementById("id_bio");
+
+        if (editBioBtn && bioEditForm) {
+            editBioBtn.addEventListener("click", function() {
+                bioEditForm.classList.remove("hidden");
+                editBioBtn.classList.add("hidden");
+                if (bioInput) {
+                    bioInput.focus();
+                }
+            });
+        }
+
+        if (cancelBioBtn && bioEditForm && editBioBtn) {
+            cancelBioBtn.addEventListener("click", function() {
+                if (bioInput) {
+                    bioInput.value = bioInput.defaultValue;
+                }
+                bioEditForm.classList.add("hidden");
+                editBioBtn.classList.remove("hidden");
             });
         }
     });
