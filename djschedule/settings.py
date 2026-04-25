@@ -165,6 +165,13 @@ SOCIALACCOUNT_PROVIDERS = {
 LOGIN_REDIRECT_URL = '/'
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
+# Email settings for development
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Allauth settings
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USERNAME_REQUIRED = True
+
 # For both static and media files
 STORAGES = {
     "default": {
@@ -185,3 +192,4 @@ AWS_S3_REGION_NAME = 'us-east-2'
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
+

@@ -120,13 +120,8 @@
         <div class="meta">
         {% if lesson.image %}
             <div style="margin-bottom:15px;">
-            <img src="{{ lesson.image.url }}" alt="Lesson Image" style="max-width:100%; border-radius:10px;">
-                <p>
-                <a href="{{ lesson.image.url }}" target="_blank" class="btn btn-secondary">
-                    Open Full Image
-                </a>
-            </p>
-        </div>
+                <img src="{{ lesson.image.url }}" alt="Lesson Image" style="max-width:100%; border-radius:10px;">
+            </div>
         {% endif %}
             <p><strong>Time:</strong> {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}</p>
             <p><strong>Location:</strong> {{ lesson.location }}</p>

@@ -129,6 +129,23 @@ body {
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
+.remove-photo-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
 .action-row {
     display: flex;
     gap: 10px;
@@ -204,33 +221,43 @@ audio {
 
         <div class="media-card">
             <strong>Profile Picture</strong>
+            <form id="profile-picture-form" method="post" action="{% url 'upload_profile_files' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="profile-picture-input" type="file" name="profile_picture" accept="image/*" hidden>
             {% if profile.profile_picture %}
-            <div class="action-row">
+            <div style="position:relative; display:inline-block;">
                 <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="Profile Picture">
+                <button type="submit" name="remove_profile_picture" value="1" class="remove-photo-btn">×</button>
             </div>
             <div class="action-row">
-                <a class="primary-btn" href="{% url 'upload_profile_files' %}">Edit Profile Picture</a>
+                <button type="button" class="primary-btn" id="edit-profile-picture-btn">Edit Profile Picture</button>
             </div>
             {% else %}
             <p class="muted">No profile picture uploaded.</p>
-            <a class="primary-btn" href="{% url 'upload_profile_files' %}">+ Add Profile Picture</a>
+            <button type="button" class="primary-btn" id="edit-profile-picture-btn">+ Add Profile Picture</button>
             {% endif %}
+            </form>
         </div>
 
         <div class="media-card">
             <strong>Intro Audio</strong>
+            <form id="intro-audio-form" method="post" action="{% url 'upload_profile_files' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="intro-audio-input" type="file" name="intro_audio" accept="audio/*" hidden>
             {% if profile.intro_audio %}
             <audio controls>
                 <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
+            <button type="submit" name="remove_intro_audio" value="1" style="background:#c0392b; color:white; border:none; border-radius:4px; cursor:pointer; margin-left:8px; width: 100px; height: 30px; font-size: 14px;">× Remove</button>
             <div class="action-row">
-                <a class="primary-btn" href="{% url 'upload_profile_files' %}">Edit Intro Audio</a>
+                <button type="button" class="primary-btn" id="edit-intro-audio-btn">Edit Intro Audio</button>
             </div>
             {% else %}
             <p class="muted">No intro audio uploaded.</p>
-            <a class="primary-btn" href="{% url 'upload_profile_files' %}">+ Add Intro Audio</a>
+            <button type="button" class="primary-btn" id="edit-intro-audio-btn">+ Add Intro Audio</button>
             {% endif %}
+            </form>
         </div>
     </div>
 
@@ -255,5 +282,42 @@ audio {
         </div>
     {% endif %}
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Profile Picture
+        var editPicBtn = document.getElementById("edit-profile-picture-btn");
+        var picFileInput = document.getElementById("profile-picture-input");
+        var picForm = document.getElementById("profile-picture-form");
+
+        if (editPicBtn && picFileInput && picForm) {
+            editPicBtn.addEventListener("click", function() {
+                picFileInput.click();
+            });
+
+            picFileInput.addEventListener("change", function() {
+                if (picFileInput.files.length) {
+                    picForm.submit();
+                }
+            });
+        }
+
+        // Intro Audio
+        var editAudioBtn = document.getElementById("edit-intro-audio-btn");
+        var audioFileInput = document.getElementById("intro-audio-input");
+        var audioForm = document.getElementById("intro-audio-form");
+
+        if (editAudioBtn && audioFileInput && audioForm) {
+            editAudioBtn.addEventListener("click", function() {
+                audioFileInput.click();
+            });
+
+            audioFileInput.addEventListener("change", function() {
+                if (audioFileInput.files.length) {
+                    audioForm.submit();
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
