@@ -565,7 +565,6 @@ body::before{
             {% if is_dj %}
             <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>
             {% else %}
-            <a href="{% url 'browse_classes' %}" class="primary-btn"> View Lessons</a>
             <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Lessons </a>
             {% endif %}
             <a href="{% url 'inbox' %}" class="secondary-btn"> Messages</a>
