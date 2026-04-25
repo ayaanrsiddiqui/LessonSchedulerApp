@@ -77,10 +77,113 @@ body::before{
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
+    align-items: center;
 }
 .nav-right {
     display: flex;
     align-items: center;
+}
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.profile-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+.profile-chip:focus-visible {
+    outline: 2px solid #7cb6ff;
+    outline-offset: 2px;
+}
+.profile-chip,
+.profile-chip:hover,
+.profile-chip:active,
+.profile-chip:visited {
+    text-decoration: none;
+    color: #ffffff;
+    transition: 0.2s ease;
+}
+.profile-chip:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+}
+.profile-menu.open .profile-chip {
+    background: rgba(255, 255, 255, 0.14);
+}
+.profile-chip-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.12);
+}
+.profile-chip-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0066cc, #4d8cff);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.profile-chip-name {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    color: #ffffff;
+}
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    padding: 8px;
+    border-radius: 14px;
+    background: rgba(18, 18, 20, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+    display: none;
+    z-index: 1100;
+}
+.profile-menu.open .profile-dropdown {
+    display: block;
+}
+.profile-dropdown a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+.profile-dropdown a:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+.profile-dropdown a.logout-link {
+    color: #ff5c5c;
+}
+.profile-dropdown-divider {
+    height: 1px;
+    margin: 6px 4px;
+    background: rgba(255, 255, 255, 0.12);
 }
 .primary-btn,
 .secondary-btn {
@@ -568,8 +671,21 @@ body::before{
             <a href="{% url 'request_class' %}?next={% url 'index' %}" class="primary-btn">Request Lessons </a>
             {% endif %}
             <a href="{% url 'inbox' %}" class="secondary-btn"> Messages</a>
-            <a href="{% url 'profile' %}" class="secondary-btn">Profile</a>
-            <a href="{% url 'account_logout' %}" class="secondary-btn">Logout</a>
+            <div class="profile-menu">
+                <button id="profileMenuButton" class="profile-chip" type="button" aria-haspopup="true" aria-expanded="false">
+                    {% if request.user.profile.profile_picture %}
+                    <img class="profile-chip-avatar" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
+                    {% else %}
+                    <span class="profile-chip-fallback">{{ request.user.username|first|upper }}</span>
+                    {% endif %}
+                    <span class="profile-chip-name">{{ request.user.username }}</span>
+                </button>
+                <div class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Account menu">
+                    <a href="{% url 'profile' %}" role="menuitem">Profile</a>
+                    <div class="profile-dropdown-divider"></div>
+                    <a href="{% url 'account_logout' %}" role="menuitem" class="logout-link">Log out</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -865,9 +981,45 @@ body::before{
 </div>
 {% endif %}
 
+<div id="dashboardMeta"
+     data-is-dj="{{ is_dj|yesno:'true,false' }}"
+     data-index-url="{% url 'index' %}"
+     hidden>
+</div>
+
 
 <script>
     const csrfToken = "{{ csrf_token }}";
+    const dashboardMeta = document.getElementById("dashboardMeta");
+    const isDj = dashboardMeta?.dataset.isDj === "true";
+    const indexUrl = dashboardMeta?.dataset.indexUrl || "/";
+    const profileMenuButton = document.getElementById("profileMenuButton");
+    const profileDropdown = document.getElementById("profileDropdown");
+    const profileMenu = document.querySelector(".profile-menu");
+
+    if (profileMenuButton && profileDropdown && profileMenu) {
+        const closeProfileMenu = () => {
+            profileMenu.classList.remove("open");
+            profileMenuButton.setAttribute("aria-expanded", "false");
+        };
+
+        profileMenuButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            const isOpen = profileMenu.classList.toggle("open");
+            profileMenuButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        profileDropdown.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+
+        document.addEventListener("click", closeProfileMenu);
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeProfileMenu();
+            }
+        });
+    }
 </script>
 
 {{ calendar_lessons|json_script:"lessonData" }}
@@ -927,15 +1079,13 @@ body::before{
     selectedDateLessonsEl.innerHTML = dayLessons.map((lesson) => {
         let buttonHtml = "";
 
-        {% if not is_dj %}
-
-        if (lesson.signup_state === "waitlisted") {
+        if (!isDj && lesson.signup_state === "waitlisted") {
             buttonHtml = `
                 <div class="button-area">
                     <span class="pill">Waitlisted</span><br>
                     <form method="post" action="/class/${lesson.id}/cancel/" style="display:inline; margin-top:8px;">
                         <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-                        <input type="hidden" name="next" value="{% url 'index' %}">
+                        <input type="hidden" name="next" value="${indexUrl}">
                         <button type="submit" class="inline-btn"
                                 onclick="return confirm('Are you sure you want to cancel this booking?');">
                             Cancel Booking
@@ -943,13 +1093,13 @@ body::before{
                     </form>
                 </div>
             `;
-        } else if (lesson.signup_state === "confirmed") {
+        } else if (!isDj && lesson.signup_state === "confirmed") {
             buttonHtml = `
                 <div class="button-area">
                     <span class="pill">Enrolled</span><br>
                     <form method="post" action="/class/${lesson.id}/cancel/" style="display:inline; margin-top:8px;">
                         <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-                        <input type="hidden" name="next" value="{% url 'index' %}">
+                        <input type="hidden" name="next" value="${indexUrl}">
                         <button type="submit" class="inline-btn"
                                 onclick="return confirm('Are you sure you want to cancel this booking?');">
                             Cancel Booking
@@ -957,12 +1107,12 @@ body::before{
                     </form>
                 </div>
             `;
-        } else {
+        } else if (!isDj) {
             buttonHtml = `
                 <div class="button-area">
                     <form method="post" action="/class/${lesson.id}/signup/" style="display:inline; margin-top:8px;">
                         <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-                        <input type="hidden" name="next" value="{% url 'index' %}">
+                        <input type="hidden" name="next" value="${indexUrl}">
                         <button type="submit" class="inline-btn">
                             Sign Up
                         </button>
@@ -970,12 +1120,11 @@ body::before{
                 </div>
             `;
         }
-        {% endif %}
 
         return `
                     <div class="item upcoming-class-item">
                 <strong>
-                    <a href="{% if is_dj %}/lesson/${lesson.id}/detail/{% else %}/lesson/${lesson.id}/student-detail/{% endif %}" class="inline-link">
+                    <a href="${isDj ? `/lesson/${lesson.id}/detail/` : `/lesson/${lesson.id}/student-detail/`}" class="inline-link">
                         ${lesson.title}
                     </a>
                 </strong>
