@@ -448,6 +448,12 @@ body::before{
     padding-right:6px;
 }
 
+#postedLessonList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
 /* Optional scrollbar styling */
 .classes-scroll-box::-webkit-scrollbar{
     width:8px;
@@ -601,32 +607,61 @@ body::before{
     {% if is_dj %}
     <div class="card">
         <h2>Your Posted Lessons</h2>
-        {% if posted_classes %}
-        <ul class="item-list">
-            {% for lesson in posted_classes %}
-            <li class="item">
-                <strong>
-                    <a href="{% url 'dj_class_detail' lesson.id %}" class="inline-link">
-                        {{ lesson.title }}
-                    </a>
-                </strong>
-                <br>
-                <strong>Confirmed:</strong> {{ lesson.confirmed_count }}/{{ lesson.capacity }}
-                <br>
-                <strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}
-                <br>
-                <strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}
-                <br>
-                <strong>Location:</strong> {{ lesson.location }}
-                <br>
-                <strong>Skill Level:</strong> {{ lesson.experience_requirements }}
-                <br>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="muted">You have not posted any lessons yet.</p>
-        {% endif %}
+
+        <div class="upcoming-classes-layout">
+
+            <div class="filters-column">
+                <div class="filter-group">
+                    <label for="postedTitleSearch">Search</label>
+                    <input type="text" id="postedTitleSearch" placeholder="Search lessons...">
+                </div>
+
+                <div class="filter-group">
+                    <label for="postedSkillFilter">Skill Level</label>
+                    <select id="postedSkillFilter">
+                        <option value="">All Class Levels</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Proficient">Proficient</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="classes-scroll-box">
+                {% if posted_classes %}
+                <ul class="item-list" id="postedLessonList">
+                    {% for lesson in posted_classes %}
+                    <li class="item upcoming-class-item"
+                        data-title="{{ lesson.title }}"
+                        data-skill="{{ lesson.experience_requirements }}">
+
+                        <strong>
+                            <a href="{% url 'dj_class_detail' lesson.id %}" class="inline-link">
+                                {{ lesson.title }}
+                            </a>
+                        </strong>
+
+                        <div class="lesson-info-row"><strong>Confirmed:</strong> {{ lesson.confirmed_count }}/{{ lesson.capacity }}</div>
+                        <div class="lesson-info-row"><strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}</div>
+                        <div class="lesson-info-row"><strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</div>
+                        <div class="lesson-info-row"><strong>Location:</strong> {{ lesson.location }}</div>
+                        <div class="lesson-info-row"><strong>Skill Level:</strong> {{ lesson.experience_requirements }}</div>
+
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <p class="muted" id="noPostedResults" style="display:none;">
+                    No posted lessons match your filters.
+                </p>
+
+                {% else %}
+                <p class="muted">You have not posted any lessons yet.</p>
+                {% endif %}
+            </div>
+
+        </div>
     </div>
 
     <div class="card">
@@ -1066,6 +1101,44 @@ body::before{
     skillFilter.addEventListener("change", applyUpcomingClassFilters);
     
 })();
+
+(function () {
+    const postedTitleSearch = document.getElementById("postedTitleSearch");
+    const postedSkillFilter = document.getElementById("postedSkillFilter");
+    const postedItems = document.querySelectorAll("#postedLessonList .upcoming-class-item");
+    const noPostedResults = document.getElementById("noPostedResults");
+
+    if (!postedTitleSearch || !postedSkillFilter || !postedItems.length) return;
+
+    function applyPostedLessonFilters() {
+        const selectedTitle = postedTitleSearch.value.trim().toLowerCase();
+        const selectedSkill = postedSkillFilter.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        postedItems.forEach((item) => {
+            const itemTitle = (item.dataset.title || "").trim().toLowerCase();
+            const itemSkill = (item.dataset.skill || "").trim().toLowerCase();
+
+            const matchesTitle = !selectedTitle || itemTitle.includes(selectedTitle);
+            const matchesSkill = !selectedSkill || itemSkill === selectedSkill;
+
+            if (matchesTitle && matchesSkill) {
+                item.style.display = "";
+                visibleCount++;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        if (noPostedResults) {
+            noPostedResults.style.display = visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    postedTitleSearch.addEventListener("input", applyPostedLessonFilters);
+    postedSkillFilter.addEventListener("change", applyPostedLessonFilters);
+})();
+
 </script>
 </body>
 </html>
