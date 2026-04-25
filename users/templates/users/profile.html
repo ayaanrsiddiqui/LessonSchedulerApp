@@ -76,6 +76,12 @@ body {
     overflow-wrap: break-word;
     word-break: break-word;
 }
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
 .role-row {
     margin: 6px 0 0;
     display: flex;
@@ -123,11 +129,24 @@ body {
     margin-bottom: 12px;
 }
 .profile-pic {
-    width: 150px;
-    height: 150px;
+    width: 132px;
+    height: 132px;
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.avatar-fallback {
+    width: 132px;
+    height: 132px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 42px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 .remove-photo-btn {
     position: absolute;
@@ -157,14 +176,16 @@ body {
 }
 .primary-btn {
     display: inline-block;
-    padding: 10px 14px;
+    padding: 10px 16px;
     border-radius: 8px;
     background: #0066cc;
     color: #fff;
     text-decoration: none;
-    border: 0;
+    border: 1px solid #0066cc;
     cursor: pointer;
     font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s ease;
 }
 .primary-btn:hover {
     background: #0052a3;
@@ -204,12 +225,30 @@ audio {
 
 <div class="container">
     <div class="card">
-        <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
-        <p class="muted">Email: {{ request.user.email }}</p>
-        <p class="muted">Role: {{ profile.get_role_display }}</p>
-        <p class="muted" id="bio-display">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
+        <div class="profile-header">
+            {% if profile.profile_picture %}
+            <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="{{ request.user.username }}">
+            {% else %}
+            <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
+            {% endif %}
+            <div>
+                <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
+                <p class="muted">Email: {{ request.user.email }}</p>
+                <p class="muted">Role: {{ profile.get_role_display }}</p>
+                <p class="muted" id="bio-display">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
+            </div>
+        </div>
 
-        <button type="button" id="edit-bio-btn" class="primary-btn {% if bio_form.bio.errors %}hidden{% endif %}">Edit Bio</button>
+        
+
+        <div class="action-row {% if bio_form.bio.errors %}hidden{% endif %}" id="bio-action-row">
+            <button type="button" id="edit-bio-btn" class="primary-btn">Edit Bio</button>
+            <form id="profile-picture-form" method="post" action="{% url 'upload_profile_files' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="profile-picture-input" type="file" name="profile_picture" accept="image/*" hidden>
+                <button type="button" class="primary-btn" id="edit-profile-picture-btn">Edit Profile Picture</button>
+            </form>
+        </div>
 
         <form method="post" id="bio-edit-form" class="{% if not bio_form.bio.errors %}hidden{% endif %}">
             {% csrf_token %}
@@ -231,26 +270,6 @@ audio {
 
     <div class="card">
         <h2>Profile Media</h2>
-
-        <div class="media-card">
-            <strong>Profile Picture</strong>
-            <form id="profile-picture-form" method="post" action="{% url 'upload_profile_files' %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input id="profile-picture-input" type="file" name="profile_picture" accept="image/*" hidden>
-            {% if profile.profile_picture %}
-            <div style="position:relative; display:inline-block;">
-                <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="Profile Picture">
-                <button type="submit" name="remove_profile_picture" value="1" class="remove-photo-btn">×</button>
-            </div>
-            <div class="action-row">
-                <button type="button" class="primary-btn" id="edit-profile-picture-btn">Edit Profile Picture</button>
-            </div>
-            {% else %}
-            <p class="muted">No profile picture uploaded.</p>
-            <button type="button" class="primary-btn" id="edit-profile-picture-btn">+ Add Profile Picture</button>
-            {% endif %}
-            </form>
-        </div>
 
         <div class="media-card">
             <strong>Intro Audio</strong>
@@ -336,24 +355,25 @@ audio {
         var bioEditForm = document.getElementById("bio-edit-form");
         var cancelBioBtn = document.getElementById("cancel-bio-btn");
         var bioInput = document.getElementById("id_bio");
+        var bioActionRow = document.getElementById("bio-action-row");
 
-        if (editBioBtn && bioEditForm) {
+        if (editBioBtn && bioEditForm && bioActionRow) {
             editBioBtn.addEventListener("click", function() {
                 bioEditForm.classList.remove("hidden");
-                editBioBtn.classList.add("hidden");
+                bioActionRow.classList.add("hidden");
                 if (bioInput) {
                     bioInput.focus();
                 }
             });
         }
 
-        if (cancelBioBtn && bioEditForm && editBioBtn) {
+        if (cancelBioBtn && bioEditForm && bioActionRow) {
             cancelBioBtn.addEventListener("click", function() {
                 if (bioInput) {
                     bioInput.value = bioInput.defaultValue;
                 }
                 bioEditForm.classList.add("hidden");
-                editBioBtn.classList.remove("hidden");
+                bioActionRow.classList.remove("hidden");
             });
         }
     });
