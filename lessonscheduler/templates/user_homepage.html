@@ -887,6 +887,8 @@ body::before{
     selectedDateLessonsEl.innerHTML = dayLessons.map((lesson) => {
         let buttonHtml = "";
 
+        {% if not is_dj %}
+
         if (lesson.signup_state === "waitlisted") {
             buttonHtml = `
                 <div class="button-area">
@@ -928,11 +930,12 @@ body::before{
                 </div>
             `;
         }
+        {% endif %}
 
         return `
-            <div class="item upcoming-class-item">
+                    <div class="item upcoming-class-item">
                 <strong>
-                    <a href="/lesson/${lesson.id}/student-detail/" class="inline-link">
+                    <a href="{% if is_dj %}/lesson/${lesson.id}/detail/{% else %}/lesson/${lesson.id}/student-detail/{% endif %}" class="inline-link">
                         ${lesson.title}
                     </a>
                 </strong>
