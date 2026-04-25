@@ -4,6 +4,7 @@
 
 from django import forms
 from django.contrib.auth.models import User
+from typing import cast
 
 from .models import Lesson, ClassSignup, ClassRequest
 
@@ -19,6 +20,33 @@ DIFFICULTY_CHOICES = [
 # DJ Form: Create or edit a class
 class LessonForm(forms.ModelForm):
     """Form for DJs to create and edit classes."""
+
+    datetime_format = "%Y-%m-%d %H:%M"
+
+    start_time = forms.DateTimeField(
+        label="Start time",
+        input_formats=[datetime_format],
+        widget=forms.DateTimeInput(
+            format=datetime_format,
+            attrs={
+                "class": "js-datetime",
+                "autocomplete": "off",
+                "placeholder": "YYYY-MM-DD HH:MM",
+            },
+        ),
+    )
+    end_time = forms.DateTimeField(
+        label="End time",
+        input_formats=[datetime_format],
+        widget=forms.DateTimeInput(
+            format=datetime_format,
+            attrs={
+                "class": "js-datetime",
+                "autocomplete": "off",
+                "placeholder": "YYYY-MM-DD HH:MM",
+            },
+        ),
+    )
 
     experience_requirements = forms.ChoiceField(
         choices=DIFFICULTY_CHOICES,
@@ -44,8 +72,6 @@ class LessonForm(forms.ModelForm):
             "image": forms.ClearableFileInput(),
             "location": forms.TextInput(attrs={"placeholder": "e.g., 'Studio A, Downtown'"}),
             "capacity": forms.NumberInput(attrs={"min": 1}),
-            "start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
 
     def __init__(self, *args, user, **kwargs):
@@ -128,7 +154,8 @@ class ClassRequestForm(forms.ModelForm):
 
         self.instance.student = self.user
 
-        self.fields["dj"].queryset = User.objects.filter(profile__role__in=["teacher", "producer"]).order_by("first_name", "username")
+        dj_field = cast(forms.ModelChoiceField, self.fields["dj"])
+        dj_field.queryset = User.objects.filter(profile__role__in=["teacher", "producer"]).order_by("first_name", "username")
 
         for field_name in self.fields:
             self.fields[field_name].required = True

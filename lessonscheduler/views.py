@@ -252,8 +252,8 @@ def lesson_create(request):
         initial = {
             "location": source_request.requested_location,
             "experience_requirements": source_request.requested_skill_level,
-            "start_time": timezone.localtime(source_request.requested_start_time).strftime("%Y-%m-%dT%H:%M"),
-            "end_time": timezone.localtime(source_request.requested_end_time).strftime("%Y-%m-%dT%H:%M"),
+            "start_time": timezone.localtime(source_request.requested_start_time).strftime("%Y-%m-%d %H:%M"),
+            "end_time": timezone.localtime(source_request.requested_end_time).strftime("%Y-%m-%d %H:%M"),
             "description": (
                 f"{source_request.description}\n\nRequested equipment: {source_request.requested_equipment}"
             ),
@@ -335,8 +335,8 @@ def lesson_edit(request, lesson_id):
         form_initial = {
             "location": source_request.requested_location or lesson.location,
             "experience_requirements": source_request.requested_skill_level or lesson.experience_requirements,
-            "start_time": timezone.localtime(source_request.requested_start_time).strftime("%Y-%m-%dT%H:%M"),
-            "end_time": timezone.localtime(source_request.requested_end_time).strftime("%Y-%m-%dT%H:%M"),
+            "start_time": timezone.localtime(source_request.requested_start_time).strftime("%Y-%m-%d %H:%M"),
+            "end_time": timezone.localtime(source_request.requested_end_time).strftime("%Y-%m-%d %H:%M"),
             "description": (
                 f"{source_request.description}\n\nRequested equipment: {source_request.requested_equipment}"
             ),

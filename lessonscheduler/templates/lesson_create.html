@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Create Lesson</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     * { box-sizing: border-box; }
     body {
@@ -96,6 +97,143 @@
         flex-wrap: wrap;
         margin-top: 10px;
     }
+    .flatpickr-calendar {
+        background: #111111;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+    }
+    .flatpickr-calendar,
+    .flatpickr-calendar .flatpickr-monthDropdown-months,
+    .flatpickr-calendar .flatpickr-current-month input.cur-year,
+    .flatpickr-calendar .flatpickr-monthDropdown-months option,
+    .flatpickr-calendar .flatpickr-time input,
+    .flatpickr-calendar .numInputWrapper span,
+    .flatpickr-calendar .flatpickr-day {
+        color: #e5e7eb;
+    }
+    .flatpickr-calendar.arrowTop:before,
+    .flatpickr-calendar.arrowTop:after,
+    .flatpickr-calendar.arrowBottom:before,
+    .flatpickr-calendar.arrowBottom:after {
+        border-bottom-color: #111111;
+        border-top-color: #111111;
+    }
+    .flatpickr-months,
+    .flatpickr-month,
+    .flatpickr-weekdays,
+    .flatpickr-innerContainer,
+    .flatpickr-time {
+        background: #111111;
+    }
+    .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-months .flatpickr-next-month {
+        color: #e5e7eb;
+        fill: #e5e7eb;
+    }
+    .flatpickr-months .flatpickr-prev-month svg,
+    .flatpickr-months .flatpickr-next-month svg,
+    .flatpickr-months .flatpickr-prev-month svg path,
+    .flatpickr-months .flatpickr-next-month svg path {
+        fill: #e5e7eb;
+    }
+    .flatpickr-months .flatpickr-prev-month:hover,
+    .flatpickr-months .flatpickr-next-month:hover,
+    .flatpickr-months .flatpickr-prev-month:hover svg,
+    .flatpickr-months .flatpickr-next-month:hover svg,
+    .flatpickr-months .flatpickr-prev-month:hover svg path,
+    .flatpickr-months .flatpickr-next-month:hover svg path {
+        color: #ffffff;
+        fill: #ffffff;
+    }
+    .flatpickr-current-month,
+    .flatpickr-monthDropdown-months,
+    .flatpickr-weekday,
+    span.flatpickr-weekday,
+    .flatpickr-time input,
+    .flatpickr-time .flatpickr-am-pm {
+        color: #e5e7eb;
+    }
+    .flatpickr-weekdays {
+        color: #e5e7eb;
+    }
+    .flatpickr-weekdays .flatpickr-weekday {
+        color: #e5e7eb;
+        fill: #e5e7eb;
+    }
+    .flatpickr-current-month .flatpickr-monthDropdown-months,
+    .flatpickr-current-month input.cur-year,
+    .flatpickr-monthDropdown-months {
+        background: #111111;
+    }
+    .flatpickr-current-month .numInputWrapper span.arrowUp,
+    .flatpickr-current-month .numInputWrapper span.arrowDown,
+    .flatpickr-time .numInputWrapper span.arrowUp,
+    .flatpickr-time .numInputWrapper span.arrowDown {
+        border-color: rgba(229, 231, 235, 0.65);
+    }
+    .flatpickr-current-month .numInputWrapper span.arrowUp:after,
+    .flatpickr-current-month .numInputWrapper span.arrowDown:after,
+    .flatpickr-time .numInputWrapper span.arrowUp:after,
+    .flatpickr-time .numInputWrapper span.arrowDown:after {
+        border-bottom-color: rgba(229, 231, 235, 0.85);
+        border-top-color: rgba(229, 231, 235, 0.85);
+    }
+    .flatpickr-time input:hover,
+    .flatpickr-time input:focus,
+    .flatpickr-time .numInputWrapper:hover,
+    .flatpickr-time .numInputWrapper:focus,
+    .flatpickr-time .numInputWrapper span:hover,
+    .flatpickr-time .flatpickr-am-pm:hover,
+    .flatpickr-time .flatpickr-am-pm:focus {
+        background: #1f1f22;
+        color: #ffffff;
+    }
+    .flatpickr-day {
+        color: #e5e7eb;
+    }
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay,
+    .flatpickr-day.disabled,
+    .flatpickr-day.notAllowed {
+        color: rgba(229, 231, 235, 0.45);
+    }
+    .flatpickr-day.today {
+        border-color: #5aa7ff;
+    }
+    .flatpickr-day.inRange {
+        background: rgba(0, 102, 204, 0.28);
+        border-color: rgba(0, 102, 204, 0.28);
+        color: #ffffff;
+        box-shadow: -5px 0 0 rgba(0, 102, 204, 0.28), 5px 0 0 rgba(0, 102, 204, 0.28);
+    }
+    .flatpickr-day:hover,
+    .flatpickr-day:focus,
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background: #0066cc;
+        border-color: #0066cc;
+        color: #ffffff;
+    }
+    .flatpickr-day.selected:hover,
+    .flatpickr-day.startRange:hover,
+    .flatpickr-day.endRange:hover {
+        background: #0059b3;
+        border-color: #0059b3;
+    }
+    .flatpickr-input,
+    .flatpickr-input[readonly] {
+        background: #1a1a1d;
+        color: #e5e7eb;
+    }
+    .flatpickr-input::placeholder {
+        color: rgba(229, 231, 235, 0.6);
+    }
+    .flatpickr-calendar .flatpickr-monthDropdown-months option,
+    .flatpickr-calendar .flatpickr-time .flatpickr-am-pm {
+        background: #111111;
+        color: #e5e7eb;
+    }
 </style>
 </head>
 <body>
@@ -182,5 +320,36 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    const datetimeInputs = document.querySelectorAll(".js-datetime");
+    const startTimePicker = flatpickr(datetimeInputs[0], {
+        enableTime: true,
+        time_24hr: false,
+        minuteIncrement: 15,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "M j, Y at h:i K",
+        allowInput: true,
+        onChange: function(selectedDates) {
+            if (!selectedDates.length || !endTimePicker) {
+                return;
+            }
+
+            const endDate = new Date(selectedDates[0].getTime() + 60 * 60 * 1000);
+            endTimePicker.setDate(endDate, true, "Y-m-d H:i");
+        }
+    });
+
+    const endTimePicker = flatpickr(datetimeInputs[1], {
+        enableTime: true,
+        time_24hr: false,
+        minuteIncrement: 15,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "M j, Y at h:i K",
+        allowInput: true
+    });
+</script>
 </body>
 </html>
