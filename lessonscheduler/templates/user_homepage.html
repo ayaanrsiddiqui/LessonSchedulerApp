@@ -505,6 +505,16 @@ body::before{
     font-size: 14px;
 }
 
+.pending-requests-scroll {
+    max-height: 560px;
+}
+
+#pendingRequestList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width:800px){
     .top-bar{
@@ -572,7 +582,11 @@ body::before{
     </h1>
 
     <p class="welcome-subtitle">
-       Discover and book DJ lessons with SHHO on Grounds!
+        {% if is_dj %}
+            Manage your classes, review requests, and grow the SHHO DJ community on Grounds!
+        {% else %}
+            Discover and book DJ lessons with SHHO on Grounds!
+        {% endif %}
     </p>
 
     <div class="welcome-accent"></div>
@@ -665,24 +679,51 @@ body::before{
     </div>
 
     <div class="card">
-        <h2>Pending Student Requests</h2>
-        {% if pending_requests %}
-        <ul class="item-list">
+    <h2>Pending Student Requests</h2>
+
+    {% if pending_requests %}
+    <div class="classes-scroll-box pending-requests-scroll">
+        <ul class="item-list" id="pendingRequestList">
             {% for req in pending_requests %}
-            <li class="item">
-                {{ req.student.get_full_name|default:req.student.username }}
-                requested {{ req.requested_start_time|date:"M d, Y H:i" }} - {{ req.requested_end_time|date:"H:i" }}
-                <br>
-                <a class="inline-btn" href="{% url 'manage_request' req.id %}">
-                    Review Request
-                </a>
+            <li class="item upcoming-class-item">
+
+                <div class="lesson-info-row">
+                    <strong>Name:</strong>
+                    <a href="{% url 'public_profile' req.student.username %}" class="dj-link">
+                        {{ req.student.get_full_name|default:req.student.username }}
+                    </a>
+                </div>
+                <div class="lesson-info-row">
+                    <strong>Date:</strong> {{ req.requested_start_time|date:"M d, Y" }}
+                </div>
+
+                <div class="lesson-info-row">
+                    <strong>Time:</strong> {{ req.requested_start_time|date:"g:i A" }} - {{ req.requested_end_time|date:"g:i A" }}
+                </div>
+
+                <div class="lesson-info-row">
+                    <strong>Skill Level:</strong> {{ req.requested_skill_level }}
+                </div>
+
+                <div class="lesson-info-row">
+                    <strong>Location:</strong> {{ req.requested_location }}
+                </div>
+
+                <div class="button-area">
+                    <a class="inline-btn" href="{% url 'manage_request' req.id %}">
+                        Manage Request
+                    </a>
+                </div>
+
             </li>
             {% endfor %}
         </ul>
-        {% else %}
-        <p class="muted">No pending requests.</p>
-        {% endif %}
     </div>
+
+    {% else %}
+    <p class="muted">No pending requests.</p>
+    {% endif %}
+</div>
 {% else %}
 <div class="card">
     <h2>Upcoming Lessons</h2>
