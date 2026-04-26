@@ -49,12 +49,14 @@ body::before{
 .content{padding:28px 40px;display:flex;flex-direction:column;flex:1;}
 .send-btn{display:inline-block;margin-bottom:18px;padding:12px 16px;border:none;border-radius:8px;background:#0066cc;color:white;font-weight:600;text-decoration:none;width:381px;margin-left: 32px;}
 .dropdown{position:relative;display:inline-block;}
-.dropdown-content{display:none;position:absolute;background-color:#f9f9f9;min-width:160px;box-shadow:0px 8px 16px 0px rgba(0,0,0,0.2);z-index:1;border-radius:8px;margin-left: 32px;}
-.dropdown-content a{color:black;padding:8px 16px;text-decoration:none;display:block;border-radius:8px;}
+.dropdown-content{display:none;position:absolute;background-color:#f9f9f9;min-width:240px;box-shadow:0px 8px 16px 0px rgba(0,0,0,0.2);z-index:1;border-radius:8px;margin-left: 32px;max-height:340px;overflow:hidden;}
+.dropdown-content a{color:black;padding:8px 16px;text-decoration:none;display:block;border-radius:0;}
 .dropdown-content a:hover{background-color:#f1f1f1;}
 .dropdown-btn{cursor:pointer;font-size: 16px;}
-.dropdown-header{font-weight:bold;padding:8px 16px;background-color:#e0e0e0;border-bottom:1px solid #bbb;border-radius:8px 8px 0 0;color:#111;}
-.search-input{width:100%;padding:8px 16px;box-sizing:border-box;border:none;border-bottom:1px solid #ccc;font-size:16px;}
+.dropdown-header{font-weight:bold;padding:8px 16px;background-color:#e0e0e0;border-bottom:1px solid #bbb;color:#111;position:sticky;top:0;z-index:2;}
+.search-input{width:100%;padding:8px 16px;box-sizing:border-box;border:none;border-bottom:1px solid #ccc;font-size:16px;background:#f9f9f9;position:sticky;top:38px;z-index:2;}
+.dropdown-list{max-height:180px;overflow-y:auto;}
+.no-users{padding:8px 16px;color:#777;font-size:16px;}
 .no-users{padding:8px 16px;color:#777;font-size:16px;}
 .conversation-card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 5px 10px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;}
 .conversation-card-content{flex:1;color:#111}
@@ -291,11 +293,13 @@ body::before{
                     {% if students %}
                     <input type="text" class="search-input" placeholder="Search students..." onkeyup="filterUsers(this, 'studentDropdown')">
                     {% endif %}
+                    <div class="dropdown-list">
                     {% for user in students %}
                         <a href="{% url 'send_message' user.username %}">{{ user.username }}</a>
                     {% empty %}
                         <div class="no-users">No students yet</div>
                     {% endfor %}
+                    </div>
                 </div>
             </div>
             <div class="dropdown">
@@ -305,11 +309,13 @@ body::before{
                     {% if teachers %}
                     <input type="text" class="search-input" placeholder="Search teachers..." onkeyup="filterUsers(this, 'teacherDropdown')">
                     {% endif %}
+                    <div class="dropdown-list">
                     {% for user in teachers %}
                         <a href="{% url 'send_message' user.username %}">{{ user.username }}</a>
                     {% empty %}
                         <div class="no-users">No teachers yet</div>
                     {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -352,7 +358,7 @@ body::before{
                 </div>
             {% endfor %}
         {% else %}
-            <p>No conversations yet.</p>
+            <p style="color:#777;">No conversations yet.</p>
         {% endif %}
     </div>
 </div>
