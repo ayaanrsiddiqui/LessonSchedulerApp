@@ -580,12 +580,78 @@ body::before{
     color:#ffffff;
 }
 .filter-group select{
+    width: 100%;
     padding:10px 12px;
     border-radius:8px;
     border:1px solid #444;
     background:#2a2a2d;
     color:#fff;
     font-size:14px;
+}
+
+.dj-filter-wrapper,
+.custom-dropdown-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.dj-search-overlay,
+.custom-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #2a2a2d;
+    border: 1px solid #444;
+    border-radius: 8px;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.dj-search-overlay.active,
+.custom-dropdown-menu.open {
+    display: block;
+}
+
+.dj-filter-search {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #555;
+    border-radius: 0;
+    background: #1f1f22;
+    color: #fff;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.dj-option-list,
+.custom-option-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.dj-option,
+.custom-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    color: #fff;
+    background: #2a2a2d;
+}
+
+.dj-option:hover,
+.dj-option.active,
+.custom-option:hover,
+.custom-option.active {
+    background: #333333;
+}
+
+.dj-option.hidden {
+    display: none;
 }
 
 .filter-group input {
@@ -843,36 +909,50 @@ body::before{
 
         <div class="filter-group">
             <label for="djFilter">DJ</label>
-            <select id="djFilter">
-                <option value="">All DJs</option>
-                {% for lesson in available_lessons %}
-                <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">
-                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
-                </option>
-                {% endfor %}
-            </select>
+            <div class="dj-filter-wrapper">
+                <select id="djFilter">
+                    <option value="">All DJs</option>
+                    {% for lesson in available_lessons %}
+                    <option value="{{ lesson.dj.get_full_name|default:lesson.dj.username }}">{{ lesson.dj.get_full_name|default:lesson.dj.username }}</option>
+                    {% endfor %}
+                </select>
+                <div class="dj-search-overlay" id="djSearchOverlay">
+                    <input type="text" class="dj-filter-search" id="djSearchInput" placeholder="Search DJs..." autocomplete="off">
+                    <ul class="dj-option-list" id="djOptionList" role="listbox"></ul>
+                </div>
+            </div>
         </div>
 
         <div class="filter-group">
             <label for="statusFilter">Lesson Status</label>
-            <select id="statusFilter">
-                <option value="">All Statuses</option>
-                <option value="enrolled">Enrolled</option>
-                <option value="waitlisted">Waitlisted</option>
-                <option value="none">Not Enrolled</option>
-            </select>
+            <div class="custom-dropdown-wrapper">
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="enrolled">Enrolled</option>
+                    <option value="waitlisted">Waitlisted</option>
+                    <option value="none">Not Enrolled</option>
+                </select>
+                <div class="custom-dropdown-menu" id="statusDropdownMenu">
+                    <ul class="custom-option-list" id="statusOptionList" role="listbox"></ul>
+                </div>
+            </div>
         </div>
 
 
         <div class="filter-group">
             <label for="skillFilter">Skill Level</label>
-            <select id="skillFilter">
-                <option value="">All Class Levels</option>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Proficient">Proficient</option>
-                <option value="Advanced">Advanced</option>
-            </select>
+            <div class="custom-dropdown-wrapper">
+                <select id="skillFilter">
+                    <option value="">All Class Levels</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Proficient">Proficient</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+                <div class="custom-dropdown-menu" id="skillDropdownMenu">
+                    <ul class="custom-option-list" id="skillOptionList" role="listbox"></ul>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -1280,6 +1360,187 @@ body::before{
     statusFilter.addEventListener("change", applyUpcomingClassFilters);
     djFilter.addEventListener("change", applyUpcomingClassFilters);
     skillFilter.addEventListener("change", applyUpcomingClassFilters);
+
+    const djSearchOverlay = document.getElementById("djSearchOverlay");
+    const djSearchInput = document.getElementById("djSearchInput");
+    const djOptionList = document.getElementById("djOptionList");
+    const djFilterWrapper = document.querySelector(".dj-filter-wrapper");
+
+    function buildDjOverlayOptions() {
+        if (!djOptionList || !djFilter) return;
+
+        djOptionList.innerHTML = "";
+        const seen = new Set();
+
+        Array.from(djFilter.options).forEach((option) => {
+            const label = option.textContent.trim();
+            if (seen.has(label)) return;
+            seen.add(label);
+
+            const item = document.createElement("li");
+            item.className = "dj-option";
+            item.setAttribute("role", "option");
+            item.tabIndex = 0;
+            item.dataset.value = option.value;
+            item.textContent = label;
+
+            item.addEventListener("click", function () {
+                djFilter.value = this.dataset.value;
+                djFilter.dispatchEvent(new Event("change", { bubbles: true }));
+                hideDjSearch();
+                djFilter.focus();
+            });
+
+            item.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+
+            djOptionList.appendChild(item);
+        });
+    }
+
+    function filterDjOptions(searchTerm) {
+        if (!djOptionList) return;
+        const options = Array.from(djOptionList.children);
+        options.forEach((option) => {
+            const text = option.textContent.toLowerCase();
+            option.style.display = text.includes(searchTerm) ? "" : "none";
+        });
+    }
+
+    function showDjSearch() {
+        if (djSearchOverlay) {
+            djSearchOverlay.classList.add("active");
+        }
+    }
+
+    function hideDjSearch() {
+        if (djSearchOverlay) {
+            djSearchOverlay.classList.remove("active");
+        }
+        if (djSearchInput) {
+            djSearchInput.value = "";
+            filterDjOptions("");
+        }
+    }
+
+    function buildCustomDropdown(selectId, menuId, listId) {
+        const selectEl = document.getElementById(selectId);
+        const menuEl = document.getElementById(menuId);
+        const listEl = document.getElementById(listId);
+
+        if (!selectEl || !menuEl || !listEl) return;
+
+        listEl.innerHTML = "";
+
+        Array.from(selectEl.options).forEach((option) => {
+            const item = document.createElement("li");
+            item.className = "custom-option";
+            item.setAttribute("role", "option");
+            item.tabIndex = 0;
+            item.dataset.value = option.value;
+            item.textContent = option.textContent;
+
+            item.addEventListener("click", function () {
+                selectEl.value = this.dataset.value;
+                selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+                menuEl.classList.remove("open");
+                selectEl.focus();
+            });
+
+            item.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+
+            listEl.appendChild(item);
+        });
+
+        selectEl.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+            if (menuEl.classList.contains("open")) {
+                menuEl.classList.remove("open");
+            } else {
+                hideDjSearch();
+                document.querySelectorAll(".custom-dropdown-menu.open").forEach((menu) => {
+                    menu.classList.remove("open");
+                });
+                menuEl.classList.add("open");
+            }
+        });
+
+        selectEl.addEventListener("keydown", function (e) {
+            if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+                e.preventDefault();
+                if (menuEl.classList.contains("open")) {
+                    menuEl.classList.remove("open");
+                } else {
+                    hideDjSearch();
+                    document.querySelectorAll(".custom-dropdown-menu.open").forEach((menu) => {
+                        menu.classList.remove("open");
+                    });
+                    menuEl.classList.add("open");
+                }
+            }
+        });
+
+        document.addEventListener("mousedown", function (event) {
+            if (!menuEl.contains(event.target) && event.target !== selectEl) {
+                menuEl.classList.remove("open");
+            }
+        });
+    }
+
+    buildDjOverlayOptions();
+    buildCustomDropdown("statusFilter", "statusDropdownMenu", "statusOptionList");
+    buildCustomDropdown("skillFilter", "skillDropdownMenu", "skillOptionList");
+
+    if (djFilter) {
+        djFilter.addEventListener("mousedown", function (e) {
+            e.preventDefault();
+            showDjSearch();
+            if (djSearchInput) {
+                djSearchInput.focus();
+            }
+        });
+
+        djFilter.addEventListener("keydown", function (e) {
+            if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) {
+                e.preventDefault();
+                showDjSearch();
+                if (djSearchInput) {
+                    djSearchInput.focus();
+                }
+            }
+        });
+    }
+
+    if (djSearchInput) {
+        djSearchInput.addEventListener("input", function () {
+            filterDjOptions(this.value.trim().toLowerCase());
+        });
+        djSearchInput.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                hideDjSearch();
+                if (djFilter) {
+                    djFilter.blur();
+                }
+            }
+        });
+    }
+
+    if (djFilterWrapper) {
+        document.addEventListener("mousedown", function (event) {
+            if (!djFilterWrapper.contains(event.target)) {
+                hideDjSearch();
+            }
+        });
+    }
     
 })();
 
