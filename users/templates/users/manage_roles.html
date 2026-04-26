@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,18 +11,26 @@
 }
 body {
     margin: 0;
+    padding-top: 120px;
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
     color: #e5e7eb;
 }
 .top-bar {
     width: 100%;
-    background: #ffffff;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    padding: 16px 40px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(2px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
 }
 .nav-left {
     display: flex;
@@ -238,21 +247,12 @@ body {
 <body>
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link">SHHO</a>
+        <a href="{% url 'index' %}" class="brand-link">
+            <img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:14px;" alt="SHHO logo">
+        </a>
     </div>
     <div class="nav-right">
-        <span class="user-chip">
-            {% if request.user.profile.profile_picture %}
-            <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
-            {% else %}
-            <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
-            {% endif %}
-            {{ request.user.username }}
-        </span>
-        <form method="post" action="{% url 'account_logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="secondary-btn">Logout</button>
-        </form>
+        <a href="{% url 'account_logout' %}" class="secondary-btn" style="background:#0066cc;color:#fff;border:#0066cc;text-decoration:none;display:inline-block;">Logout</a>
     </div>
 </div>
 
