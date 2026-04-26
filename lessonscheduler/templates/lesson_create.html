@@ -260,6 +260,48 @@ body::before{
     margin-top: 20px;
 }
 
+.submit-row {
+    display: flex;
+    gap: 19px;
+    margin-top: 20px;
+}
+
+.submit-btn,
+.cancel-btn {
+    flex: 1;
+    padding: 14px 0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+form button.submit-btn {
+    margin-top: 0;
+}
+
+.submit-btn {
+    background: #1565c0;
+    color: white;
+    border: none;
+}
+
+.submit-btn:hover {
+    background: #0d4ea3;
+}
+
+
+.cancel-btn {
+    background: #666666;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #555555;
+}
+
 
     /* ===== TOP BAR ===== */
 .top-bar {
@@ -478,14 +520,6 @@ body::before{
             </div>
 
             <div class="form-group">
-                <label for="id_description">{{ form.description.label }}</label>
-                {{ form.description }}
-                {% if form.description.errors %}
-                    <div class="error-message">{{ form.description.errors.0 }}</div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
                 <label for="id_image">{{ form.image.label }}</label>
                 {{ form.image }}
                 {% if form.image.errors %}
@@ -534,11 +568,26 @@ body::before{
                 {% endif %}
             </div>
 
+            <div class="form-group">
+                <label for="id_description">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error-message">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
             {% if form.non_field_errors %}
                 <div class="error-message">{{ form.non_field_errors.0 }}</div>
             {% endif %}
 
-            <button type="submit">Create Lesson</button>
+            
+            <div class="submit-row">
+                <button type="submit" class="submit-btn">Create Lesson</button>
+
+                <a href="{% url 'index' %}" class="cancel-btn">
+                    Cancel
+                </a>
+            </div>
         </form>
 
     </div>
