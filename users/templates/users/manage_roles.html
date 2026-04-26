@@ -180,6 +180,26 @@ body {
 .primary-btn:hover {
     background: #0052a3;
 }
+.search-bar {
+    margin: 18px 0 8px;
+}
+.search-input {
+    width: 100%;
+    max-width: 460px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #e5e7eb;
+    padding: 10px 12px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+.search-input::placeholder {
+    color: #b7bcc4;
+}
+.user-email {
+    display: none;
+}
 .user-form {
     display: grid;
     gap: 12px;
@@ -297,6 +317,9 @@ body {
     <div class="card">
         <h2>Manual Role Controls</h2>
         <p class="muted">You can still change student and teacher roles for any non-admin user.</p>
+        <div class="search-bar">
+            <input id="manual-role-search" class="search-input" type="text" placeholder="Search users...">
+        </div>
         {% for user in users %}
         <form class="user-form" method="POST" action="{% url 'update_role' user.user.id %}">
             {% csrf_token %}
@@ -308,6 +331,7 @@ body {
                 {% endif %}
                 <a class="profile-link" href="{% url 'public_profile' user.user.username %}">{{ user.user.username }}</a>
             </span>
+            <span class="user-email">{{ user.user.email }}</span>
             <select class="select-input" name="role">
                 <option value="student" {% if user.role == "student" %}selected{% endif %}>Student</option>
                 <option value="teacher" {% if user.role == "teacher" %}selected{% endif %}>Teacher</option>
@@ -317,5 +341,24 @@ body {
         {% endfor %}
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var searchInput = document.getElementById('manual-role-search');
+        if (!searchInput) {
+            return;
+        }
+
+
+        searchInput.addEventListener('input', function () {
+            var query = this.value.trim().toLowerCase();
+            document.querySelectorAll('.user-form').forEach(function (form) {
+                var name = form.querySelector('.profile-link').textContent.trim().toLowerCase();
+                var email = form.querySelector('.user-email').textContent.trim().toLowerCase();
+                var match = !query || name.includes(query) || email.includes(query);
+                form.style.display = match ? '' : 'none';
+            });
+        });
+    });
+</script>
 </body>
 </html>
