@@ -8,7 +8,39 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif;}
-body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0f10,#1b1b1d,#2a2a2d);padding:30px;}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #000000;
+    padding: 200px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 120; 
+}
+
+.bg-image{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 75%;
+    z-index: -2;
+
+}
+body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: -1;
+}
+
 .corner-logo{position:fixed;top:30px;left:40px;width:110px;background:white;padding:8px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.35);z-index:999;}
 .page-container{display:flex;flex-direction:column;width:950px;max-width:100%;height:90vh;border-radius:18px;overflow:hidden;background:#f5f5f5;box-shadow:0 18px 50px rgba(0,0,0,0.35);}
 .header{background:#111;color:#fff;padding:30px 40px;}
@@ -27,7 +59,7 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 .select-box{width:100%;max-width:420px; margin-bottom:14px; padding:12px 14px; border:1px solid #ccc; border-radius:8px; background:#fff; font-size:16px; color:#111;}
 .text-area{width:100%;height:100px;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;resize:none;}
 .file-input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;background:#fff;}
-.send-btn{padding:12px 16px;border:none;border-radius:8px;background:#111;color:white;font-weight:600;cursor:pointer;font-size: 14px;}
+.send-btn{padding:12px 16px;border:none;border-radius:8px;background:#0066cc;color:white;font-weight:600;cursor:pointer;font-size: 14px;}
 .top-right-btn{position:absolute;top:38px;right:40px;padding:12px 12px;border-radius:8px;background:#fff;font-size:17px;color:#111;border:1px solid #ccc;text-decoration:none;}
 .back-btn{display:inline-block;margin-top:12px;color:#111;text-decoration:none;}
 .user-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f3f3f3;color:#111;border:1px solid #d6d6d6;font-size:13px;font-weight:600;margin-right:12px;}
@@ -36,26 +68,222 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 .avatar-fallback{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:10px;font-weight:700;}
 .status-message{padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:14px;}
 .status-error{background:#ffe9e9;border:1px solid #f1bcbc;color:#8a1f1f;}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+     width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 40px;
+
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(2px);
+
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.brand-link {
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.nav-buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+}
+.nav-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.profile-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.08);
+    border: 0px solid rgba(0, 0, 0, 0.14);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+.profile-chip:focus-visible {
+    outline: 2px solid #7cb6ff;
+    outline-offset: 2px;
+}
+.profile-chip,
+.profile-chip:active,
+.profile-chip:visited {
+    text-decoration: none;
+    color: #ffffff;
+    transition: 0.2s ease;
+}
+
+
+.profile-chip-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.12);
+}
+.profile-chip-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0066cc, #4d8cff);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.profile-chip-name {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1;
+    color: #ffffff;
+}
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    padding: 8px;
+    border-radius: 14px;
+    background: rgba(18, 18, 20, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+    display: none;
+    z-index: 1100;
+}
+.profile-menu.open .profile-dropdown {
+    display: block;
+}
+.profile-dropdown a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.profile-dropdown a.logout-link {
+    color: #ff5c5c;
+}
+.profile-dropdown-divider {
+    height: 1px;
+    margin: 6px 4px;
+    background: rgba(255, 255, 255, 0);
+    
+}
+.primary-btn,
+.secondary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 17px;
+    transition: 0.2s ease;
+    display: inline-block;
+}
+.primary-btn {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+}
+
+.secondary-btn {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+
+}
+
+
 </style>
 </head>
 <body>
-<a href="{% url 'index' %}"><img src="{% static 'images/shhoLogo.png' %}" class="corner-logo"></a>
+
+
+<body>
+<img src="{% static 'images/djbackground3.png' %}" class="bg-image">
+
+ <div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link">
+            <img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:20px;">
+        </a>
+    </div>
+    <div class="nav-right">
+        <div class="nav-buttons">
+
+            {% if request.user.profile.role == 'student' %}
+                <a href="{% url 'request_class' %}" class="primary-btn">Request Lessons</a>
+            {% else %}
+                <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>
+            {% endif %}
+            <a href="{% url 'inbox' %}" class="secondary-btn"> Messages</a>
+
+            <div class="profile-menu">
+                <button id="profileMenuButton" class="profile-chip" type="button">
+                    {% if request.user.profile.profile_picture %}
+                    <img class="profile-chip-avatar" src="{{ request.user.profile.profile_picture.url }}">
+                    {% else %}
+                    <span class="profile-chip-fallback">{{ request.user.username|first|upper }}</span>
+                    {% endif %}
+                    <span class="profile-chip-name">{{ request.user.username }}</span>
+                </button>
+
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="{% url 'profile' %}">Profile</a>
+                    <div class="profile-dropdown-divider"></div>
+                    <a href="{% url 'account_logout' %}" class="logout-link">Log out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="page-container">
     <div class="header" style="position:relative;display:flex;align-items:center;justify-content:space-between;">
         <div>
             <h1>Chat with <a href="{% url 'public_profile' recipient.username %}" style="color:inherit;text-decoration:none;">{{ recipient.username }}</a></h1>
-            <p>Messages between you and {{ recipient.username }}.</p>
+        
         </div>
         <div style="display:flex;align-items:center;">
-            <span class="user-chip">
-                {% if request.user.profile.profile_picture %}
-                <img class="avatar-sm" src="{{ request.user.profile.profile_picture.url }}" alt="{{ request.user.username }}">
-                {% else %}
-                <span class="avatar-fallback">{{ request.user.username|first|upper }}</span>
-                {% endif %}
-                {{ request.user.username }}
-            </span>
-            <a href="{% url 'inbox' %}" class="top-right-btn" style="position:static;">Back to Inbox</a>
         </div>
     </div>
     <div class="content">

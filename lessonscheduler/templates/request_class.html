@@ -168,13 +168,6 @@
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="id_requested_equipment">Requested Equipment</label>
-                {{ form.requested_equipment }}
-                {% if form.requested_equipment.errors %}
-                    <div class="error-message">{{ form.requested_equipment.errors.0 }}</div>
-                {% endif %}
-            </div>
 
             <div class="form-group">
                 <label for="id_description">{{ form.description.label }}</label>
