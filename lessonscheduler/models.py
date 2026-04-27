@@ -57,6 +57,9 @@ class Lesson(models.Model):
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             errors["end_time"] = "End time must be after start time."
 
+        if self.start_time and self.end_time and self.start_time.date() != self.end_time.date():
+            errors["end_time"] = "A lesson must start and end on the same day."
+
         if dj_id and not Profile.objects.filter(
             user_id=dj_id, role__in=('teacher', 'producer')
         ).exists():
