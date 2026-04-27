@@ -531,10 +531,10 @@ audio {
 
     {% if profile.role == 'student' %}
         <div class="card">
-            <h2>Request Teacher Role</h2>
+            <h2>Request DJ Role</h2>
             {% if pending_teacher_request %}
                 <div>
-                    <p class="muted" style="margin-top:8px;">Teacher role request pending.</p>
+                    <p class="muted" style="margin-top:8px;">DJ role request pending.</p>
                     {% if pending_teacher_request.explanation %}
                         <p class="muted" style="margin-top:4px;">Reason: {{ pending_teacher_request.explanation }}</p>
                     {% endif %}
@@ -542,7 +542,7 @@ audio {
             {% else %}
                 <form method="post" action="{% url 'request_teacher_role' %}" class="teacher-request-form">
                     {% csrf_token %}
-                    <p>If you would like to request a teacher role, please provide your reasoning below.</p>
+                    <p>If you would like to request a DJ role, please provide your reasoning below.</p>
                     <textarea id="id_explanation" name="explanation" class="bio-input" rows="3" maxlength="1000" placeholder="Share your experience, availability, or motivation..."></textarea>
                     <button type="submit" class="primary-btn">Request Teacher Role</button>
                 </form>

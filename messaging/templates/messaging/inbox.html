@@ -232,6 +232,12 @@ body::before{
 
 }
 
+.role-label {
+    font-size: 14px;
+    color: #555;
+    margin-left: 6px;
+}
+
 </style>
 </head>
 
@@ -303,17 +309,17 @@ body::before{
                 </div>
             </div>
             <div class="dropdown">
-                <button class="send-btn dropdown-btn" onclick="toggleDropdown('teacherDropdown')">Message a Teacher</button>
+                <button class="send-btn dropdown-btn" onclick="toggleDropdown('teacherDropdown')">Message a DJ</button>
                 <div id="teacherDropdown" class="dropdown-content">
-                    <div class="dropdown-header">Teachers</div>
+                    <div class="dropdown-header">DJ</div>
                     {% if teachers %}
-                    <input type="text" class="search-input" placeholder="Search teachers..." onkeyup="filterUsers(this, 'teacherDropdown')">
+                    <input type="text" class="search-input" placeholder="Search DJs..." onkeyup="filterUsers(this, 'teacherDropdown')">
                     {% endif %}
                     <div class="dropdown-list">
                     {% for user in teachers %}
                         <a href="{% url 'send_message' user.username %}">{{ user.username }}</a>
                     {% empty %}
-                        <div class="no-users">No teachers yet</div>
+                        <div class="no-users">No DJs yet</div>
                     {% endfor %}
                     </div>
                 </div>
@@ -331,7 +337,8 @@ body::before{
                                 <span class="avatar-fallback">{{ convo.peer.username|first|upper }}</span>
                                 {% endif %}
                                 <a href="{% url 'public_profile' convo.peer.username %}" style="color:inherit;text-decoration:none;">{{ convo.peer.username }}</a>
-                            </strong> (Student)
+                                <span class="role-label">(Student)</span>
+                            </strong> 
                         {% elif convo.peer in teachers %}
                             <strong class="user-inline">
                                 {% if convo.peer.profile.profile_picture %}
@@ -340,7 +347,8 @@ body::before{
                                 <span class="avatar-fallback">{{ convo.peer.username|first|upper }}</span>
                                 {% endif %}
                                 <a href="{% url 'public_profile' convo.peer.username %}" style="color:inherit;text-decoration:none;">{{ convo.peer.username }}</a>
-                            </strong> (Teacher)
+                                <span class="role-label">(DJ)</span>
+                            </strong> 
                         {% else %}
                             <strong class="user-inline">
                                 {% if convo.peer.profile.profile_picture %}
