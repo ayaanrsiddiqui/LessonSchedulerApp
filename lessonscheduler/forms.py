@@ -173,16 +173,17 @@ class ClassRequestForm(forms.ModelForm):
 class ManageClassRequestForm(forms.ModelForm):
     """Form for DJs to accept or deny class requests."""
 
+    status = forms.ChoiceField(
+        choices=[
+            ("accepted", "Accept"),
+            ("denied", "Decline"),
+        ],
+        widget=forms.Select()
+    )
+
     class Meta:
         model = ClassRequest
         fields = ["status"]
-        widgets = {
-            "status": forms.Select(choices=[
-                ("pending", "Pending"),
-                ("accepted", "Accept Request"),
-                ("denied", "Deny Request"),
-            ])
-        }
 
     def save(self, commit=True):
         request = super().save(commit=False)
