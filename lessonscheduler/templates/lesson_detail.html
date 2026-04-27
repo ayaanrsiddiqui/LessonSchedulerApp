@@ -384,7 +384,7 @@
             </div>
         {% endif %}
             <p>
-                <strong>DJ:</strong> 
+                <strong>{% if lesson.dj.profile.role == 'producer' %}Producer{% else %}DJ{% endif %}:</strong>
                 <a href="{% url 'public_profile' lesson.dj.username %}" class="dj-link">
                     {{ lesson.dj.get_full_name|default:lesson.dj.username }}
                 </a>

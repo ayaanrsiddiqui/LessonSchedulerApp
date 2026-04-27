@@ -985,11 +985,12 @@ body::before{
                 </strong>
 
                 <div class="lesson-info-row">
-                <strong>DJ:</strong>
+                <strong>{% if lesson.dj.profile.role == 'producer' %}Producer{% else %}DJ{% endif %}:</strong>
                     <a href="{% url 'public_profile' lesson.dj.username %}" class="dj-link">
                         {{ lesson.dj.get_full_name|default:lesson.dj.username }}
                     </a>
                 </div>
+                <div class="lesson-info-row"><strong>Lesson Type:</strong> {% if lesson.dj.profile.role == 'producer' %}Production{% else %}DJ{% endif %}</div>
 
                 <div class="lesson-info-row"><strong>Confirmed:</strong>  {{ lesson.confirmed_count }}/{{ lesson.capacity }}</div>
                 <div class="lesson-info-row"><strong>Date:</strong> <span class="local-date" data-utc="{{ lesson.start_time|date:'c' }}">{{ lesson.start_time|date:"M d, Y" }}</span></div>
@@ -1205,11 +1206,12 @@ body::before{
                 </strong>
 
                 <div class="lesson-info-row">
-                    <strong>DJ:</strong>
+                    <strong>${lesson.instructor_label}:</strong>
                     <a href="/profile/${lesson.dj_username}/" class="dj-link">
                         ${lesson.dj_name}
                     </a>
                 </div>
+                <div class="lesson-info-row"><strong>Lesson Type:</strong> ${lesson.instructor_label === 'Producer' ? 'Production' : 'DJ'}</div>
                 <div class="lesson-info-row"><strong>Confirmed:</strong> ${lesson.confirmed_count}/${lesson.capacity}</div>
                 <div class="lesson-info-row"><strong>Date:</strong> ${lesson.start_utc ? new Date(lesson.start_utc).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) : lesson.start_display}</div>
                 <div class="lesson-info-row"><strong>Time:</strong> ${lesson.start_utc ? new Date(lesson.start_utc).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) + ' - ' + new Date(lesson.end_utc).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) : lesson.time_display}</div>

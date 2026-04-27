@@ -123,6 +123,7 @@ def _serialize_calendar_lessons(
                 "time_display": f"{start_local.strftime('%I:%M %p').lstrip('0')} - {end_local.strftime('%I:%M %p').lstrip('0')}",
                 "location": lesson.location,
                 "dj_name": lesson.dj.get_full_name() or lesson.dj.username,
+                "instructor_label": "Producer" if getattr(getattr(lesson.dj, "profile", None), "role", "") == "producer" else "DJ",
                 "experience_requirements": lesson.experience_requirements,
                 "confirmed_count": confirmed_count,
                 "capacity": lesson.capacity,
