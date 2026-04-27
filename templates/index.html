@@ -34,6 +34,7 @@ body{
     z-index: -2;
 }
 
+
 body::before{
     content: "";
     position: fixed;
@@ -44,23 +45,19 @@ body::before{
 
 /* logo top left */
 
-.corner-logo{
+.corner-logo {
     position: fixed;
-    top: 30px;
-    left: 40px;
+    top: 16px;     
+    left: 40px;   
 
-    width: 90px;     
-    height: 90px;     
+    width: 85px;
+    height: 85px;
 
-    padding: 8px;
-    border-radius: 10px;
+    object-fit: contain;
+    border-radius: 20px;
 
-    box-shadow: 0 6px 18px rgba(0,0,0,.35);
-    z-index: 999;
-
-    display: block;
+    z-index: 1000;
 }
-
 /* center container */
 
 .page-container{
