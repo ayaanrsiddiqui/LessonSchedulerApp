@@ -607,8 +607,8 @@ def request_class(request):
         lesson = get_object_or_404(Lesson, id=lesson_id)
         initial = {
             "dj": lesson.dj,
-            "requested_start_time": timezone.localtime(lesson.start_time).strftime("%Y-%m-%dT%H:%M"),
-            "requested_end_time": timezone.localtime(lesson.end_time).strftime("%Y-%m-%dT%H:%M"),
+            "requested_start_time": timezone.localtime(lesson.start_time).strftime("%Y-%m-%d %H:%M"),
+            "requested_end_time": timezone.localtime(lesson.end_time).strftime("%Y-%m-%d %H:%M"),
             "requested_skill_level": lesson.experience_requirements,
             "requested_location": lesson.location,
             "requested_equipment": "",

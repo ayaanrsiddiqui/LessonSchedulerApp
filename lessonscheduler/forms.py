@@ -125,6 +125,34 @@ class ClassSignupForm(forms.ModelForm):
 # Student Form: Request a class
 class ClassRequestForm(forms.ModelForm):
 
+    datetime_format = "%Y-%m-%d %H:%M"
+
+    requested_start_time = forms.DateTimeField(
+        label="Requested start time",
+        input_formats=[datetime_format],
+        widget=forms.DateTimeInput(
+            format=datetime_format,
+            attrs={
+                "class": "js-datetime",
+                "autocomplete": "off",
+                "placeholder": "YYYY-MM-DD HH:MM",
+            },
+        ),
+    )
+
+    requested_end_time = forms.DateTimeField(
+        label="Requested end time",
+        input_formats=[datetime_format],
+        widget=forms.DateTimeInput(
+            format=datetime_format,
+            attrs={
+                "class": "js-datetime",
+                "autocomplete": "off",
+                "placeholder": "YYYY-MM-DD HH:MM",
+            },
+        ),
+    )
+
     dj = forms.ModelChoiceField(
         queryset=User.objects.none(),
         label="DJ",
@@ -143,8 +171,6 @@ class ClassRequestForm(forms.ModelForm):
             "description",
         ]
         widgets = {
-            "requested_start_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "requested_end_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "requested_skill_level": forms.Select(choices=DIFFICULTY_CHOICES),
             "requested_location": forms.TextInput(attrs={"placeholder": "e.g., Studio A, Downtown"}),
             "requested_equipment": forms.Textarea(attrs={"rows": 3, "placeholder": "e.g., Controller, speakers, headphones"}),
