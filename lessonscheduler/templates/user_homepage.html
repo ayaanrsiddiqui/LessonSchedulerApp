@@ -450,15 +450,17 @@ body::before{
     font-weight:700;
     font-size:15px;
 }
-.lesson-dot{
-    width:10px;
-    height:10px;
-    border-radius:999px;
-    background:#111;
-    margin-top:8px;
+.lesson-dots{
+    display:flex;
+    gap:3px;
+    justify-content:center;
+    margin-top:6px;
 }
-.calendar-day.selected .lesson-dot{
-    background:white;
+.lesson-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    flex-shrink:0;
 }
 .calendar-details{
     margin-top:22px;
@@ -1190,12 +1192,16 @@ body::before{
             `;
         }
 
+        const lessonUrl = isDj
+            ? (lesson.is_own ? `/lesson/${lesson.id}/detail/` : null)
+            : `/lesson/${lesson.id}/student-detail/`;
+
         return `
                     <div class="item upcoming-class-item">
                 <strong>
-                    <a href="${isDj ? `/lesson/${lesson.id}/detail/` : `/lesson/${lesson.id}/student-detail/`}" class="inline-link">
-                        ${lesson.title}
-                    </a>
+                    ${lessonUrl
+                        ? `<a href="${lessonUrl}" class="inline-link">${lesson.title}</a>`
+                        : `<span class="inline-link" style="cursor:default">${lesson.title}</span>`}
                 </strong>
 
                 <div class="lesson-info-row">
@@ -1243,7 +1249,8 @@ body::before{
                 month === today.getMonth() &&
                 year === today.getFullYear();
 
-            const hasLesson = !!lessonsByDate[dateKey];
+            const dayLessonsForDot = lessonsByDate[dateKey] || [];
+            const hasLesson = dayLessonsForDot.length > 0;
             const isSelected = selectedDate === dateKey;
 
             const dayEl = document.createElement("div");
@@ -1252,9 +1259,14 @@ body::before{
             if (hasLesson) dayEl.classList.add("has-lesson");
             if (isSelected) dayEl.classList.add("selected");
 
+            const uniqueColors = [...new Set(dayLessonsForDot.map(l => l.dot_color))];
+            const dotsHtml = hasLesson
+                ? `<div class="lesson-dots">${uniqueColors.map(c => `<div class="lesson-dot" style="background:${c}"></div>`).join("")}</div>`
+                : "";
+
             dayEl.innerHTML = `
                 <div class="calendar-day-number">${day}</div>
-                ${hasLesson ? '<div class="lesson-dot"></div>' : ''}
+                ${dotsHtml}
             `;
 
             dayEl.addEventListener("click", function () {

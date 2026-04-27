@@ -83,6 +83,7 @@ def _build_lesson_update_notification(lesson, previous_state):
 def _serialize_calendar_lessons(
     lessons,
     is_dj,
+    user=None,
     confirmed_signup_ids=None,
     waitlisted_signup_ids=None,
 ):
@@ -93,21 +94,23 @@ def _serialize_calendar_lessons(
     for lesson in lessons:
         start_local = timezone.localtime(lesson.start_time)
         end_local = timezone.localtime(lesson.end_time)
+        confirmed_count = getattr(lesson, "confirmed_count", 0)
 
         if is_dj:
-            confirmed_count = ClassSignup.objects.filter(
-                lesson=lesson,
-                status="confirmed",
-            ).count()
             signup_state = ""
+            is_own = user is not None and lesson.dj_id == user.id
+            dot_color = "#0066cc" if is_own else "#888888"
         else:
-            confirmed_count = getattr(lesson, "confirmed_count", 0)
             if lesson.id in waitlisted_signup_ids:
                 signup_state = "waitlisted"
+                dot_color = "#fd7e14"
             elif lesson.id in confirmed_signup_ids:
                 signup_state = "confirmed"
+                dot_color = "#28a745"
             else:
                 signup_state = "none"
+                dot_color = "#888888"
+            is_own = signup_state in ("confirmed", "waitlisted")
 
         serialized.append(
             {
@@ -123,6 +126,8 @@ def _serialize_calendar_lessons(
                 "capacity": lesson.capacity,
                 "signup_state": signup_state,
                 "dj_username": lesson.dj.username,
+                "is_own": is_own,
+                "dot_color": dot_color,
             }
         )
     return serialized
@@ -144,7 +149,12 @@ def _render_dj_dashboard(request):
         confirmed_count=Count("signups", filter=Q(signups__status="confirmed")),
         waitlisted_count=Count("signups", filter=Q(signups__status="waitlisted")),
     )
-    calendar_lessons = _serialize_calendar_lessons(posted_classes, is_dj=True)
+
+    all_lessons = Lesson.objects.annotate(
+        confirmed_count=Count("signups", filter=Q(signups__status="confirmed")),
+    ).filter(start_time__date__gte=today).select_related("dj").order_by("start_time")
+
+    calendar_lessons = _serialize_calendar_lessons(all_lessons, is_dj=True, user=request.user)
 
     return render(
         request,
@@ -185,9 +195,10 @@ def _render_student_dashboard(request):
     calendar_lessons = _serialize_calendar_lessons(
         available_lessons,
         is_dj=False,
+        user=request.user,
         confirmed_signup_ids=confirmed_signup_ids,
         waitlisted_signup_ids=waitlisted_signup_ids,
-)
+    )
 
     return render(
         request,
