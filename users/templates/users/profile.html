@@ -422,7 +422,7 @@ audio {
     <div class="nav-right">
         <div class="nav-buttons">
 
-            {% if profile.role == 'student' %}
+            {% if request.user.profile.role == 'student' %}
                 <a href="{% url 'request_class' %}" class="primary-btn">Request Lessons</a>
             {% else %}
                 <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>

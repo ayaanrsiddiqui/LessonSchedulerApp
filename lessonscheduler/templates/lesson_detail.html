@@ -3,13 +3,13 @@
 # Generated with Copilot on March 29, 2026
 # Prompt: add a DJ-side page to view class details and the list of signed up students
 -->
-
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Class Details</title>
+    <title>Lesson Details</title>
     <style>
         * {
             box-sizing: border-box;
@@ -17,10 +17,29 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
             color: #e5e7eb;
-            padding: 24px 14px;
+            padding: 200px;
         }
+
+        .bg-image{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 75%;
+            z-index: -2;
+
+        }
+        body::before{
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: -1;
+        }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -37,9 +56,14 @@
             margin-top: 0;
             color: #ffffff;
         }
+       .meta {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
         .meta p {
-            margin: 6px 0;
-            color: #c9ced6;
+            margin: 0;   
         }
         .pill {
             display: inline-block;
@@ -111,43 +135,281 @@
             font-size: 11px;
             font-weight: 700;
         }
+
+        .top-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px;
+
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(2px);
+
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+            box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .brand-link {
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+        .profile-menu {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .profile-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.08);
+            border: 0px solid rgba(0, 0, 0, 0.14);
+            cursor: pointer;
+            font: inherit;
+            text-align: left;
+        }
+        .profile-chip:focus-visible {
+            outline: 2px solid #7cb6ff;
+            outline-offset: 2px;
+        }
+        .profile-chip,
+        .profile-chip:active,
+        .profile-chip:visited {
+            text-decoration: none;
+            color: #ffffff;
+            transition: 0.2s ease;
+        }
+
+
+        .profile-chip-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .profile-chip-fallback {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0066cc, #4d8cff);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .profile-chip-name {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1;
+            color: #ffffff;
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            min-width: 180px;
+            padding: 8px;
+            border-radius: 14px;
+            background: rgba(18, 18, 20, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+            display: none;
+            z-index: 1100;
+        }
+        .profile-menu.open .profile-dropdown {
+            display: block;
+        }
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-dropdown a.logout-link {
+            color: #ff5c5c;
+        }
+        .profile-dropdown-divider {
+            height: 1px;
+            margin: 6px 4px;
+            background: rgba(255, 255, 255, 0);
+            
+        }
+        .primary-btn,
+        .secondary-btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 17px;
+            transition: 0.2s ease;
+            display: inline-block;
+        }
+
+        .nav-buttons .primary-btn {
+            background: transparent;
+            color: #ffffff;
+            border: none;
+        }
+
+        .nav-buttons .secondary-btn {
+            background: transparent;
+            color: #ffffff;
+            border: none;
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: #ffffff;
+            border: none;
+
+        }
+        .nav-buttons .primary-btn:hover,
+        .nav-buttons .secondary-btn:hover {
+            background: transparent;
+            color: #ffffff;
+        }
+
+        .teacher-request-form button {
+            margin-top: 12px;
+        }
+
+        .dj-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .dj-link:hover {
+            text-decoration: underline;
+            color: #ffffff;
+        }
+        .edit-btn {
+            margin-top: 20px;   
+            padding: 14px 20px; 
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+<img src="{% static 'images/djbackground3.png' %}" class="bg-image">
+
+<div class="top-bar">
+    <div class="nav-left">
+        <a href="{% url 'index' %}" class="brand-link">
+            <img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:20px;">
+        </a>
+    </div>
+    <div class="nav-right">
+        <div class="nav-buttons">
+
+            {% if request.user.profile.role == 'student' %}
+                <a href="{% url 'request_class' %}" class="primary-btn">Request Lessons</a>
+            {% else %}
+                <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>
+            {% endif %}
+
+            <a href="{% url 'inbox' %}" class="secondary-btn">Messages</a>
+            
+            <div class="profile-menu">
+                <button id="profileMenuButton" class="profile-chip" type="button">
+                    {% if request.user.profile.profile_picture %}
+                    <img class="profile-chip-avatar" src="{{ request.user.profile.profile_picture.url }}">
+                    {% else %}
+                    <span class="profile-chip-fallback">{{ request.user.username|first|upper }}</span>
+                    {% endif %}
+                    <span class="profile-chip-name">{{ request.user.username }}</span>
+                </button>
+
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="{% url 'profile' %}">Profile</a>
+                    <div class="profile-dropdown-divider"></div>
+                    <a href="{% url 'account_logout' %}" class="logout-link">Log out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="container">
     <div class="card">
         <h1>{{ lesson.title }}</h1>
         <div class="meta">
         {% if lesson.image %}
             <div style="margin-bottom:15px;">
-                <img src="{{ lesson.image.url }}" alt="Lesson Image" style="max-width:100%; border-radius:10px;">
+                <img 
+                    src="{{ lesson.image.url }}" 
+                    alt="Lesson Image" 
+                    style="width:100%; max-height:500px; border-radius:10px;"
+                >
             </div>
         {% endif %}
-            <p><strong>Time:</strong> {{ lesson.start_time|date:"M d, Y H:i" }} - {{ lesson.end_time|date:"H:i" }}</p>
-            <p><strong>Location:</strong> {{ lesson.location }}</p>
-            <p><strong>Description:</strong> {{ lesson.description|linebreaks }}</p>
-            <p><strong>Requirements:</strong> {{ lesson.experience_requirements }}</p>
             <p>
-                <span class="pill">Capacity: {{ lesson.capacity }}</span>
-                <span class="pill">Confirmed: {{ confirmed_signups|length }}</span>
-                <span class="pill">Waitlisted: {{ waitlisted_signups|length }}</span>
+                <strong>DJ:</strong> 
+                <a href="{% url 'public_profile' lesson.dj.username %}" class="dj-link">
+                    {{ lesson.dj.get_full_name|default:lesson.dj.username }}
+                </a>
             </p>
+            <p><strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}</p>
+            <p><strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</p>
+            <p><strong>Location:</strong> {{ lesson.location }}</p>
+            <p><strong>Description:</strong> {{ lesson.description|linebreaksbr }}</p>
+            <p><strong>Skill Level:</strong> {{ lesson.experience_requirements }}</p>
+
         </div>
         <div class="btn-row">
             {% if not is_student_view and can_edit_lesson %}
-            <a class="btn" href="{% url 'lesson_edit' lesson.id %}">Edit Class</a>
+           <a class="btn edit-btn" href="{% url 'lesson_edit' lesson.id %}">Edit Lesson</a>
             {% endif %}
 
-            {% if not is_student_view %}
-            <a class="btn" href="{% url 'lesson_create' %}">Post New Class</a>
-            {% endif %}
+        
 
-            <a class="btn btn-secondary" href="{% url 'index' %}">Back to Dashboard</a>
         </div>
     </div>
 
     <div class="card">
-        <h2>Confirmed Students</h2>
+        <h2>Confirmed Students
+            ({{ confirmed_signups|length }}/{{ lesson.capacity }})
+        </h2>
         {% if confirmed_signups %}
             <ul class="list">
                 {% for signup in confirmed_signups %}
@@ -170,7 +432,9 @@
     </div>
 
     <div class="card">
-        <h2>Waitlisted Students</h2>
+        <h2>Waitlisted Students
+            ({{ waitlisted_signups|length }})
+        </h2>
         {% if waitlisted_signups %}
             <ul class="list">
                 {% for signup in waitlisted_signups %}
@@ -192,5 +456,25 @@
         {% endif %}
     </div>
 </div>
+<script>
+const profileMenuButton = document.getElementById("profileMenuButton");
+const profileDropdown = document.getElementById("profileDropdown");
+const profileMenu = document.querySelector(".profile-menu");
+
+if (profileMenuButton && profileDropdown && profileMenu) {
+    const closeProfileMenu = () => {
+        profileMenu.classList.remove("open");
+    };
+
+    profileMenuButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        profileMenu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", closeProfileMenu);
+}
+
+
+</script>
 </body>
 </html>
