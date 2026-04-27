@@ -829,8 +829,8 @@ body::before{
                         </strong>
 
                         <div class="lesson-info-row"><strong>Confirmed:</strong> {{ lesson.confirmed_count }}/{{ lesson.capacity }}</div>
-                        <div class="lesson-info-row"><strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}</div>
-                        <div class="lesson-info-row"><strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</div>
+                        <div class="lesson-info-row"><strong>Date:</strong> <span class="local-date" data-utc="{{ lesson.start_time|date:'c' }}">{{ lesson.start_time|date:"M d, Y" }}</span></div>
+                        <div class="lesson-info-row"><strong>Time:</strong> <span class="local-time-range" data-start="{{ lesson.start_time|date:'c' }}" data-end="{{ lesson.end_time|date:'c' }}">{{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</span></div>
                         <div class="lesson-info-row"><strong>Location:</strong> {{ lesson.location }}</div>
                         <div class="lesson-info-row"><strong>Skill Level:</strong> {{ lesson.experience_requirements }}</div>
 
@@ -866,11 +866,11 @@ body::before{
                     </a>
                 </div>
                 <div class="lesson-info-row">
-                    <strong>Date:</strong> {{ req.requested_start_time|date:"M d, Y" }}
+                    <strong>Date:</strong> <span class="local-date" data-utc="{{ req.requested_start_time|date:'c' }}">{{ req.requested_start_time|date:"M d, Y" }}</span>
                 </div>
 
                 <div class="lesson-info-row">
-                    <strong>Time:</strong> {{ req.requested_start_time|date:"g:i A" }} - {{ req.requested_end_time|date:"g:i A" }}
+                    <strong>Time:</strong> <span class="local-time-range" data-start="{{ req.requested_start_time|date:'c' }}" data-end="{{ req.requested_end_time|date:'c' }}">{{ req.requested_start_time|date:"g:i A" }} - {{ req.requested_end_time|date:"g:i A" }}</span>
                 </div>
 
                 <div class="lesson-info-row">
@@ -992,8 +992,8 @@ body::before{
                 </div>
 
                 <div class="lesson-info-row"><strong>Confirmed:</strong>  {{ lesson.confirmed_count }}/{{ lesson.capacity }}</div>
-                <div class="lesson-info-row"><strong>Date:</strong> {{ lesson.start_time|date:"M d, Y" }}</div>
-                <div class="lesson-info-row"><strong>Time:</strong> {{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</div>
+                <div class="lesson-info-row"><strong>Date:</strong> <span class="local-date" data-utc="{{ lesson.start_time|date:'c' }}">{{ lesson.start_time|date:"M d, Y" }}</span></div>
+                <div class="lesson-info-row"><strong>Time:</strong> <span class="local-time-range" data-start="{{ lesson.start_time|date:'c' }}" data-end="{{ lesson.end_time|date:'c' }}">{{ lesson.start_time|date:"g:i A" }} - {{ lesson.end_time|date:"g:i A" }}</span></div>
                 <div class="lesson-info-row"><strong>Location:</strong> {{ lesson.location }}</div>
                 <div class="lesson-info-row"><strong>Skill Level:</strong> {{ lesson.experience_requirements }}</div>
 
@@ -1592,6 +1592,15 @@ body::before{
     postedTitleSearch.addEventListener("input", applyPostedLessonFilters);
     postedSkillFilter.addEventListener("change", applyPostedLessonFilters);
 })();
+
+document.querySelectorAll('.local-date[data-utc]').forEach(function(el) {
+    el.textContent = new Date(el.dataset.utc).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+});
+document.querySelectorAll('.local-time-range[data-start]').forEach(function(el) {
+    const s = new Date(el.dataset.start).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
+    const e = new Date(el.dataset.end).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
+    el.textContent = `${s} - ${e}`;
+});
 
 </script>
 </body>
