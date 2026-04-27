@@ -510,6 +510,7 @@ form button.submit-btn {
 
         <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
+            <input type="hidden" name="user_timezone" id="user_timezone">
 
             <div class="form-group">
                 <label for="id_title">{{ form.title.label }}</label>
@@ -594,6 +595,8 @@ form button.submit-btn {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+    document.getElementById('user_timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const datetimeInputs = document.querySelectorAll(".js-datetime");
     const startTimePicker = flatpickr(datetimeInputs[0], {
         enableTime: true,

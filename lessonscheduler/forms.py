@@ -48,6 +48,8 @@ class LessonForm(forms.ModelForm):
         ),
     )
 
+    user_timezone = forms.CharField(required=False, widget=forms.HiddenInput())
+
     experience_requirements = forms.ChoiceField(
         choices=DIFFICULTY_CHOICES,
         label="Skill Level",
@@ -80,8 +82,24 @@ class LessonForm(forms.ModelForm):
 
         for field in self.fields:
             self.fields[field].required = True
-        
+
         self.fields["image"].required = False
+        self.fields["user_timezone"].required = False
+
+    def clean(self):
+        from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+        cleaned_data = super().clean()
+        tz_name = (cleaned_data.get("user_timezone") or "").strip()
+        if tz_name:
+            try:
+                tz = ZoneInfo(tz_name)
+                for field in ("start_time", "end_time"):
+                    val = cleaned_data.get(field)
+                    if val is not None and val.tzinfo is None:
+                        cleaned_data[field] = val.replace(tzinfo=tz)
+            except (ZoneInfoNotFoundError, Exception):
+                pass
+        return cleaned_data
 
     def save(self, commit=True):
         lesson = super().save(commit=False)

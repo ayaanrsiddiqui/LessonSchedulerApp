@@ -527,6 +527,7 @@ body::before{
         <h1>Edit Lesson: {{ lesson.title }}</h1>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            <input type="hidden" name="user_timezone" id="user_timezone">
         <div class="form-group">
     <label for="id_title">{{ form.title.label }}</label>
             {{ form.title }}
@@ -614,10 +615,12 @@ body::before{
 </div>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+    document.getElementById('user_timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     const datetimeInputs = document.querySelectorAll(".js-datetime");
     const startTimePicker = flatpickr(datetimeInputs[0], {
         enableTime: true,
-        time_24hr: true,
+        time_24hr: false,
         minuteIncrement: 15,
         dateFormat: "Y-m-d H:i",
         altInput: true,
@@ -635,13 +638,19 @@ body::before{
 
     const endTimePicker = flatpickr(datetimeInputs[1], {
         enableTime: true,
-        time_24hr: true,
+        time_24hr: false,
         minuteIncrement: 15,
         dateFormat: "Y-m-d H:i",
         altInput: true,
         altFormat: "M j, Y at h:i K",
         allowInput: true
     });
+
+    // Convert stored UTC times to local time for display
+    const startUtc = "{{ lesson.start_time.isoformat }}";
+    const endUtc = "{{ lesson.end_time.isoformat }}";
+    if (startUtc) startTimePicker.setDate(new Date(startUtc), false);
+    if (endUtc) endTimePicker.setDate(new Date(endUtc), false);
 
 const profileMenuButton = document.getElementById("profileMenuButton");
 const profileDropdown = document.getElementById("profileDropdown");
