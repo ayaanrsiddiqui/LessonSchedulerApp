@@ -1211,8 +1211,8 @@ body::before{
                     </a>
                 </div>
                 <div class="lesson-info-row"><strong>Confirmed:</strong> ${lesson.confirmed_count}/${lesson.capacity}</div>
-                <div class="lesson-info-row"><strong>Date:</strong> ${lesson.start_display}</div>
-                <div class="lesson-info-row"><strong>Time:</strong> ${lesson.time_display}</div>
+                <div class="lesson-info-row"><strong>Date:</strong> ${lesson.start_utc ? new Date(lesson.start_utc).toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}) : lesson.start_display}</div>
+                <div class="lesson-info-row"><strong>Time:</strong> ${lesson.start_utc ? new Date(lesson.start_utc).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) + ' - ' + new Date(lesson.end_utc).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) : lesson.time_display}</div>
                 <div class="lesson-info-row"><strong>Location:</strong> ${lesson.location}</div>
                 <div class="lesson-info-row"><strong>Skill Level:</strong> ${lesson.experience_requirements}</div>
 

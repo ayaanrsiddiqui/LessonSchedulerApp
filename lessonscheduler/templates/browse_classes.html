@@ -248,7 +248,9 @@
                         
                         <div class="class-info">
                             <strong>📅 Date & Time:</strong><br>
-                            {{ lesson.start_time|date:"M d, Y at H:i" }} - {{ lesson.end_time|date:"H:i" }}
+                            <span class="local-time" data-start="{{ lesson.start_time|date:'c' }}" data-end="{{ lesson.end_time|date:'c' }}">
+                                {{ lesson.start_time|date:"M d, Y at H:i" }} - {{ lesson.end_time|date:"H:i" }}
+                            </span>
                         </div>
                         
                         <div class="class-info">
@@ -330,6 +332,14 @@
             const raw = Number(el.dataset.fillPercent || 0);
             const bounded = Math.max(0, Math.min(100, raw));
             el.style.width = `${bounded}%`;
+        });
+        document.querySelectorAll('.local-time[data-start]').forEach(function(el) {
+            const start = new Date(el.dataset.start);
+            const end = new Date(el.dataset.end);
+            const dateStr = start.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+            const startTime = start.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
+            const endTime = end.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
+            el.textContent = `${dateStr} at ${startTime} - ${endTime}`;
         });
     </script>
 </body>

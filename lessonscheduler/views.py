@@ -117,6 +117,8 @@ def _serialize_calendar_lessons(
                 "id": lesson.id,
                 "date_key": start_local.date().isoformat(),
                 "title": lesson.title,
+                "start_utc": lesson.start_time.isoformat(),
+                "end_utc": lesson.end_time.isoformat(),
                 "start_display": start_local.strftime("%b %d, %Y"),
                 "time_display": f"{start_local.strftime('%I:%M %p').lstrip('0')} - {end_local.strftime('%I:%M %p').lstrip('0')}",
                 "location": lesson.location,
