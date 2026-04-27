@@ -595,8 +595,6 @@ form button.submit-btn {
 </div>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    document.getElementById('user_timezone').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
     const datetimeInputs = document.querySelectorAll(".js-datetime");
     const startTimePicker = flatpickr(datetimeInputs[0], {
         enableTime: true,
@@ -607,10 +605,7 @@ form button.submit-btn {
         altFormat: "M j, Y at h:i K",
         allowInput: true,
         onChange: function(selectedDates) {
-            if (!selectedDates.length || !endTimePicker) {
-                return;
-            }
-
+            if (!selectedDates.length || !endTimePicker) return;
             const endDate = new Date(selectedDates[0].getTime() + 60 * 60 * 1000);
             endTimePicker.setDate(endDate, true, "Y-m-d H:i");
         }
@@ -624,6 +619,20 @@ form button.submit-btn {
         altInput: true,
         altFormat: "M j, Y at h:i K",
         allowInput: true
+    });
+
+    // Before submitting, convert local times to UTC so the server receives correct times
+    document.querySelector("form").addEventListener("submit", function() {
+        const pad = n => String(n).padStart(2, "0");
+        function toUtcString(date) {
+            return `${date.getUTCFullYear()}-${pad(date.getUTCMonth()+1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+        }
+        if (startTimePicker.selectedDates[0]) {
+            datetimeInputs[0].value = toUtcString(startTimePicker.selectedDates[0]);
+        }
+        if (endTimePicker.selectedDates[0]) {
+            datetimeInputs[1].value = toUtcString(endTimePicker.selectedDates[0]);
+        }
     });
 
 

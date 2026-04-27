@@ -86,21 +86,6 @@ class LessonForm(forms.ModelForm):
         self.fields["image"].required = False
         self.fields["user_timezone"].required = False
 
-    def clean(self):
-        from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-        cleaned_data = super().clean()
-        tz_name = (cleaned_data.get("user_timezone") or "").strip()
-        if tz_name:
-            try:
-                tz = ZoneInfo(tz_name)
-                for field in ("start_time", "end_time"):
-                    val = cleaned_data.get(field)
-                    if val is not None and val.tzinfo is None:
-                        cleaned_data[field] = val.replace(tzinfo=tz)
-            except (ZoneInfoNotFoundError, Exception):
-                pass
-        return cleaned_data
-
     def save(self, commit=True):
         lesson = super().save(commit=False)
         lesson.dj = self.user
