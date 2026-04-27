@@ -461,8 +461,17 @@ audio {
             {% endif %}
             <div>
                 <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
+                <p class="muted">
+                    Role: 
+                    {% if profile.role == 'teacher' %}
+                        DJ
+                    {% else %}
+                        Student
+                    {% endif %}
+                </p>
+
                 <p class="muted">Email: {{ request.user.email }}</p>
-                <p class="muted">Role: {{ profile.get_role_display }}</p>
+        
                 <p class="muted" id="bio-display">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
             </div>
         </div>

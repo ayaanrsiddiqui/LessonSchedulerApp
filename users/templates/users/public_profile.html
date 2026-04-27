@@ -9,21 +9,33 @@
 * {
     box-sizing: border-box;
 }
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0f0f10, #1b1b1d, #2a2a2d);
     color: #e5e7eb;
+    padding: 200px;
 }
-.top-bar {
+
+.bg-image{
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    background: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 40px 15px 20px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    height: 100%;
+    object-fit: cover;
+    object-position: center 75%;
+    z-index: -2;
+
 }
+body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: -1;
+}
+
 .nav-left {
     display: flex;
     align-items: center;
@@ -115,10 +127,10 @@ body {
 }
 .media-card {
     background: rgba(255, 255, 255, 0.06);
-    border-left: 4px solid #0066cc;
     border-radius: 8px;
     padding: 14px;
     margin-bottom: 12px;
+    margin-top: 0px; 
 }
 audio {
     width: 100%;
@@ -138,53 +150,309 @@ audio {
         gap: 12px;
     }
 }
+
+/* ===== TOP BAR ===== */
+.top-bar {
+     width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 40px;
+
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(2px);
+
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.brand-link {
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.nav-buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+}
+.nav-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.profile-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.08);
+    border: 0px solid rgba(0, 0, 0, 0.14);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+}
+.profile-chip:focus-visible {
+    outline: 2px solid #7cb6ff;
+    outline-offset: 2px;
+}
+.profile-chip,
+.profile-chip:active,
+.profile-chip:visited {
+    text-decoration: none;
+    color: #ffffff;
+    transition: 0.2s ease;
+}
+
+
+.profile-chip-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.12);
+}
+.profile-chip-fallback {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0066cc, #4d8cff);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+.profile-chip-name {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1;
+    color: #ffffff;
+}
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    padding: 8px;
+    border-radius: 14px;
+    background: rgba(18, 18, 20, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+    display: none;
+    z-index: 1100;
+}
+.profile-menu.open .profile-dropdown {
+    display: block;
+}
+.profile-dropdown a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.profile-dropdown a.logout-link {
+    color: #ff5c5c;
+}
+.profile-dropdown-divider {
+    height: 1px;
+    margin: 6px 4px;
+    background: rgba(255, 255, 255, 0);
+    
+}
+.primary-btn,
+.secondary-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 17px;
+    transition: 0.2s ease;
+    display: inline-block;
+}
+
+.nav-buttons .primary-btn {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+}
+
+.nav-buttons .secondary-btn {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+}
+
+.secondary-btn {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+
+}
+.nav-buttons .primary-btn:hover,
+.nav-buttons .secondary-btn:hover {
+    background: transparent;
+    color: #ffffff;
+}
+
+.teacher-request-form button {
+    margin-top: 12px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+    flex-wrap: nowrap;
+}
+
+.profile-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.profile-info p {
+    margin: 0;
+}
+
+.profile-info h1 {
+    margin: 0 0 6px 0;
+}
+
+.profile-action-btn {
+    width: 132px;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 8px;
+}
+
+
+
 </style>
 </head>
 <body>
+
+<img src="{% static 'images/djbackground3.png' %}" class="bg-image">
+
 <div class="top-bar">
     <div class="nav-left">
-        <a href="{% url 'index' %}" class="brand-link"><img src="{% static 'images/shhoLogo.png' %}" style="height:70px;width:70px;object-fit:contain;border-radius:8px;"></a>
-        <a href="{% url 'profile' %}" class="secondary-btn">My Profile</a>
+        <a href="{% url 'index' %}" class="brand-link">
+            <img src="{% static 'images/shhoLogo.png' %}" style="height:85px;width:85px;object-fit:contain;border-radius:20px;">
+        </a>
+    </div>
+    <div class="nav-right">
+        <div class="nav-buttons">
+
+            {% if request.user.profile.role == 'student' %}
+                <a href="{% url 'request_class' %}" class="primary-btn">Request Lessons</a>
+            {% else %}
+                <a href="{% url 'lesson_create' %}" class="primary-btn">Post Lessons</a>
+            {% endif %}
+
+            <a href="{% url 'inbox' %}" class="secondary-btn">Messages</a>
+            
+            <div class="profile-menu">
+                <button id="profileMenuButton" class="profile-chip" type="button">
+                    {% if request.user.profile.profile_picture %}
+                    <img class="profile-chip-avatar" src="{{ request.user.profile.profile_picture.url }}">
+                    {% else %}
+                    <span class="profile-chip-fallback">{{ request.user.username|first|upper }}</span>
+                    {% endif %}
+                    <span class="profile-chip-name">{{ request.user.username }}</span>
+                </button>
+
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="{% url 'profile' %}">Profile</a>
+                    <div class="profile-dropdown-divider"></div>
+                    <a href="{% url 'account_logout' %}" class="logout-link">Log out</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 <div class="container">
     <div class="card">
         <div class="profile-header">
+
+        <div class="profile-left">
             {% if profile.profile_picture %}
-            <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="{{ viewed_user.username }}">
+                <img class="profile-pic" src="{{ profile.profile_picture.url }}" alt="{{ viewed_user.username }}">
             {% else %}
-            <span class="avatar-fallback">{{ viewed_user.username|first|upper }}</span>
+                <span class="avatar-fallback">{{ viewed_user.username|first|upper }}</span>
             {% endif %}
-            <div>
-                <h1>{{ viewed_user.get_full_name|default:viewed_user.username }}</h1>
-                <p class="muted">@{{ viewed_user.username }}</p>
-                <p class="muted">Role: {{ profile.get_role_display }}</p>
-                {% if viewed_user.email %}
-                <p class="muted">Email: {{ viewed_user.email }}</p>
-                {% endif %}
-                
-            </div>
-            
+
+            {% if is_own_profile %}
+                <a href="{% url 'profile' %}" class="primary-btn profile-action-btn">Edit Profile</a>
+            {% else %}
+                <a href="{% url 'send_message' viewed_user.username %}" class="primary-btn profile-action-btn">Message User</a>
+            {% endif %}
         </div>
-        {% if is_own_profile %}
-    <a href="{% url 'profile' %}" class="primary-btn">Edit Profile</a>
-    {% else %}
-    <a href="{% url 'send_message' viewed_user.username %}" class="primary-btn">Message User</a>
-    {% endif %}
-    </div>
 
-    <div class="card">
-        <h2>About</h2>
-        <p class="muted">{{ profile.bio|default:"No bio added yet." }}</p>
-    </div>
+        <div class="profile-info">
+            <h1>{{ viewed_user.get_full_name|default:viewed_user.username }}</h1>
+            <p class="muted">
+                Role: 
+                {% if profile.role == 'teacher' %}
+                    DJ
+                {% else %}
+                    Student
+                {% endif %}
+            </p>
 
+            {% if viewed_user.email %}
+                <p class="muted">Email: {{ viewed_user.email }}</p>
+            {% endif %}
+
+            <p class="muted">Bio: {{ profile.bio|default:"No bio added yet." }}</p>
+        </div>
+
+    </div>
+</div>
     <div class="card">
-        <h2>Profile Media</h2>
+        <h2>Intro Audio</h2>
 
 
         <div class="media-card">
-            <strong>Intro Audio</strong>
             {% if profile.intro_audio %}
             <audio controls>
                 <source src="{{ profile.intro_audio.url }}" type="audio/mpeg">
@@ -196,5 +464,89 @@ audio {
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Profile Picture
+        var editPicBtn = document.getElementById("edit-profile-picture-btn");
+        var picFileInput = document.getElementById("profile-picture-input");
+        var picForm = document.getElementById("profile-picture-form");
+
+        if (editPicBtn && picFileInput && picForm) {
+            editPicBtn.addEventListener("click", function() {
+                picFileInput.click();
+            });
+
+            picFileInput.addEventListener("change", function() {
+                if (picFileInput.files.length) {
+                    picForm.submit();
+                }
+            });
+        }
+
+        // Intro Audio
+        var editAudioBtn = document.getElementById("edit-intro-audio-btn");
+        var audioFileInput = document.getElementById("intro-audio-input");
+        var audioForm = document.getElementById("intro-audio-form");
+
+        if (editAudioBtn && audioFileInput && audioForm) {
+            editAudioBtn.addEventListener("click", function() {
+                audioFileInput.click();
+            });
+
+            audioFileInput.addEventListener("change", function() {
+                if (audioFileInput.files.length) {
+                    audioForm.submit();
+                }
+            });
+        }
+
+        // Bio editor toggle
+        var editBioBtn = document.getElementById("edit-bio-btn");
+        var bioEditForm = document.getElementById("bio-edit-form");
+        var cancelBioBtn = document.getElementById("cancel-bio-btn");
+        var bioInput = document.getElementById("id_bio");
+        var bioActionRow = document.getElementById("bio-action-row");
+
+        if (editBioBtn && bioEditForm && bioActionRow) {
+            editBioBtn.addEventListener("click", function() {
+                bioEditForm.classList.remove("hidden");
+                bioActionRow.classList.add("hidden");
+                if (bioInput) {
+                    bioInput.focus();
+                }
+            });
+        }
+
+        if (cancelBioBtn && bioEditForm && bioActionRow) {
+            cancelBioBtn.addEventListener("click", function() {
+                if (bioInput) {
+                    bioInput.value = bioInput.defaultValue;
+                }
+                bioEditForm.classList.add("hidden");
+                bioActionRow.classList.remove("hidden");
+            });
+        }
+    });
+
+    const profileMenuButton = document.getElementById("profileMenuButton");
+const profileDropdown = document.getElementById("profileDropdown");
+const profileMenu = document.querySelector(".profile-menu");
+
+if (profileMenuButton && profileDropdown && profileMenu) {
+    const closeProfileMenu = () => {
+        profileMenu.classList.remove("open");
+    };
+
+    profileMenuButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        profileMenu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", closeProfileMenu);
+}
+
+
+</script>
 </body>
 </html>
