@@ -10,6 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Class</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         * {
             margin: 0;
@@ -291,7 +292,41 @@
             background: transparent;
             color: #ffffff;
             border: none;
+        }
 
+        .flatpickr-calendar {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+        }
+        .flatpickr-months,
+        .flatpickr-month,
+        .flatpickr-weekdays,
+        .flatpickr-innerContainer,
+        .flatpickr-time,
+        .flatpickr-time input,
+        .flatpickr-time .flatpickr-am-pm,
+        .flatpickr-day,
+        .flatpickr-weekday,
+        span.flatpickr-weekday,
+        .flatpickr-current-month,
+        .flatpickr-monthDropdown-months {
+            background: #111111;
+            color: #e5e7eb;
+        }
+        .flatpickr-day:hover,
+        .flatpickr-day:focus,
+        .flatpickr-day.selected,
+        .flatpickr-day.startRange,
+        .flatpickr-day.endRange {
+            background: #0066cc;
+            border-color: #0066cc;
+            color: #ffffff;
+        }
+        .flatpickr-input,
+        .flatpickr-input[readonly] {
+            background: #333;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -427,5 +462,17 @@ if (profileMenuButton && profileDropdown && profileMenu) {
 
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+        flatpickr(".js-datetime", {
+            enableTime: true,
+            time_24hr: false,
+            minuteIncrement: 15,
+            dateFormat: "Y-m-d H:i",
+            altInput: true,
+            altFormat: "M j, Y at h:i K",
+            allowInput: true
+        });
+</script>
 </body>
 </html>
