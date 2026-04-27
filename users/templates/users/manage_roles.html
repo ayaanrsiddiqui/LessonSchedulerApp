@@ -263,7 +263,7 @@ body {
     </div>
 
     <div class="card">
-        <h2>Pending Teacher Role Requests</h2>
+        <h2>Pending Role Requests</h2>
         {% if pending_requests %}
         <table class="role-table">
             <thead>
@@ -310,13 +310,13 @@ body {
             </tbody>
         </table>
         {% else %}
-        <p class="muted">No pending teacher role requests.</p>
+        <p class="muted">No pending role requests.</p>
         {% endif %}
     </div>
 
     <div class="card">
         <h2>Manual Role Controls</h2>
-        <p class="muted">You can still change student and teacher roles for any non-admin user.</p>
+        <p class="muted">Change roles for any non-admin user.</p>
         <div class="search-bar">
             <input id="manual-role-search" class="search-input" type="text" placeholder="Search users...">
         </div>
@@ -334,7 +334,8 @@ body {
             <span class="user-email">{{ user.user.email }}</span>
             <select class="select-input" name="role">
                 <option value="student" {% if user.role == "student" %}selected{% endif %}>Student</option>
-                <option value="teacher" {% if user.role == "teacher" %}selected{% endif %}>Teacher</option>
+                <option value="teacher" {% if user.role == "teacher" %}selected{% endif %}>DJ</option>
+                <option value="producer" {% if user.role == "producer" %}selected{% endif %}>Producer</option>
             </select>
             <button type="submit" class="primary-btn">Update</button>
         </form>

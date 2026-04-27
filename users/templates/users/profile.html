@@ -462,9 +462,11 @@ audio {
             <div>
                 <h1>{{ request.user.first_name|default:request.user.username }} {{ request.user.last_name }}</h1>
                 <p class="muted">
-                    Role: 
+                    Role:
                     {% if profile.role == 'teacher' %}
                         DJ
+                    {% elif profile.role == 'producer' %}
+                        Producer
                     {% else %}
                         Student
                     {% endif %}
@@ -531,10 +533,10 @@ audio {
 
     {% if profile.role == 'student' %}
         <div class="card">
-            <h2>Request DJ Role</h2>
+            <h2>Request Instructor Role</h2>
             {% if pending_teacher_request %}
                 <div>
-                    <p class="muted" style="margin-top:8px;">DJ role request pending.</p>
+                    <p class="muted" style="margin-top:8px;">Instructor role request pending.</p>
                     {% if pending_teacher_request.explanation %}
                         <p class="muted" style="margin-top:4px;">Reason: {{ pending_teacher_request.explanation }}</p>
                     {% endif %}
@@ -542,11 +544,15 @@ audio {
             {% else %}
                 <form method="post" action="{% url 'request_teacher_role' %}" class="teacher-request-form">
                     {% csrf_token %}
-                    <p>If you would like to request a DJ role, please provide your reasoning below.</p>
+                    <p>Request to become a <strong>DJ</strong> or <strong>Producer</strong> instructor. Select the role you are applying for:</p>
+                    <select name="requested_role" class="bio-input" style="margin-bottom:10px;">
+                        <option value="teacher">DJ</option>
+                        <option value="producer">Producer</option>
+                    </select>
                     <textarea id="id_explanation" name="explanation" class="bio-input" rows="3" maxlength="1000" placeholder="Share your experience, availability, or motivation..."></textarea>
-                    <button type="submit" class="primary-btn">Request Teacher Role</button>
+                    <button type="submit" class="primary-btn">Submit Request</button>
                 </form>
-            {% endif %}            
+            {% endif %}
         </div>
     {% endif %}
 </div>

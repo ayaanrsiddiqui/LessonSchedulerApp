@@ -434,6 +434,8 @@ audio {
                 Role: 
                 {% if profile.role == 'teacher' %}
                     DJ
+                {% elif profile.role == 'producer' %}
+                    Producer
                 {% else %}
                     Student
                 {% endif %}

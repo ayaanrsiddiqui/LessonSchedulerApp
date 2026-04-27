@@ -87,7 +87,10 @@ def request_teacher_role(request):
     if request.method == "POST" and profile.role == "student":
         if not profile.has_pending_teacher_request():
             explanation = request.POST.get("explanation", "").strip()
-            RoleChangeRequest.objects.create(profile=profile, explanation=explanation)
+            requested_role = request.POST.get("requested_role", "teacher")
+            if requested_role not in ("teacher", "producer"):
+                requested_role = "teacher"
+            RoleChangeRequest.objects.create(profile=profile, explanation=explanation, requested_role=requested_role)
     return redirect("profile")
 
 # Admin decision on role requests
