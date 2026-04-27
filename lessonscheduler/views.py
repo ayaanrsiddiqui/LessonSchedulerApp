@@ -481,7 +481,6 @@ def browse_classes(request):
     ).filter(
         dj__isnull=False,
         start_time__date__gte=today,
-        confirmed_count__lt=F('capacity')
     ).order_by("start_time").select_related("dj__profile")
 
     confirmed_signup_ids = set(

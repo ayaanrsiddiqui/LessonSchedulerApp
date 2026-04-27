@@ -301,15 +301,15 @@
 
                         {% else %}
                             <div class="actions">
-                                {% if lesson.spots_available > 0 %}
-                                    <form method="post" action="{% url 'class_signup' lesson.id %}" style="flex:1;">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="next" value="{% url 'browse_classes' %}">
+                                <form method="post" action="{% url 'class_signup' lesson.id %}" style="flex:1;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'browse_classes' %}">
+                                    {% if lesson.spots_available > 0 %}
                                         <button type="submit" class="signup-btn" style="width:100%;">Sign Up</button>
-                                    </form>
-                                {% else %}
-                                    <button class="signup-btn" disabled>Class Full</button>
-                                {% endif %}
+                                    {% else %}
+                                        <button type="submit" class="signup-btn" style="width:100%;background-color:#fd7e14;">Join Waitlist</button>
+                                    {% endif %}
+                                </form>
                                 <a href="{% url 'request_class' %}?lesson_id={{ lesson.id }}&next={% url 'browse_classes' %}" class="request-btn"> Request Custom Date </a>
                             </div>
                         {% endif %}
