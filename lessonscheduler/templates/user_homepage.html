@@ -3,6 +3,7 @@
 # Generated with Copilot on March 29, 2026
 # Prompt: use one cohesive dashboard UI where both roles can use the calendar without duplicate separate interfaces
 -->
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +15,12 @@
 * {
     box-sizing: border-box;
 }
+
+/*# AI Use: Generated with ChatGPT on April 22nd, 2026.
+#  Prompt: "Change backfground for user_homepage, so I can put a picture as background"
+# Notes: Modified to values to fit the website. Furthermore, after tweakubg the values on user_homepage page the code was copied to many other pages. */
+
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -40,6 +47,11 @@ body::before{
     background: rgba(0,0,0,0.75);
     z-index: -1;
 }
+
+/*# AI Use: Generated with ChatGPT on April 22nd, 2026.
+#  Prompt: "Change task bar, so SHHO logo is in top left and Post Lesson, Request Lessons, Messages, and logout are in top right"
+# Notes: Editted the top-bar configurations to fit the website. For example, made it so only DJ's can see post lesson. Furthermore, after tweaking the values on user_homepage page the code was copied to many other pages. */
+
 
 .top-bar {
      width: 100%;
@@ -709,11 +721,24 @@ body::before{
         max-height:320px;
     }
 }
+
+
+
+
 </style>
 </head>
 <body>
 
+<!--/*# AI Use: Generated with ChatGPT on April 22nd, 2026.
+#  Prompt: "Change backfground for user_homepage, so I can put a picture as background"
+# Notes: Modified to the bg-image to fit the website. Furthermore, after tweakubg the values on user_homepage page the code was copied to many other pages.-->
+
 <img src="{% static 'images/djbackground3.png' %}" class="bg-image">
+
+
+<!-- AI Use: Generated with ChatGPT on April 22nd, 2026.
+#  Prompt: "Change task bar, so SHHO logo is in top left and Post Lesson, Request Lessons, Messages, and logout are in top right"
+# Notes: Editted the top-bar configurations to fit the website. For example, made it so only DJ's can see post lesson. Furthermore, after tweaking the values on user_homepage page the code was copied to many other pages.-->
 
 <div class="top-bar">
     <div class="nav-left">
@@ -755,7 +780,7 @@ body::before{
 
     <p class="welcome-subtitle">
         {% if is_dj %}
-            Manage your classes, review requests, and grow the SHHO DJ community on Grounds!
+            Manage your lessons, review requests, and grow the SHHO DJ community on Grounds!
         {% else %}
             Discover and book DJ lessons with SHHO on Grounds!
         {% endif %}
