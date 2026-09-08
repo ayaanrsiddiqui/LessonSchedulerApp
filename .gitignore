@@ -224,3 +224,9 @@ __marimo__/
 # Other local env files. The committed template is the exception.
 .env*
 !.env.example
+
+# Test uploads from development. Production media lives in S3.
+/uploads/
+
+# Superseded template copies, kept locally only.
+/BackupHTMLs/
