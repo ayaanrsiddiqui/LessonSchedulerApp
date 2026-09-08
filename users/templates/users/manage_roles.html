@@ -101,9 +101,25 @@ body::before{
     font-weight: 600;
 }
 .user-inline {
-    display: inline-flex;
+    /* Block-level flex, not inline-flex: an inline-flex box sizes itself to
+       max-content and so ignores the cell width, letting a long username spill
+       over the email column instead of wrapping inside its own cell. */
+    display: flex;
     align-items: center;
     gap: 8px;
+}
+/* Usernames are user-supplied, so allow a break as a last resort. min-width:0
+   is what lets this flex item shrink below its content width at all; without
+   it the text cannot wrap no matter what overflow-wrap says. overflow-wrap
+   breaks only a word that genuinely cannot fit, unlike the word-break that
+   used to apply to every cell. */
+.user-inline .profile-link {
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+.avatar-sm,
+.avatar-fallback {
+    flex-shrink: 0;
 }
 .profile-link {
     color: #fff;
@@ -153,6 +169,10 @@ body::before{
     width: 100%;
     border-collapse: collapse;
     margin-top: 18px;
+    /* Auto layout hands almost all the width to the explanation column, which
+       holds free text, and starves the rest down to their narrowest content.
+       Fixed layout honours the widths declared below instead. */
+    table-layout: fixed;
 }
 .role-table th,
 .role-table td {
@@ -160,10 +180,16 @@ body::before{
     border-bottom: 1px solid rgba(255,255,255,0.08);
     text-align: left;
     font-size: 14px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
+    vertical-align: top;
 }
+/* Only the two columns holding arbitrary user-supplied text may break inside a
+   word. Applying that globally is what turned "demo_riley" into "dem/o_ril/ey",
+   "Submitted" into "Submitte/d", and the button label into "Approv/e". */
+.role-table th:nth-child(1), .role-table td:nth-child(1) { width: 15%; }
+.role-table th:nth-child(2), .role-table td:nth-child(2) { width: 20%; overflow-wrap: anywhere; }
+.role-table th:nth-child(3), .role-table td:nth-child(3) { width: 35%; overflow-wrap: anywhere; }
+.role-table th:nth-child(4), .role-table td:nth-child(4) { width: 14%; }
+.role-table th:nth-child(5), .role-table td:nth-child(5) { width: 16%; }
 .role-table th {
     font-weight: 700;
     color: #d7dce1;
@@ -179,6 +205,11 @@ body::before{
 }
 .inline-actions form {
     display: inline;
+}
+/* Button labels are fixed strings, never user text -- they should never wrap. */
+.inline-actions .primary-btn,
+.inline-actions .secondary-btn {
+    white-space: nowrap;
 }
 .select-input {
     border-radius: 8px;
