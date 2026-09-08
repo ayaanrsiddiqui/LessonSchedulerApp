@@ -1,5 +1,7 @@
 # Lesson Scheduler
 
+**Live:** https://lesson-scheduler-uva-swe-19fc691db615.herokuapp.com
+
 A Django application for scheduling DJ and Producer lessons, built for UVA's Hip Hop
 Organization. The club had added lessons taught by experienced executive members, and
 was coordinating them over text message and Instagram DMs. This replaces that: teachers
@@ -78,7 +80,7 @@ Google Cloud project and register both redirect URIs:
 
 ```
 http://localhost:8000/accounts/google/login/callback/
-https://<your-host>/accounts/google/login/callback/
+https://lesson-scheduler-uva-swe-19fc691db615.herokuapp.com/accounts/google/login/callback/
 ```
 
 Google matches these exactly — a missing entry is the usual cause of a login that
