@@ -227,3 +227,43 @@ else:
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "/media/"
 
+
+
+# ---------------------------------------------------------------------------
+# Logging
+#
+# Django's default configuration only sends request errors to the console when
+# DEBUG is True. In production they go to the admin-email handler instead, which
+# isn't configured here -- so a 500 shows up in the logs as a bare status code
+# with no traceback. This routes everything to stdout, which on Heroku is the
+# log stream.
+# ---------------------------------------------------------------------------
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+    },
+    "loggers": {
+        # Unhandled exceptions are logged here, with the traceback attached.
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
