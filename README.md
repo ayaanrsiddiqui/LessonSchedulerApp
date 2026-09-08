@@ -1,6 +1,6 @@
 # Lesson Scheduler
 
-**Live:** https://lesson-scheduler-uva-swe-19fc691db615.herokuapp.com
+**Live:** https://lesson-scheduler-uva-swe-19fc691db615.herokuapp.com (Google sign-in required)
 
 A Django application for scheduling DJ and Producer lessons, built for UVA's Hip Hop
 Organization. The club had added lessons taught by experienced executive members, and
@@ -8,13 +8,23 @@ was coordinating them over text message and Instagram DMs. This replaces that: t
 post lessons with date, time, capacity, skill level, location and lesson type, and
 students sign up for the ones that fit.
 
+## Screenshots
+
+| Browsing lessons | Roster and waitlist, teacher view |
+|---|---|
+| ![Lesson list showing skill level, remaining seats and schedule](docs/screenshots/lesson-list.jpg) | ![A teacher's roster for a lesson at capacity: confirmed students, and the ordered waitlist behind them](docs/screenshots/lesson-roster.jpg) |
+
+| Posting a lesson | Administering roles |
+|---|---|
+| ![The teacher's lesson form with validation on times and capacity](docs/screenshots/post-lesson.jpg) | ![Administrator reviewing a pending student-to-teacher role request](docs/screenshots/admin-roles.jpg) |
+
 ## About this repository
 
 Originally built by a five-person team for UVA CS 3240 (Software Engineering),
-January–May 2026. I was the DevOps lead: release pipeline, Postgres provisioning,
-S3 media storage, and migrations across development and production. I also wrote the
-lesson-lifecycle logic — capacity floors tied to confirmed enrollment, with automatic
-waitlist promotion.
+January–May 2026. I was the DevOps lead — release pipeline, Postgres provisioning,
+S3 media storage, and migrations across development and production — and I owned the
+lesson-lifecycle behavior: capacity floors tied to confirmed enrollment, and automatic
+waitlist promotion when a seat opens or capacity is raised.
 
 This copy is published with deployment configuration moved out of source and into
 environment variables.
@@ -29,7 +39,9 @@ python manage.py migrate    # creates the database
 python manage.py runserver
 ```
 
-Only `DJANGO_SECRET_KEY` is required — any string works for development. Everything
+Only `DJANGO_SECRET_KEY` is required, and it has no fallback on purpose: the app
+refuses to start without one rather than quietly using a checked-in default, which is
+how real keys end up in version control. Any string works for development. Everything
 else has a working default, so the app runs from a clean clone with no cloud accounts.
 
 ### Environment variables
@@ -38,7 +50,7 @@ Read from a `.env` file via python-dotenv. `.env.example` documents all of them.
 
 | Variable | Required | Notes |
 |---|---|---|
-| `DJANGO_SECRET_KEY` | yes | Any string in development. Generate a real one for production. |
+| `DJANGO_SECRET_KEY` | yes | Deliberately has no fallback default, so a real key can never be committed by accident. Any string works in development. |
 | `DJANGO_DEBUG` | no | `True` for local development. Defaults to `False`. |
 | `DJANGO_ALLOWED_HOSTS` | production | Comma-separated hostnames. |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | production | Scheme-qualified, comma-separated. Required for POSTs over HTTPS behind a proxy. |
