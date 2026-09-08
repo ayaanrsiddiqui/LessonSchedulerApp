@@ -20,7 +20,7 @@ import traceback
 
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
+from django.core.files.storage import storages
 from django.core.management.base import BaseCommand
 
 PROBE_PATH = "s3-healthcheck/probe.txt"
@@ -50,7 +50,12 @@ class Command(BaseCommand):
         bad = self.style.ERROR
         warn = self.style.WARNING
 
-        backend = type(default_storage)
+        # django.core.files.storage.default_storage is a LazyObject proxy --
+        # type() on it returns the wrapper (DefaultStorage), not the backend it
+        # wraps. Go through the storages registry to get the real instance.
+        self.storage = storages["default"]
+        backend = type(self.storage)
+
         self.stdout.write("")
         self.stdout.write(f"DEBUG                   {settings.DEBUG}")
         self.stdout.write(f"Active media backend    {backend.__module__}.{backend.__name__}")
