@@ -1,39 +1,99 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/F1hjDb63)
+# Lesson Scheduler
 
+A Django application for scheduling DJ and Producer lessons, built for UVA's Hip Hop
+Organization. The club had added lessons taught by experienced executive members, and
+was coordinating them over text message and Instagram DMs. This replaces that: teachers
+post lessons with date, time, capacity, skill level, location and lesson type, and
+students sign up for the ones that fit.
 
-# Running locally
-*written by Ayaan*
+## About this repository
 
-The app is setup with python dot_env to read in a file called .env with some needed environment variable
+Originally built by a five-person team for UVA CS 3240 (Software Engineering),
+January–May 2026. I was the DevOps lead: release pipeline, Postgres provisioning,
+S3 media storage, and migrations across development and production. I also wrote the
+lesson-lifecycle logic — capacity floors tied to confirmed enrollment, with automatic
+waitlist promotion.
 
-- `DJANGO_SECRET_KEY`
-    - this is the only required one, and this can be any string for use in development, the production configuration is taken care of. the reason i have it setup this way is as an extra protection against accidentally pushing a real secret key to production.
-    - example: `DJANGO_SECRET_KEY=insecure-dev-key-for-django`
-- `DJANGO_DEBUG`
-    - set to True for easier debugging
-    - `DJANGO_DEBUG=True`
--  `DATABASE_URL`
-    - this is optional. if you have a particular local database setup that you want to use, you put the url to it in this field. i have a postgres server setup on my computer and this field looks like `DATABASE_URL=postgres://postgres:postgres@localhost:5432/\[database name\]` but you dont need this. if not set, this will just use a sqlite db. 
-    - if you use a local postgres setup, also add `DJANGO_POSTGRES_SSL_REQUIRE=False`
+This copy is published with deployment configuration moved out of source and into
+environment variables.
 
-# initial setup
-Fhe first time you run this remember to run:
-`python manage.py migrate` which sets up a blank database in the correct format. You will also need to do these migrations whenever you change the models.
+## Running locally
 
-# Our Application
-We built this application for UVA's Hip Hop Organization. As of last semester, the organization has added DJ and Producer lessons which are hosted by a handful of experienced executive members for any interested club members. Previously, they were scheduling lessons via text message or Instagram DM. With our app, we hope to streamline lesson scheduling by allowing DJ and Producer teachers to post lesson offering with date, time, capacity, skill level, location, and lesson type. In response, DJ and Producer students can sign up for lessons fitting their schedules and needs.
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # then fill in what you need
+python manage.py migrate    # creates the database
+python manage.py runserver
+```
 
-# Using our App
+Only `DJANGO_SECRET_KEY` is required — any string works for development. Everything
+else has a working default, so the app runs from a clean clone with no cloud accounts.
 
-# As a DJ/Producer Teacher
-Our application's first user type is a DJ/Producer Teacher. This user is able to post lessons by clicking "Post Lessons" in the top menu bar. Upon clicking, the user we will be redirected to a lesson form on which they can fill out their lesson's details. Once filled out, the user can click "Submit".
+### Environment variables
 
-# As a DJ/Producer Student
-Our application's second user type is a DJ/Producer student. This user can sign up for any posted classes by clicking on a class's "Sign Up" button. 
+Read from a `.env` file via python-dotenv. `.env.example` documents all of them.
 
-# Both students and 
-Both users are able to send/receive messages. A user can view their messages by clicking "Messages" in the top menu bar. From the inbox, a user can start a new conversation with any existing teacher/student user or continue an existing chat. Furthermore, both of these user types can view their own and other's profiles. Their own profile can be navigated to by clicking the profile icon in the top right corner.
+| Variable | Required | Notes |
+|---|---|---|
+| `DJANGO_SECRET_KEY` | yes | Any string in development. Generate a real one for production. |
+| `DJANGO_DEBUG` | no | `True` for local development. Defaults to `False`. |
+| `DJANGO_ALLOWED_HOSTS` | production | Comma-separated hostnames. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | production | Scheme-qualified, comma-separated. Required for POSTs over HTTPS behind a proxy. |
+| `DATABASE_URL` | no | Falls back to SQLite. Set automatically on Heroku. |
+| `DJANGO_POSTGRES_SSL_REQUIRE` | no | Set `False` for a local Postgres instance. |
+| `CLIENT_ID`, `CLIENT_SECRET`, `GOOGLE_KEY` | for Google login | From a Google Cloud OAuth client. |
+| `AWS_*` | no | See below. |
 
-# As Admin
-Our application's third user type is the User Administrator. This user can view all existing users, view/accept/deny user role change requests (student requesting teacher role).
+### Storage
 
+Static files are served by WhiteNoise off the application server.
+
+User uploads go to S3 when `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and
+`AWS_STORAGE_BUCKET_NAME` are all set, and to the local filesystem otherwise — so
+you can run the whole application without an AWS account. When S3 is configured the
+bucket stays private and django-storages issues presigned URLs per request.
+
+If you do use S3, give it an IAM user scoped to that one bucket rather than
+administrator credentials:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::YOUR-BUCKET/*" },
+    { "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::YOUR-BUCKET" }
+  ]
+}
+```
+
+### Google sign-in
+
+Login uses django-allauth with Google. Create an OAuth client (Web application) in a
+Google Cloud project and register both redirect URIs:
+
+```
+http://localhost:8000/accounts/google/login/callback/
+https://<your-host>/accounts/google/login/callback/
+```
+
+Google matches these exactly — a missing entry is the usual cause of a login that
+fails without an obvious error.
+
+## Using the application
+
+**Teachers** post lessons from "Post Lessons" in the menu bar, filling in the lesson's
+date, time, capacity, skill level, location and type.
+
+**Students** sign up for any posted lesson from its "Sign Up" button.
+
+**Both** can message each other. "Messages" opens an inbox where a user can start a
+conversation with any teacher or student, or continue an existing one. Both can view
+their own and others' profiles.
+
+**Administrators** can view all users and accept or deny role-change requests — for
+example, a student asking to be given the teacher role.

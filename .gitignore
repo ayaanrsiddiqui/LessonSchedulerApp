@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local media uploads. Production uses S3; this directory only exists when
+# running without AWS credentials configured.
+/media/
+
+# Other local env files. The committed template is the exception.
+.env*
+!.env.example

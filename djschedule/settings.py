@@ -30,7 +30,20 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'dj-lesson-scheduler-swe-a-12-ddb7c472ccde.herokuapp.com']
+# Comma-separated, e.g. "localhost,127.0.0.1,my-app.herokuapp.com"
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if h.strip()
+]
+
+# Django 4+ requires the scheme-qualified origin for POSTs over HTTPS behind a
+# proxy. Comma-separated, e.g. "https://my-app.herokuapp.com"
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if o.strip()
+]
 
 
 # Application definition
@@ -163,6 +176,8 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 LOGIN_REDIRECT_URL = '/'
+# Skips allauth's intermediate confirmation page. Convenient, but allauth warns
+# it opens a login-CSRF vector; set to False to require an explicit POST.
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Email settings for development
@@ -172,24 +187,43 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_USERNAME_REQUIRED = True
 
-# For both static and media files
+# ---------------------------------------------------------------------------
+# Storage
+#
+# Static files are served by WhiteNoise straight off the dyno -- there is no
+# reason to pay S3 round-trips for CSS. User uploads go to S3 when credentials
+# are present in the environment, and to the local filesystem when they are
+# not, so the project runs from a fresh clone with no AWS account.
+# ---------------------------------------------------------------------------
+
 STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-    },
     "staticfiles": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-2")
 
-
-AWS_ACCESS_KEY_ID = 'REDACTED'
-AWS_SECRET_ACCESS_KEY = 'REDACTED'
-AWS_STORAGE_BUCKET_NAME = 'amazn-s3-dj-proj'
-AWS_S3_REGION_NAME = 'us-east-2'
-AWS_DEFAULT_ACL = None
-AWS_QUERYSTRING_AUTH = False
-MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/"
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    }
+    # Bucket stays private; django-storages issues presigned URLs per request
+    # rather than relying on public-read objects.
+    AWS_QUERYSTRING_AUTH = True
+    AWS_DEFAULT_ACL = None
+    AWS_S3_FILE_OVERWRITE = False
+else:
+    STORAGES["default"] = {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    }
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/media/"
 

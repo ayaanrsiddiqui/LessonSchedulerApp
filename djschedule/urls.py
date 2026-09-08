@@ -16,10 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path("", include("lessonscheduler.urls")),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
-    path('', include('messaging.urls'))
+    path('', include('messaging.urls')),
+    # Required by Google OAuth: the privacy policy must be served from the same
+    # domain as the application itself.
+    path(
+        "privacy/",
+        TemplateView.as_view(template_name="privacy.html"),
+        name="privacy",
+    ),
 ]
