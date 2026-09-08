@@ -81,16 +81,27 @@ class Command(BaseCommand):
             self.stdout.write(bad("S3 is NOT active. Uploads are going to the dyno filesystem,"))
             self.stdout.write(bad("which is wiped on every restart and every deploy."))
             self.stdout.write("")
-            self.stdout.write(f"Missing config vars: {', '.join(missing) or '(none -- unexpected)'}")
-            self.stdout.write("")
-            self.stdout.write("Set them with:")
-            for name in missing:
-                self.stdout.write(f"  heroku config:set {name}=... --app <app>")
+
+            if missing:
+                self.stdout.write(f"Missing config vars: {', '.join(missing)}")
+                self.stdout.write("")
+                self.stdout.write("Set them with:")
+                for name in missing:
+                    self.stdout.write(f"  heroku config:set {name}=... --app <app>")
+            else:
+                self.stdout.write(
+                    warn(
+                        "All three credentials are present, so settings.py should have "
+                        "selected S3. Something else is overriding STORAGES -- check for "
+                        "a local settings override, and confirm django-storages is "
+                        "installed (import storages.backends.s3boto3)."
+                    )
+                )
             return
 
         # ------------------------------------------------------------ live checks
         try:
-            client = default_storage.connection.meta.client
+            client = self.storage.connection.meta.client
             self.stdout.write(f"Resolved endpoint       {client.meta.endpoint_url}")
             self.stdout.write(f"Signature version       {client.meta.config.signature_version}")
             self.stdout.write("")
@@ -129,11 +140,11 @@ class Command(BaseCommand):
     # ---------------------------------------------------------------- the steps
 
     def _write(self):
-        self._saved_name = default_storage.save(PROBE_PATH, ContentFile(PROBE_BODY))
+        self._saved_name = self.storage.save(PROBE_PATH, ContentFile(PROBE_BODY))
         return self._saved_name
 
     def _exists(self):
-        found = default_storage.exists(self._saved_name)
+        found = self.storage.exists(self._saved_name)
         if not found:
             raise RuntimeError(
                 "The object was written but exists() says it is absent. This is the "
@@ -143,14 +154,14 @@ class Command(BaseCommand):
         return "object is present"
 
     def _read(self):
-        with default_storage.open(self._saved_name, "rb") as handle:
+        with self.storage.open(self._saved_name, "rb") as handle:
             body = handle.read()
         if body != PROBE_BODY:
             raise RuntimeError(f"Read back {body!r}, expected {PROBE_BODY!r}")
         return f"{len(body)} bytes match"
 
     def _url(self):
-        url = default_storage.url(self._saved_name)
+        url = self.storage.url(self._saved_name)
         signed = "X-Amz-Signature" in url
         self.stdout.write(f"             url   {url}")
         if not signed:
@@ -161,7 +172,7 @@ class Command(BaseCommand):
         return "presigned"
 
     def _delete(self):
-        default_storage.delete(self._saved_name)
+        self.storage.delete(self._saved_name)
         return "probe removed"
 
     # --------------------------------------------------------------- diagnosis
