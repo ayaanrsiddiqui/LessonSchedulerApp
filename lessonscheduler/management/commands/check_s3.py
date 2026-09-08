@@ -17,6 +17,8 @@ disappears. This command makes that state loud.
 """
 
 import traceback
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -114,22 +116,32 @@ class Command(BaseCommand):
             ("read back", self._read),
             ("sign url", self._url),
         ]
-        if not options["keep"]:
-            steps.append(("delete", self._delete))
 
         failed = False
-        for label, fn in steps:
-            try:
-                detail = fn()
-            except Exception as exc:  # noqa: BLE001 -- we want every failure mode
-                failed = True
-                self.stdout.write(bad(f"  {label:<10} FAILED"))
-                self.stdout.write("")
-                self.stdout.write(self._explain(exc))
-                self.stdout.write("")
-                self.stdout.write(traceback.format_exc())
-                break
-            self.stdout.write(ok(f"  {label:<10} ok    {detail}"))
+        try:
+            for label, fn in steps:
+                try:
+                    detail = fn()
+                except Exception as exc:  # noqa: BLE001 -- we want every failure mode
+                    failed = True
+                    self.stdout.write(bad(f"  {label:<10} FAILED"))
+                    self.stdout.write("")
+                    self.stdout.write(self._explain(exc))
+                    self.stdout.write("")
+                    self.stdout.write(traceback.format_exc())
+                    break
+                self.stdout.write(ok(f"  {label:<10} ok    {detail}"))
+        finally:
+            # Cleanup runs even when a step failed, so a bad run does not leave
+            # probe objects behind. AWS_S3_FILE_OVERWRITE is False, so each
+            # orphan would otherwise accumulate under a new suffixed name.
+            saved = getattr(self, "_saved_name", None)
+            if saved and not options["keep"]:
+                try:
+                    self.storage.delete(saved)
+                    self.stdout.write(ok(f"  {'cleanup':<10} ok    probe removed"))
+                except Exception as exc:  # noqa: BLE001
+                    self.stdout.write(warn(f"  {'cleanup':<10} could not remove {saved}: {exc}"))
 
         self.stdout.write("")
         if failed:
@@ -162,18 +174,42 @@ class Command(BaseCommand):
 
     def _url(self):
         url = self.storage.url(self._saved_name)
-        signed = "X-Amz-Signature" in url
         self.stdout.write(f"             url   {url}")
-        if not signed:
-            raise RuntimeError(
-                "The URL is not presigned. With a private bucket this will 403 in the "
-                "browser. Check that AWS_QUERYSTRING_AUTH is True."
-            )
-        return "presigned"
 
-    def _delete(self):
-        self.storage.delete(self._saved_name)
-        return "probe removed"
+        # Two valid presigning formats. SigV4 uses X-Amz-* query parameters;
+        # SigV2 -- still accepted by buckets in regions that predate 2014, such
+        # as us-east-1 -- uses AWSAccessKeyId/Signature/Expires. Matching only
+        # the first would flag a working URL as broken.
+        if "X-Amz-Signature" in url:
+            style = "SigV4"
+        elif "AWSAccessKeyId=" in url and "Signature=" in url:
+            style = "SigV2 (legacy)"
+        elif "?" not in url:
+            raise RuntimeError(
+                "The URL carries no query string, so it is not presigned at all. "
+                "Against a private bucket the browser will get 403. Check that "
+                "AWS_QUERYSTRING_AUTH is True."
+            )
+        else:
+            style = "unrecognised signature format"
+
+        # Recognising the format only proves a signature is present, not that S3
+        # accepts it. Fetch the object the way a browser would, which is the
+        # thing we actually care about.
+        try:
+            with urlopen(Request(url, headers={"User-Agent": "check_s3"}), timeout=20) as response:
+                body = response.read()
+                status = response.status
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", "replace")[:600]
+            raise RuntimeError(
+                f"S3 rejected the presigned URL with HTTP {exc.code}. Response body:\n{detail}"
+            ) from exc
+
+        if body != PROBE_BODY:
+            raise RuntimeError(f"Fetched {body!r} from the signed URL, expected {PROBE_BODY!r}")
+
+        return f"{style}, fetched OK (HTTP {status})"
 
     # --------------------------------------------------------------- diagnosis
 
